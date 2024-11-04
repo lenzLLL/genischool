@@ -461,62 +461,62 @@ export const lessonsData = [
   {
     id: 1,
     subject: "Math",
-    class: "1A",
-    teacher: "Tommy Wise",
+    class: ["1A","2A"],
+    teacher: ["Tommy Wise"],
   },
   {
     id: 2,
     subject: "English",
-    class: "2A",
-    teacher: "Rhoda Frank",
+    class: ["2A"],
+    teacher: ["Rhoda Frank"],
   },
   {
     id: 3,
     subject: "Science",
-    class: "3A",
-    teacher: "Della Dunn",
+    class: ["3A","2A"],
+    teacher: ["Della Dunn"],
   },
   {
     id: 4,
     subject: "Social Studies",
-    class: "1B",
-    teacher: "Bruce Rodriguez",
+    class: ["1B","3A"],
+    teacher: ["Bruce Rodriguez"],
   },
   {
     id: 5,
     subject: "Art",
-    class: "4A",
-    teacher: "Birdie Butler",
+    class: ["4A"],
+    teacher: ["Birdie Butler"],
   },
   {
     id: 6,
     subject: "Music",
-    class: "5A",
-    teacher: "Bettie Oliver",
+    class: ["5A"],
+    teacher: ["Bettie Oliver"],
   },
   {
     id: 7,
     subject: "History",
-    class: "6A",
-    teacher: "Herman Howard",
+    class: ["6A"],
+    teacher: ["Herman Howard"],
   },
   {
     id: 8,
     subject: "Geography",
-    class: "6B",
-    teacher: "Lucinda Thomas",
+    class: ["6B"],
+    teacher: ["Lucinda Thomas"],
   },
   {
     id: 9,
     subject: "Physics",
-    class: "6C",
-    teacher: "Ronald Roberts",
+    class: ["6C"],
+    teacher: ["Ronald Roberts"],
   },
   {
     id: 10,
     subject: "Chemistry",
-    class: "4B",
-    teacher: "Julia Pittman",
+    class: ["4B"],
+    teacher: ["Julia Pittman"],
   },
 ];
 
@@ -527,6 +527,7 @@ export const examsData = [
     class: "1A",
     teacher: "Martha Morris",
     date: "2025-01-01",
+    credit:2
   },
   {
     id: 2,
@@ -534,6 +535,7 @@ export const examsData = [
     class: "2A",
     teacher: "Randall Garcia",
     date: "2025-01-01",
+    credit:4
   },
   {
     id: 3,
@@ -541,6 +543,7 @@ export const examsData = [
     class: "3A",
     teacher: "Myrtie Scott",
     date: "2025-01-01",
+    credit:1
   },
   {
     id: 4,
@@ -548,6 +551,7 @@ export const examsData = [
     class: "1B",
     teacher: "Alvin Swanson",
     date: "2025-01-01",
+    credit:6
   },
   {
     id: 5,
@@ -555,6 +559,7 @@ export const examsData = [
     class: "4A",
     teacher: "Mabelle Wallace",
     date: "2025-01-01",
+    credit:4
   },
   {
     id: 6,
@@ -562,6 +567,7 @@ export const examsData = [
     class: "5A",
     teacher: "Dale Thompson",
     date: "2025-01-01",
+    credit:9
   },
   {
     id: 7,
@@ -569,6 +575,7 @@ export const examsData = [
     class: "6A",
     teacher: "Allie Conner",
     date: "2025-01-01",
+    credit:2
   },
   {
     id: 8,
@@ -576,6 +583,7 @@ export const examsData = [
     class: "6B",
     teacher: "Hunter Fuller",
     date: "2025-01-01",
+    credit:3
   },
   {
     id: 9,
@@ -583,6 +591,7 @@ export const examsData = [
     class: "7A",
     teacher: "Lois Lindsey",
     date: "2025-01-01",
+    credit:2
   },
   {
     id: 10,
@@ -590,6 +599,7 @@ export const examsData = [
     class: "8A",
     teacher: "Vera Soto",
     date: "2025-01-01",
+    credit:3
   },
 ];
 
@@ -773,7 +783,8 @@ export const eventsData = [
   {
     id: 1,
     title: "Lake Trip",
-    class: "1A",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -781,7 +792,8 @@ export const eventsData = [
   {
     id: 2,
     title: "Picnic",
-    class: "2A",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -789,7 +801,8 @@ export const eventsData = [
   {
     id: 3,
     title: "Beach Trip",
-    class: "3A",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -797,7 +810,8 @@ export const eventsData = [
   {
     id: 4,
     title: "Museum Trip",
-    class: "4A",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -805,7 +819,8 @@ export const eventsData = [
   {
     id: 5,
     title: "Music Concert",
-    class: "5A",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -813,7 +828,8 @@ export const eventsData = [
   {
     id: 6,
     title: "Magician Show",
-    class: "1B",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -821,7 +837,8 @@ export const eventsData = [
   {
     id: 7,
     title: "Lake Trip",
-    class: "2B",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -829,7 +846,8 @@ export const eventsData = [
   {
     id: 8,
     title: "Cycling Race",
-    class: "3B",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -837,7 +855,8 @@ export const eventsData = [
   {
     id: 9,
     title: "Art Exhibition",
-    class: "4B",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -845,7 +864,8 @@ export const eventsData = [
   {
     id: 10,
     title: "Sports Tournament",
-    class: "5B",
+    class: ["1A"],
+    description:"lorem isum",
     date: "2025-01-01",
     startTime: "10:00",
     endTime: "11:00",
@@ -858,60 +878,79 @@ export const announcementsData = [
     title: "About 4A Math Test",
     class: "4A",
     date: "2025-01-01",
+    description:"lorem ipsum"
   },
   {
     id: 2,
     title: "About 3A Math Test",
     class: "3A",
     date: "2025-01-01",
+    description:"lorem ipsum"
+    
   },
   {
     id: 3,
     title: "About 3B Math Test",
     class: "3B",
     date: "2025-01-01",
+    description:"lorem ipsum"
+
   },
   {
     id: 4,
     title: "About 6A Math Test",
     class: "6A",
     date: "2025-01-01",
+    description:"lorem ipsum"
+
   },
   {
     id: 5,
     title: "About 8C Math Test",
     class: "8C",
     date: "2025-01-01",
+    description:"lorem ipsum"
+
   },
   {
     id: 6,
     title: "About 2A Math Test",
     class: "2A",
     date: "2025-01-01",
+    description:"lorem ipsum"
+
   },
   {
     id: 7,
     title: "About 4C Math Test",
     class: "4C",
     date: "2025-01-01",
+    description:"lorem ipsum"
+
   },
   {
     id: 8,
     title: "About 4B Math Test",
     class: "4B",
     date: "2025-01-01",
+    description:"lorem ipsum"
+
   },
   {
     id: 9,
     title: "About 3C Math Test",
     class: "3C",
     date: "2025-01-01",
+    description:"lorem ipsum"
+
   },
   {
     id: 10,
     title: "About 1C Math Test",
     class: "1C",
     date: "2025-01-01",
+    description:"lorem ipsum"
+
   },
 ];
 
@@ -921,143 +960,143 @@ export const calendarEvents = [
   {
     title: "Math",
     allDay: false,
-    start: new Date(2024, 7, 12, 8, 0),
-    end: new Date(2024, 7, 12, 8, 45),
+    start: new Date(2024, 10, 4, 8, 0),
+    end: new Date(2024, 10, 4, 10, 0),
   },
   {
     title: "English",
     allDay: false,
-    start: new Date(2024, 7, 12, 9, 0),
-    end: new Date(2024, 7, 12, 9, 45),
+    start: new Date(2024, 10, 6, 22, 0),
+    end: new Date(2024, 10, 6, 23, 45),
   },
   {
     title: "Biology",
     allDay: false,
-    start: new Date(2024, 7, 12, 10, 0),
-    end: new Date(2024, 7, 12, 10, 45),
+    start: new Date(2024, 10, 7, 10, 0),
+    end: new Date(2024, 10, 7, 14, 45),
   },
-  {
-    title: "Physics",
-    allDay: false,
-    start: new Date(2024, 7, 12, 11, 0),
-    end: new Date(2024, 7, 12, 11, 45),
-  },
-  {
-    title: "Chemistry",
-    allDay: false,
-    start: new Date(2024, 7, 12, 13, 0),
-    end: new Date(2024, 7, 12, 13, 45),
-  },
-  {
-    title: "History",
-    allDay: false,
-    start: new Date(2024, 7, 12, 14, 0),
-    end: new Date(2024, 7, 12, 14, 45),
-  },
-  {
-    title: "English",
-    allDay: false,
-    start: new Date(2024, 7, 13, 9, 0),
-    end: new Date(2024, 7, 13, 9, 45),
-  },
-  {
-    title: "Biology",
-    allDay: false,
-    start: new Date(2024, 7, 13, 10, 0),
-    end: new Date(2024, 7, 13, 10, 45),
-  },
-  {
-    title: "Physics",
-    allDay: false,
-    start: new Date(2024, 7, 13, 11, 0),
-    end: new Date(2024, 7, 13, 11, 45),
-  },
+  // {
+  //   title: "Physics",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 12, 11, 0),
+  //   end: new Date(2024, 7, 12, 11, 45),
+  // },
+  // {
+  //   title: "Chemistry",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 12, 13, 0),
+  //   end: new Date(2024, 7, 12, 13, 45),
+  // },
+  // {
+  //   title: "History",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 12, 14, 0),
+  //   end: new Date(2024, 7, 12, 14, 45),
+  // },
+  // {
+  //   title: "English",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 13, 9, 0),
+  //   end: new Date(2024, 7, 13, 9, 45),
+  // },
+  // {
+  //   title: "Biology",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 13, 10, 0),
+  //   end: new Date(2024, 7, 13, 10, 45),
+  // },
+  // {
+  //   title: "Physics",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 13, 11, 0),
+  //   end: new Date(2024, 7, 13, 11, 45),
+  // },
 
-  {
-    title: "History",
-    allDay: false,
-    start: new Date(2024, 7, 13, 14, 0),
-    end: new Date(2024, 7, 13, 14, 45),
-  },
-  {
-    title: "Math",
-    allDay: false,
-    start: new Date(2024, 7, 14, 8, 0),
-    end: new Date(2024, 7, 14, 8, 45),
-  },
-  {
-    title: "Biology",
-    allDay: false,
-    start: new Date(2024, 7, 14, 10, 0),
-    end: new Date(2024, 7, 14, 10, 45),
-  },
+  // {
+  //   title: "History",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 13, 14, 0),
+  //   end: new Date(2024, 7, 13, 14, 45),
+  // },
+  // {
+  //   title: "Math",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 14, 8, 0),
+  //   end: new Date(2024, 7, 14, 8, 45),
+  // },
+  // {
+  //   title: "Biology",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 14, 10, 0),
+  //   end: new Date(2024, 7, 14, 10, 45),
+  // },
 
-  {
-    title: "Chemistry",
-    allDay: false,
-    start: new Date(2024, 7, 14, 13, 0),
-    end: new Date(2024, 7, 14, 13, 45),
-  },
-  {
-    title: "History",
-    allDay: false,
-    start: new Date(2024, 7, 14, 14, 0),
-    end: new Date(2024, 7, 13, 14, 45),
-  },
-  {
-    title: "English",
-    allDay: false,
-    start: new Date(2024, 7, 15, 9, 0),
-    end: new Date(2024, 7, 15, 9, 45),
-  },
-  {
-    title: "Biology",
-    allDay: false,
-    start: new Date(2024, 7, 15, 10, 0),
-    end: new Date(2024, 7, 15, 10, 45),
-  },
-  {
-    title: "Physics",
-    allDay: false,
-    start: new Date(2024, 7, 15, 11, 0),
-    end: new Date(2024, 7, 15, 11, 45),
-  },
+  // {
+  //   title: "Chemistry",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 14, 13, 0),
+  //   end: new Date(2024, 7, 14, 13, 45),
+  // },
+  // {
+  //   title: "History",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 14, 14, 0),
+  //   end: new Date(2024, 7, 13, 14, 45),
+  // },
+  // {
+  //   title: "English",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 15, 9, 0),
+  //   end: new Date(2024, 7, 15, 9, 45),
+  // },
+  // {
+  //   title: "Biology",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 15, 10, 0),
+  //   end: new Date(2024, 7, 15, 10, 45),
+  // },
+  // {
+  //   title: "Physics",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 15, 11, 0),
+  //   end: new Date(2024, 7, 15, 11, 45),
+  // },
 
-  {
-    title: "History",
-    allDay: false,
-    start: new Date(2024, 7, 15, 14, 0),
-    end: new Date(2024, 7, 15, 14, 45),
-  },
-  {
-    title: "Math",
-    allDay: false,
-    start: new Date(2024, 7, 16, 8, 0),
-    end: new Date(2024, 7, 16, 8, 45),
-  },
-  {
-    title: "English",
-    allDay: false,
-    start: new Date(2024, 7, 16, 9, 0),
-    end: new Date(2024, 7, 16, 9, 45),
-  },
+  // {
+  //   title: "History",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 15, 14, 0),
+  //   end: new Date(2024, 7, 15, 14, 45),
+  // },
+  // {
+  //   title: "Math",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 16, 8, 0),
+  //   end: new Date(2024, 7, 16, 8, 45),
+  // },
+  // {
+  //   title: "English",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 16, 9, 0),
+  //   end: new Date(2024, 7, 16, 9, 45),
+  // },
 
-  {
-    title: "Physics",
-    allDay: false,
-    start: new Date(2024, 7, 16, 11, 0),
-    end: new Date(2024, 7, 16, 11, 45),
-  },
-  {
-    title: "Chemistry",
-    allDay: false,
-    start: new Date(2024, 7, 16, 13, 0),
-    end: new Date(2024, 7, 16, 13, 45),
-  },
-  {
-    title: "History",
-    allDay: false,
-    start: new Date(2024, 7, 16, 14, 0),
-    end: new Date(2024, 7, 16, 14, 45),
-  },
+  // {
+  //   title: "Physics",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 16, 11, 0),
+  //   end: new Date(2024, 7, 16, 11, 45),
+  // },
+  // {
+  //   title: "Chemistry",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 16, 13, 0),
+  //   end: new Date(2024, 7, 16, 13, 45),
+  // },
+  // {
+  //   title: "History",
+  //   allDay: false,
+  //   start: new Date(2024, 7, 16, 14, 0),
+  //   end: new Date(2024, 7, 16, 14, 45),
+  // },
 ];
