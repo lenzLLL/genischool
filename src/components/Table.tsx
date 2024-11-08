@@ -7,6 +7,7 @@ const Table = ({
   renderRow: (item: any) => React.ReactNode;
   data: any[];
 }) => {
+  
   return (
     <table className="w-full mt-4">
       <thead>
