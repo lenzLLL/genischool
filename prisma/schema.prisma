@@ -54,6 +54,9 @@ model Student {
   birthday    DateTime
   classYears ClassYear[]
   studentFees StudentFees[]
+  currentClassId String
+  currentClass      Class       @relation(fields: [currentClassId], references: [id])
+
 }
 
 model ClassYear {
@@ -113,6 +116,7 @@ model Class {
   announcements Announcement[]
   classYears ClassYear[]
   fees Fees[]
+  currentStudents Student[]
 
 }
 
