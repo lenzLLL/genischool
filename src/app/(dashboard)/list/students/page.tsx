@@ -10,7 +10,7 @@ import { Class, Prisma, Student } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 
-type StudentList = Student & { class: Class };
+type StudentList = Student & { currentClass: Class };
 
 const columns = [
   {
@@ -62,8 +62,8 @@ const StudentListPage = async ({
           className="md:hidden xl:block w-10 h-10 rounded-full object-cover"
         />
         <div className="flex flex-col">
-          <h3 className="font-semibold">{item.name}</h3>
-          <p className="text-xs text-gray-500">{item.class.name}</p>
+          <h3 className="font-semibold">{item.name} {item.username}</h3>
+          <p className="text-xs text-gray-500">{item.currentClass.name}</p>
         </div>
       </td>
       <td className="hidden md:table-cell">{item.id}</td>
