@@ -4,7 +4,7 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { eventsData, role } from "@/lib/data";
-import { getCurrentUser } from "@/lib/functs";
+import { getCurrentUser, getFilterEvents } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Event, EventClass, Prisma } from "@prisma/client";
@@ -86,12 +86,13 @@ const EventListPage = async ({
       </td>
       <td>
         <div className="flex items-center gap-2">
-           {role === "admin" && (
+           {currentUser?.role=== "Admin" && (
             <>
               <FormModal table="event" type="update" data={item} />
               <FormModal table="event" type="delete" id={item.id} />
             </>
           )} 
+          
         </div>
       </td>
     </tr>
@@ -120,11 +121,24 @@ const EventListPage = async ({
 
   // ROLE CONDITIONS
 
-  
+  if (currentUser?.role === "Parent"){
+      query.eventClass = {some:{class:{currentStudents:{some:{parentId:currentUser.id}}}}}
+  }
+  else if (currentUser?.role === "Student"){
+      query.eventClass = {some:{class:{currentStudents:{some:{id:currentUser.id}}}}}
+  }
+  else if(currentUser?.role === "Teacher"){
+    query.eventClass = {some:{class:{lessons:{some:{teacherId:currentUser.id}}}}}
+  }
   const [data, count] = await prisma.$transaction([
     prisma.event.findMany({
+      where:query,
       include: {
-        eventClass: true,
+        eventClass: {
+          include:{
+            class:true
+          }
+        },
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
@@ -146,7 +160,7 @@ const EventListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {/* {role === "admin" && <FormModal table="event" type="create" />} */}
+             {currentUser?.role === "Admin" && <FormModal table="event" type="create" />} 
           </div>
         </div>
       </div>

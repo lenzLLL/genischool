@@ -1,4 +1,5 @@
 import EmptyComponent from "@/components/emptyComponent";
+import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -6,6 +7,7 @@ import {
   resultsData,
   role,
 } from "@/lib/data";
+import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Prisma } from "@prisma/client";
@@ -23,46 +25,52 @@ type ResultList = {
   startTime: Date;
 };
 
-const columns = [
-  {
-    header: "Subject Name",
-    accessor: "name",
-  },
-  {
-    header: "Student",
-    accessor: "student",
-  },
-  {
-    header: "Score",
-    accessor: "score",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Teacher",
-    accessor: "teacher",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Class",
-    accessor: "class",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Date",
-    accessor: "date",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
-];
+
 
 const ResultListPage = async ({
   searchParams,
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
+  const currentUser = await getCurrentUser()
+  const columns = [
+    {
+      header: "Subject Name",
+      accessor: "name",
+    },
+    {
+      header: "Student",
+      accessor: "student",
+    },
+    {
+      header: "Score",
+      accessor: "score",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Teacher",
+      accessor: "teacher",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Class",
+      accessor: "class",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Date",
+      accessor: "date",
+      className: "hidden md:table-cell",
+    },
+    ...(currentUser?.role === "Admin" || currentUser?.role === "Teacher"
+      ? [
+          {
+            header: "Actions",
+            accessor: "action",
+          },
+        ]
+      : []),
+  ];
   const renderRow = (item: ResultList) => (
     <tr
       key={item.id}
@@ -81,12 +89,12 @@ const ResultListPage = async ({
       </td>
       <td>
         <div className="flex items-center gap-2">
-          {/* {role === "admin" || role === "teacher" && (
+           {currentUser?.role === "admin" || currentUser?.role === "teacher" && (
             <>
               <FormModal table="result" type="update" data={item} />
               <FormModal table="result" type="delete" id={item.id} />
             </>
-          )} */}
+          )} 
         </div>
       </td>
     </tr>
@@ -121,25 +129,23 @@ const ResultListPage = async ({
 
   // ROLE CONDITIONS
 
-  switch (role) {
-    case "admin":
+  switch (currentUser?.role) {
+    case "Admin":
       break;
-    // case "teacher":
-    //   query.OR = [
-    //     { exam: { lesson: { teacherId: currentUserId! } } },
-    //     { assignment: { lesson: { teacherId: currentUserId! } } },
-    //   ];
-    //   break;
+     case "Teacher":
+       query.OR = [
+         { exam: { lesson: { teacherId: currentUser?.id } } },
+       ];
+       break;
+     case "Student":
+       query.studentId = currentUser?.id;
+       break;
 
-    // case "student":
-    //   query.studentId = currentUserId!;
-    //   break;
-
-    // case "parent":
-    //   query.student = {
-    //     parentId: currentUserId!,
-    //   };
-    //   break;
+     case "Parent":
+       query.student = {
+         parentId: currentUser?.id,
+       };
+       break;
     default:
       break;
   }

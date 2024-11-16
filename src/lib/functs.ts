@@ -46,7 +46,7 @@ export const getCurrentUser = async () => {
     }
 }
 
-export const getFilterEvents = async ({data,role}:{data:Event[] & {eventClass:EventClass & {class:Class}},role:String}) => {
+export const getFilterEvents = async ({data,role}:{data:Event & {eventClass:(EventClass & {class:Class})[]},role:String}) => {
     let finalData:Event[] = []
     if(role === "Parent"){
     

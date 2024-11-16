@@ -1,8 +1,10 @@
 import EmptyComponent from "@/components/emptyComponent";
+import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { parentsData, role } from "@/lib/data";
+import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Parent, Prisma, Student } from "@prisma/client";
@@ -11,6 +13,13 @@ import Image from "next/image";
 type ParentList = Parent & { students: Student[] };
 
 
+const ParentListPage = async ({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | undefined };
+}) => {
+const currentUser = await getCurrentUser()
+  
 const columns = [
   {
     header: "Info",
@@ -31,17 +40,16 @@ const columns = [
     accessor: "address",
     className: "hidden lg:table-cell",
   },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  ...(currentUser?.role === "Admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 
-const ParentListPage = async ({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | undefined };
-}) => {
   const renderRow = (item: ParentList) => (
     <tr
       key={item.id}
@@ -59,12 +67,12 @@ const ParentListPage = async ({
       <td className="hidden md:table-cell">{item.address}</td>
       <td>
         <div className="flex items-center gap-2">
-          {/* {role === "admin" && (
+           {currentUser?.role === "Admin" && (
             <>
               <FormModal table="parent" type="update" data={item} />
               <FormModal table="parent" type="delete" id={item.id} />
             </>
-          )} */}
+          )} 
         </div>
       </td>
     </tr>
@@ -115,9 +123,9 @@ const ParentListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {/* {role === "admin" && (
+             {currentUser?.role === "Admin" && (
               <FormModal table="teacher" type="create"/>
-            )} */}
+            )} 
           </div>
         </div>
       </div>

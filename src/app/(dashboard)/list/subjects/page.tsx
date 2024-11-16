@@ -4,6 +4,7 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { role, subjectsData } from "@/lib/data";
+import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Prisma, Subject, Teacher } from "@prisma/client";
@@ -12,27 +13,29 @@ import Image from "next/image";
 type SubjectList = Subject & { teachers: Teacher[] };
 
 
-const columns = [
-  {
-    header: "Subject Name",
-    accessor: "name",
-  },
-  {
-    header: "Teachers",
-    accessor: "teachers",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
-];
 
 const SubjectListPage = async ({
   searchParams,
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
+  const currentUser = await getCurrentUser()
+  const columns = [
+    {
+      header: "Subject Name",
+      accessor: "name",
+    },
+    {
+      header: "Teachers",
+      accessor: "teachers",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Actions",
+      accessor: "action",
+    },
+  ];
+  
   const renderRow = (item: SubjectList) => (
     <tr
       key={item.id}
@@ -42,7 +45,7 @@ const SubjectListPage = async ({
       <td className="hidden md:table-cell">{item.teachers.map((teacher) => teacher.name).join(",")}</td>
       <td>
         <div className="flex items-center gap-2">
-           {role === "admin" && (
+           {currentUser?.role === "Admin" && (
             <>
               <FormModal table="subject" type="update" data={item} />
               <FormModal table="subject" type="delete" id={item.id} />

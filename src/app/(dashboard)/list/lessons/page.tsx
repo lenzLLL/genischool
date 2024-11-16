@@ -4,6 +4,7 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { lessonsData, role } from "@/lib/data";
+import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
@@ -13,31 +14,37 @@ type LessonList = Lesson & { subject: Subject } & { class: Class } & {
   teacher: Teacher;
 };
 
-const columns = [
-  {
-    header: "Subject Name",
-    accessor: "name",
-  },
-  {
-    header: "Classes",
-    accessor: "classes",
-  },
-  {
-    header: "Teacher",
-    accessor: "teacher",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
-];
 
 const LessonListPage = async ({
   searchParams,
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
+  const currentser = await getCurrentUser()
+  const columns = [
+    {
+      header: "Subject Name",
+      accessor: "name",
+    },
+    {
+      header: "Classes",
+      accessor: "classes",
+    },
+    {
+      header: "Teacher",
+      accessor: "teacher",
+      className: "hidden md:table-cell",
+    },
+    ...(role === "admin"
+      ? [
+          {
+            header: "Actions",
+            accessor: "action",
+          },
+        ]
+      : []),
+  ];
+  
   const renderRow = (item: LessonList) => (
     <tr
       key={item.id}
@@ -50,7 +57,7 @@ const LessonListPage = async ({
       </td>
       <td>
         <div className="flex items-center gap-2">
-           {role === "admin" && (
+           {currentser?.role === "Admin" && (
             <>
               <FormModal table="lesson" type="update" data={item} />
               <FormModal table="lesson" type="delete" id={item.id} />
@@ -120,7 +127,7 @@ const LessonListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {/* {role === "admin" && <FormModal table="lesson" type="create" />} */}
+             {role === "admin" && <FormModal table="lesson" type="create" />} 
           </div>
         </div>
       </div>
