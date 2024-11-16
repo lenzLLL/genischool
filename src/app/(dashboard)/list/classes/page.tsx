@@ -2,6 +2,7 @@ import FormContainer from "@/components/FormContainer";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
+import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Prisma, Teacher } from "@prisma/client";
@@ -18,7 +19,7 @@ const ClassListPage = async ({
 // const { sessionClaims } = auth();
 // const role = (sessionClaims?.metadata as { role?: string })?.role;
 
-
+const currentUser = await getCurrentUser()
 const columns = [
   {
     header: "Class Name",
@@ -39,10 +40,14 @@ const columns = [
     accessor: "supervisor",
     className: "hidden md:table-cell",
   }, 
+  ...(currentUser?.role === "Admin"
+    ? [
         {
           header: "Actions",
           accessor: "action",
         },
+      ]
+    : []),
       
 ];
 
@@ -94,7 +99,7 @@ const renderRow = (item: ClassList) => (
       }
     }
   }
-
+ 
   const [data, count] = await prisma.$transaction([
     prisma.class.findMany({
       where: query,

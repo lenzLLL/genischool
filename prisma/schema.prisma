@@ -15,6 +15,7 @@ model School {
   address String
   createdAt   DateTime     @default(now())
   schoolyears Schoolyear[]
+  admins Admin[]
 }
 
 model Schoolyear {
@@ -31,7 +32,10 @@ model Schoolyear {
 
 model Admin {
   id       String @id
-  username String @unique
+  username String
+  email String @unique
+  schoolId String
+  parent      School       @relation(fields: [schoolId], references: [id])
 }
 
 model Student {
@@ -59,6 +63,12 @@ model Student {
 
 }
 
+model Auth {
+  id String @id
+  password String 
+  email String @unique
+  role String  
+}
 model ClassYear {
   id        String    @id
   schoolYearId String
@@ -231,7 +241,7 @@ model EventClass {
 
 }
 model Announcement {
-  id          Int      @id @default(autoincrement())
+  id          String @id
   title       String
   description String
   date        DateTime

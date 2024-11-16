@@ -1,4 +1,5 @@
 import { role } from "@/lib/data";
+import { getCurrentUser } from "@/lib/functs";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -52,12 +53,6 @@ const menuItems = [
         icon: "/exam.png",
         label: "Exams",
         href: "/list/exams",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/assignment.png",
-        label: "Assignments",
-        href: "/list/assignments",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
@@ -117,7 +112,8 @@ const menuItems = [
   },
 ];
 
-const Menu = () => {
+const Menu = async () => {
+  const currentUser = await getCurrentUser()
   return (
     <div className="mt-4 text-sm">
       {menuItems.map((i) => (
