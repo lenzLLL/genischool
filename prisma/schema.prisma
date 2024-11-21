@@ -8,7 +8,7 @@ datasource db {
 }
 
 model School {
-  id String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name String @unique
   email String?
   logo String?
@@ -16,13 +16,14 @@ model School {
   createdAt   DateTime     @default(now())
   schoolyears Schoolyear[]
   admins Admin[]
+  auths Auth[]
 }
 
 model Schoolyear {
-  id String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt   DateTime     @default(now())
   endedAt   DateTime?     
-  schoolId String
+  schoolId String @db.Uuid
   school      School       @relation(fields: [schoolId], references: [id])
   classYears ClassYear[]
   semestres Semestre[]
@@ -31,18 +32,16 @@ model Schoolyear {
 }
 
 model Admin {
-  id       String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username String
   email String @unique
-  schoolId String
-  parent      School       @relation(fields: [schoolId], references: [id])
+  schoolId String @db.Uuid
+  school      School       @relation(fields: [schoolId], references: [id])
 }
 
 model Student {
-  id          String       @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username    String       @unique
-  name        String
-  surname     String
   email       String?      @unique
   phone       String?      @unique
   address     String
@@ -50,7 +49,7 @@ model Student {
   bloodType   String
   sex         UserSex
   createdAt   DateTime     @default(now())
-  parentId    String
+  parentId    String @db.Uuid
   parent      Parent       @relation(fields: [parentId], references: [id])
   gradeId     Int
   attendances Attendance[]
@@ -58,22 +57,25 @@ model Student {
   birthday    DateTime
   classYears ClassYear[]
   studentFees StudentFees[]
-  currentClassId String
+  currentClassId String @db.Uuid
   currentClass      Class       @relation(fields: [currentClassId], references: [id])
 
 }
 
 model Auth {
-  id String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   password String 
   email String @unique
   role String  
+  school      School?       @relation(fields: [schoolId], references: [id])
+  schoolId String? @db.Uuid
+  
 }
 model ClassYear {
-  id        String    @id
-  schoolYearId String
-  classId String
-  studentId String
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schoolYearId String @db.Uuid
+  classId String @db.Uuid
+  studentId String @db.Uuid
   schoolYear       Schoolyear        @relation(fields: [schoolYearId], references: [id])
   class       Class        @relation(fields: [classId], references: [id])
   student       Student        @relation(fields: [studentId], references: [id])
@@ -83,10 +85,8 @@ model ClassYear {
 }
 
 model Teacher {
-  id        String    @id
-  username  String    @unique
-  name      String
-  surname   String
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username  String
   email     String?   @unique
   phone     String?   @unique
   address   String
@@ -101,7 +101,7 @@ model Teacher {
 }
 
 model Parent {
-  id        String    @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username  String    @unique
   name      String
   surname   String
@@ -115,10 +115,9 @@ model Parent {
 
 
 model Class {
-  id       String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name     String
-  capacity Int
-  supervisorId  String?
+  supervisorId  String? @db.Uuid
   supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
   lessons       Lesson[]
   gradeId       Int
@@ -130,7 +129,7 @@ model Class {
 }
 
 model Subject {
-  id       String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name     String   
   credit Int @default(1)
   teachers Teacher[]
@@ -140,17 +139,17 @@ model Subject {
 }
 
 model Lesson {
-  id        String      @id 
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
   day       Day
   credit Int @default(1)
   startTime DateTime
   endTime   DateTime
-  subjectId   String
+  subjectId   String @db.Uuid
   subject     Subject      @relation(fields: [subjectId], references: [id])
-  classId     String
+  classId     String @db.Uuid
   class       Class        @relation(fields: [classId], references: [id])
-  teacherId   String
+  teacherId   String @db.Uuid
   teacher     Teacher      @relation(fields: [teacherId], references: [id])
   attendances Attendance[]
   files String[]
@@ -159,45 +158,45 @@ model Lesson {
 }
 
 model Semestre {
-  id String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type String
   startTime DateTime
   endTime   DateTime
-  schoolYearId String
+  schoolYearId String @db.Uuid
   schoolYear     Schoolyear      @relation(fields: [schoolYearId], references: [id])
   examens Exam[]    
 }
 model Exam {
-  id        String      @id 
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title     String
   startTime DateTime
   endTime   DateTime
-  subjectId String
+  subjectId String @db.Uuid
   files String[]
   keys String[]
-  lessonId String 
+  lessonId String @db.Uuid
   lesson Lesson           @relation(fields: [lessonId], references: [id])
   
   semestre     Semestre      @relation(fields: [semestreId], references: [id])
-  semestreId String
+  semestreId String @db.Uuid
   subject   Subject   @relation(fields: [subjectId], references: [id])
   results  Result[]
 }
 
 model Fees {
-  id String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order Int
-  classId String
+  classId String @db.Uuid
   class     Class      @relation(fields: [classId], references: [id])
   amount BigInt
   studentFees StudentFees[]
 }
  model StudentFees {
-   id String @id
+   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
    amount BigInt
-   studentId String
-   schoolYearId String
-   FeesId String
+   studentId String @db.Uuid
+   schoolYearId String @db.Uuid
+   FeesId String @db.Uuid
    fees     Fees      @relation(fields: [FeesId], references: [id])
    schoolYear     Schoolyear      @relation(fields: [schoolYearId], references: [id])
    student     Student      @relation(fields: [studentId], references: [id])
@@ -205,26 +204,26 @@ model Fees {
  }
 
 model Result {
-  id    String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   score Int
-  examId       String?
+  examId       String? @db.Uuid
   exam         Exam?       @relation(fields: [examId], references: [id])
-  studentId    String
+  studentId    String @db.Uuid
   student      Student     @relation(fields: [studentId], references: [id])
 }
 
 model Attendance {
-  id      Int      @id @default(autoincrement())
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   date    DateTime
   present Boolean
-  studentId String
+  studentId String @db.Uuid
   student   Student @relation(fields: [studentId], references: [id])
-  lessonId  String
+  lessonId  String @db.Uuid
   lesson    Lesson  @relation(fields: [lessonId], references: [id])
 }
 
 model Event {
-  id          String      @id 
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String
   description String
   startTime   DateTime
@@ -233,19 +232,19 @@ model Event {
 }
 
 model EventClass {
-  id String @id
-  eventId String
-  classId String
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId String @db.Uuid
+  classId String @db.Uuid
   event   Event @relation(fields: [eventId], references: [id])
   class   Class @relation(fields: [classId], references: [id])
 
 }
 model Announcement {
-  id          String @id
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String
   description String
   date        DateTime
-  classId String?
+  classId String? @db.Uuid
   class   Class? @relation(fields: [classId], references: [id])
 }
 

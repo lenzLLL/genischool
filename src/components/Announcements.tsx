@@ -1,25 +1,28 @@
 import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 const Announcements = async () => {
   const currentUser = await getCurrentUser()
   const roleConditions = {
     Teacher: { lessons: { some: { teacherId: currentUser?.id } } },
-    Student: { students: { some: { id: currentUser?.id } } },
-    Parent: { students: { some: { parentId: currentUser?.id } } },
+    Student: { currentStudents: { some: { id: currentUser?.id } } },
+    Parent: { currentStudents: { some: { parentId: currentUser?.id } } },
   };
+  const query: Prisma.AnnouncementWhereInput = {};
+
 
   const data = await prisma.announcement.findMany({
     take: 4,
-    orderBy: { date: "desc" },
     where: {
-      ...(currentUser?.role !== "admin" && {
+      ...(currentUser?.role !== "Admin" && {
         OR: [
           { classId: null },
           { class: roleConditions[currentUser?.role as keyof typeof roleConditions] || {} },
         ],
       }),
     },
+    orderBy: { date: "desc" },
   });
 
   return (
