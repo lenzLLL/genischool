@@ -5,4 +5,5 @@ export type AuthSchema = {
     fullname:string|null
     role:string|null
     id:string
+    schoolId:string
 }

@@ -41,7 +41,7 @@ export const getCurrentUser = async () => {
             }
         })
         if(!data){return}
-        const response:AuthSchema = {email:data.email,role:"Admin",fullname:data.username,id:data.id}
+        const response:AuthSchema = {email:data.email,role:"Admin",fullname:data.username,id:data.id,schoolId:data.schoolId}
         return response
     }
 }

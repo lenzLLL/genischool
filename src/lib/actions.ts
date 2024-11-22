@@ -9,6 +9,8 @@ import {
   TeacherSchema,
 } from "./formValidationSchemas";
 import prisma from "./prisma";
+import { connect } from "http2";
+import { getCurrentUser } from "./functs";
 
 type CurrentState = { success: boolean; error: boolean };
 
@@ -141,30 +143,31 @@ export const createTeacher = async (
   data: TeacherSchema
 ) => {
   try {
-    const user = await clerkClient.users.createUser({
-      username: data.username,
-      password: data.password,
-      firstName: data.name,
-      lastName: data.surname,
-      publicMetadata:{role:"teacher"}
-    });
-
+    const currentUser = await getCurrentUser()
+    const r = await prisma.auth.create({
+      data:{
+        role:'t',
+        password:data.username.split(" ").join("_"),
+        email:data.email? data.email:"",
+        school:{
+          connect:{id:currentUser?.schoolId}
+        }
+      }
+    })
+    if(!r){
+        return { success: false, error: true };    
+    }
     await prisma.teacher.create({
       data: {
-        id: user.id,
         username: data.username,
-        name: data.name,
-        surname: data.surname,
         email: data.email || null,
         phone: data.phone || null,
         address: data.address,
         img: data.img || null,
-        bloodType: data.bloodType,
         sex: data.sex,
-        birthday: data.birthday,
         subjects: {
           connect: data.subjects?.map((subjectId: string) => ({
-            id: parseInt(subjectId),
+            id: subjectId,
           })),
         },
       },

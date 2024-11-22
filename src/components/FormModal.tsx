@@ -77,14 +77,14 @@ const forms: {
        relatedData={relatedData}
     />
    ),
-  // teacher: (setOpen, type, data, relatedData) => (
-  //   <TeacherForm
-  //     type={type}
-  //     data={data}
-  //     setOpen={setOpen}
-  //     relatedData={relatedData}
-  //   />
-  // ),
+   teacher: (setOpen, type, data, relatedData) => (
+     <TeacherForm
+       type={type}
+       data={data}
+       setOpen={setOpen}
+       relatedData={relatedData}
+     />
+   ),
   // student: (setOpen, type, data, relatedData) => (
   //   <StudentForm
   //     type={type}

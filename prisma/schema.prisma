@@ -64,8 +64,8 @@ model Student {
 
 model Auth {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  password String 
-  email String @unique
+  password String @unique
+  email String 
   role String  
   school      School?       @relation(fields: [schoolId], references: [id])
   schoolId String? @db.Uuid
@@ -91,13 +91,11 @@ model Teacher {
   phone     String?   @unique
   address   String
   img       String?
-  bloodType String
   sex       UserSex
   createdAt DateTime  @default(now())
   subjects  Subject[]
   lessons   Lesson[]
   classes   Class[]
-  birthday  DateTime
 }
 
 model Parent {

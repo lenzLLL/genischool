@@ -1,9 +1,11 @@
 import EmptyComponent from "@/components/emptyComponent";
+import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { role, teachersData } from "@/lib/data";
+import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Prisma, Subject, Teacher } from "@prisma/client";
@@ -68,7 +70,7 @@ const TeacherListPage = async ({
           className="md:hidden xl:block w-10 h-10 rounded-full object-cover"
         />
         <div className="flex flex-col">
-          <h3 className="font-semibold">{item.name}</h3>
+          <h3 className="font-semibold">{item.username}</h3>
           <p className="text-xs text-gray-500">{item?.email}</p>
         </div>
       </td>
@@ -114,7 +116,7 @@ const TeacherListPage = async ({
             };
             break;
           case "search":
-            query.name = { contains: value, mode: "insensitive" };
+            query.username = { contains: value, mode: "insensitive" };
             break;
           default:
             break;
@@ -135,6 +137,7 @@ const TeacherListPage = async ({
     }),
     prisma.teacher.count({ where: query }),
   ]);
+  const currentUser = await getCurrentUser()
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
@@ -149,9 +152,9 @@ const TeacherListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-             {role === "admin" && (
+             {currentUser?.role === "Admin" && (
               
-               <FormModal table="teacher" type="create"/>
+               <FormContainer table="teacher" type="create"/>
             )} 
           </div>
         </div>
