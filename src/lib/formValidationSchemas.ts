@@ -11,7 +11,6 @@ export type SubjectSchema = z.infer<typeof subjectSchema>;
 export const classSchema = z.object({
   id: z.coerce.string().optional(),
   name: z.string().min(1, { message: "Subject name is required!" }),
-  gradeId: z.coerce.number().min(1, { message: "Grade name is required!" }),
   supervisorId: z.coerce.string().optional(),
 });
 

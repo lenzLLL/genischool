@@ -98,7 +98,7 @@ export const createClass = async (
 
 export const updateClass = async (
   currentState: CurrentState,
-  data: ClassSchema
+  data: any
 ) => {
   try {
     await prisma.class.update({

@@ -120,12 +120,12 @@ model Class {
   supervisorId  String? @db.Uuid
   supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
   lessons       Lesson[]
-  gradeId       Int
   announcements Announcement[]
   classYears ClassYear[]
   fees Fees[]
   currentStudents Student[]
   events EventClass[]
+
 }
 
 model Subject {

@@ -5,10 +5,10 @@ import TableSearch from "@/components/TableSearch";
 import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Class, Prisma, Teacher } from "@prisma/client";
+import { Class, Prisma, Student, Teacher } from "@prisma/client";
 import Image from "next/image";
 
-type ClassList = Class & { supervisor: Teacher };
+type ClassList = Class & { supervisor: Teacher } & {currentStudents:Student[]};
 
 const ClassListPage = async ({
   searchParams,
@@ -25,11 +25,7 @@ const columns = [
     header: "Class Name",
     accessor: "name",
   },
-  {
-    header: "Capacity",
-    accessor: "capacity",
-    className: "hidden md:table-cell",
-  },
+
   {
     header: "Students",
     accessor: "students",
@@ -57,14 +53,13 @@ const renderRow = (item: ClassList) => (
     className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
   >
     <td className="flex items-center gap-4 p-4">{item.name}</td>
-    <td className="hidden md:table-cell">{20}</td>
-    <td className="hidden md:table-cell">{item.name[0]}</td>
+    <td className="hidden md:table-cell">{item.currentStudents.length}</td>
     <td className="hidden md:table-cell">
       {item.supervisor.username}
     </td>
     <td>
       <div className="flex items-center gap-2">
-         {currentUser?.role === "admin" && (
+         {currentUser?.role === "Admin" && (
           <>
             <FormContainer table="class" type="update" data={item} />
             <FormContainer table="class" type="delete" id={item.id} />
@@ -105,6 +100,7 @@ const renderRow = (item: ClassList) => (
       where: query,
       include: {
         supervisor: true,
+        currentStudents:true
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
