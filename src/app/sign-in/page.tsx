@@ -11,7 +11,7 @@ const SignUp = async (props: Props) => {
         <div className='z-1 absolute'>
             <img src='/bg.jpg' className='w-screen h-screen' alt =''/>
         </div>  
-//      <AuthForm/>
+      <AuthForm/>
     </div>
   )
 }

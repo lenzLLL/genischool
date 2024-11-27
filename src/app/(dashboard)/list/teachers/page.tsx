@@ -21,8 +21,8 @@ const columns = [
     accessor: "info",
   },
   {
-    header: "Teacher ID",
-    accessor: "teacherId",
+    header: "Sexe",
+    accessor: "sexe",
     className: "hidden md:table-cell",
   },
   {
@@ -74,7 +74,7 @@ const TeacherListPage = async ({
           <p className="text-xs text-gray-500">{item?.email}</p>
         </div>
       </td>
-      <td className="hidden md:table-cell">{item.id}</td>
+      <td className="hidden md:table-cell">{item.sex}</td>
       <td className="hidden md:table-cell">{item.subjects.map(item=><span className="flex flex-wrap gap-1 text-sm">{item.name}</span>)}</td>
       <td className="hidden md:table-cell">{item.classes.map(item=><span className="flex flex-wrap gap-1 text-sm">{item.name}</span>)}</td>
       <td className="hidden md:table-cell">{item.phone}</td>
@@ -124,7 +124,7 @@ const TeacherListPage = async ({
       }
     }
   }
-
+  query.deleted = false
   const [data, count] = await prisma.$transaction([
     prisma.teacher.findMany({
       where: query,

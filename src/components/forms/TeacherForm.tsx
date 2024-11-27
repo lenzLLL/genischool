@@ -1,5 +1,5 @@
 "use client";
-
+import { CldUploadWidget } from "next-cloudinary";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
@@ -10,7 +10,7 @@ import { useFormState } from "react-dom";
 import { createTeacher, updateTeacher } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { CldUploadWidget } from "next-cloudinary";
+import { ImageUpIcon } from "lucide-react";
 
 const TeacherForm = ({
   type,
@@ -32,7 +32,7 @@ const TeacherForm = ({
   });
 
   const [img, setImg] = useState<any>();
-
+  const [image,setImage] = useState<any>("")
   const [state, formAction] = useFormState(
     type === "create" ? createTeacher : updateTeacher,
     {
@@ -43,7 +43,7 @@ const TeacherForm = ({
 
   const onSubmit = handleSubmit((data) => {
     console.log(data);
-    formAction({ ...data, img: img?.secure_url });
+    formAction({ ...data, img: img?.secure_url,key:img?.public_id });
   });
 
   const router = useRouter();
@@ -59,7 +59,7 @@ const TeacherForm = ({
   const { subjects } = relatedData;
 
   return (
-    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
+    <form className="flex flex-col gap-2" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
         {type === "create" ? "Create a new teacher" : "Update the teacher"}
       </h1>
@@ -94,13 +94,7 @@ const TeacherForm = ({
         Personal Information
       </span>
       <div className="flex justify-between flex-wrap gap-4">
-        <InputField
-          label="First Name"
-          name="name"
-          defaultValue={data?.name}
-          register={register}
-          error={errors.username}
-        />
+       
 
         <InputField
           label="Phone"
@@ -129,7 +123,7 @@ const TeacherForm = ({
           />
         )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Sex</label>
+          <label className="text-xs text-gray-500">Sexe</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("sex")}
@@ -164,6 +158,9 @@ const TeacherForm = ({
             </p>
           )}
         </div>
+        <div>
+          { img && <img className="h-32 w-32 rounded-full" src = {img.secure_url}/>}
+        </div>
         <CldUploadWidget
           uploadPreset="school"
           onSuccess={(result, { widget }) => {
@@ -173,16 +170,14 @@ const TeacherForm = ({
         >
           {({ open }) => {
             return (
-              <div
-                className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-                onClick={() => open()}
-              >
-                <Image src="/upload.png" alt="" width={28} height={28} />
-                <span>Upload a photo</span>
-              </div>
+
+                      <label onClick={() => open()} htmlFor='cv' className='cursor-pointer shadow-sm hover:shadow-lg flex flex-row justify-center border w-full py-[10px] items-center gap-2 px-20 bg-[#414141] text-white rounded-lg '>
+                      <ImageUpIcon/> Upload profil picture  
+                   </label>
             );
           }}
         </CldUploadWidget>
+
       </div>
       {state.error && (
         <span className="text-red-500">Something went wrong!</span>

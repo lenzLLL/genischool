@@ -1,5 +1,5 @@
 "use server";
-
+import cloudinary from "cloudinary"
 import { revalidatePath } from "next/cache";
 import {
   ClassSchema,
@@ -13,6 +13,16 @@ import { connect } from "http2";
 import { getCurrentUser } from "./functs";
 
 type CurrentState = { success: boolean; error: boolean };
+
+cloudinary.v2.config({
+  cloud_name:process.env.CLOUDINARY_NAME,
+  api_key:process.env.CLOUDINARY_API_KEY,
+  api_secret:process.env.CLOUDINARY_API_SECRET
+
+})
+
+
+
 
 export const createSubject = async (
   currentState: CurrentState,
@@ -144,34 +154,60 @@ export const createTeacher = async (
 ) => {
   try {
     const currentUser = await getCurrentUser()
-    const r = await prisma.auth.create({
-      data:{
-        role:'t',
-        password:data.username.split(" ").join("_"),
-        email:data.email? data.email:"",
-        school:{
-          connect:{id:currentUser?.schoolId}
-        }
+    const isExistAuth = await prisma.auth.findFirst({
+      where:{
+        email:data.email,
       }
     })
-    if(!r){
+    let r:any = null
+    if(!isExistAuth){
+      r = await prisma.auth.create({
+      data:{
+        password:data.password? data.password:"",
+        email:data.email? data.email:"",
+      }
+      })
+    }
+    if(!r && !isExistAuth){
         return { success: false, error: true };    
     }
-    await prisma.teacher.create({
+    let res:any  = null
+
+    const t = await prisma.teacher.create({
       data: {
         username: data.username,
         email: data.email || null,
         phone: data.phone || null,
         address: data.address,
         img: data.img || null,
+        imgKey:data.key || null,
         sex: data.sex,
         subjects: {
           connect: data.subjects?.map((subjectId: string) => ({
             id: subjectId,
           })),
         },
+        school:{
+          connect:{id:currentUser?.schoolId}
+        }
+      
       },
     });
+
+    if (t){
+        const id = isExistAuth? isExistAuth.id:r?.id
+        await prisma.authSchool.create({
+          data:{
+            role:"t",
+            school:{
+              connect:{id:currentUser?.schoolId}
+            },
+            user:{
+              connect:{id}
+            }
+          }
+        })  
+    }
 
     // revalidatePath("/list/teachers");
     return { success: true, error: false };
@@ -233,14 +269,30 @@ export const deleteTeacher = async (
 ) => {
   const id = data.get("id") as string;
   try {
-    await clerkClient.users.deleteUser(id);
-
-    await prisma.teacher.delete({
-      where: {
-        id: id,
-      },
-    });
-
+      const t = await prisma.teacher.findUnique({
+        where:{
+          id
+        }
+      })
+      const a = await prisma.auth.findFirst({
+        where:{
+          email:t?.email? t.email:""
+        }
+      })
+      await prisma.teacher.update({
+        where:{
+          id
+        },
+        data:{
+          deleted:true
+        }
+      })
+      await prisma.authSchool.deleteMany({
+        where:{
+          userId:a?.id,
+          schoolId:t?.schoolId? t.schoolId:""
+        }
+      })
     // revalidatePath("/list/teachers");
     return { success: true, error: false };
   } catch (err) {

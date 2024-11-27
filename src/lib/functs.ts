@@ -11,6 +11,9 @@ export const toLogin =  async ({email,password}:{email:string,password:string}) 
         where:{
             email:email,
             password:password
+        },
+        include:{
+            schools:true
         }
     })
     if(auth){
@@ -22,22 +25,34 @@ export const toLogin =  async ({email,password}:{email:string,password:string}) 
     }
 }
 
+export const chooseSchool = async () => {
+
+}
 export const getCurrentUser = async () => {
     const cookieStore = await cookies()
     if(!cookieStore.get("auth")){
         redirect("/sign-in")
     }
     const email = cookieStore.get("auth")?.value
+    const schoolId = "550e8400-e29b-41d4-a716-446655440000"
     const user = await prisma.auth.findFirst({
         where:{
             email
+        },
+        include:{
+            schools:{
+                where:{
+                    schoolId
+                }
+            }
         }
     })
     if(!user){return}
-    if(user.role === "a"){
+    if(user.schools[0].role === "a"){
         const data = await prisma.admin.findFirst({
             where:{
-                email
+                email,
+                schoolId
             }
         })
         if(!data){return}

@@ -18,7 +18,7 @@ export default function AuthForm() {
         }    
         const r = await toLogin({email,password})
         if(r){
-            if(r.role === "a") {
+            if(r.schools[0].role === "a") {
                 router.push("/admin")            
             }           
         }

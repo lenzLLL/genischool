@@ -16,7 +16,9 @@ model School {
   createdAt   DateTime     @default(now())
   schoolyears Schoolyear[]
   admins Admin[]
-  auths Auth[]
+  // auths Auth[]
+  users AuthSchool[]
+  teachers Teacher[]
 }
 
 model Schoolyear {
@@ -28,7 +30,7 @@ model Schoolyear {
   classYears ClassYear[]
   semestres Semestre[]
   studentFees StudentFees[]
-
+  activate Boolean? @default(false)
 }
 
 model Admin {
@@ -37,6 +39,7 @@ model Admin {
   email String @unique
   schoolId String @db.Uuid
   school      School       @relation(fields: [schoolId], references: [id])
+  deleted Boolean @default(false)
 }
 
 model Student {
@@ -59,17 +62,26 @@ model Student {
   studentFees StudentFees[]
   currentClassId String @db.Uuid
   currentClass      Class       @relation(fields: [currentClassId], references: [id])
-
+  deleted Boolean @default(false)
+  
 }
 
 model Auth {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   password String @unique
-  email String 
-  role String  
+  email String   
+  //  school      School?       @relation(fields: [schoolId], references: [id])
+  // schoolId String? @db.Uuid
+  schools AuthSchool[]
+}
+
+model AuthSchool {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   school      School?       @relation(fields: [schoolId], references: [id])
-  schoolId String? @db.Uuid
-  
+  user      Auth?       @relation(fields: [userId], references: [id])
+  role String
+  schoolId String @db.Uuid
+  userId String @db.Uuid
 }
 model ClassYear {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -91,7 +103,11 @@ model Teacher {
   phone     String?   @unique
   address   String
   img       String?
+  imgKey    String?
+  deleted Boolean @default(false)
   sex       UserSex
+  schoolId String? @db.Uuid
+  school       School?        @relation(fields: [schoolId], references: [id])
   createdAt DateTime  @default(now())
   subjects  Subject[]
   lessons   Lesson[]
@@ -108,6 +124,7 @@ model Parent {
   address   String
   createdAt DateTime  @default(now())
   students  Student[]
+  deleted Boolean @default(false)
 }
 
 
@@ -123,6 +140,7 @@ model Class {
   fees Fees[]
   currentStudents Student[]
   events EventClass[]
+  deleted Boolean @default(false)
 
 }
 
@@ -133,6 +151,7 @@ model Subject {
   teachers Teacher[]
   lessons  Lesson[]
   exams       Exam[]
+  deleted Boolean @default(false)
 
 }
 
@@ -153,6 +172,8 @@ model Lesson {
   files String[]
   keys String[]
   examens Exam[]
+  deleted Boolean @default(false)
+
 }
 
 model Semestre {
@@ -163,6 +184,8 @@ model Semestre {
   schoolYearId String @db.Uuid
   schoolYear     Schoolyear      @relation(fields: [schoolYearId], references: [id])
   examens Exam[]    
+  deleted Boolean @default(false)
+
 }
 model Exam {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -174,6 +197,7 @@ model Exam {
   keys String[]
   lessonId String @db.Uuid
   lesson Lesson           @relation(fields: [lessonId], references: [id])
+  deleted Boolean @default(false)
   
   semestre     Semestre      @relation(fields: [semestreId], references: [id])
   semestreId String @db.Uuid
@@ -187,6 +211,7 @@ model Fees {
   classId String @db.Uuid
   class     Class      @relation(fields: [classId], references: [id])
   amount BigInt
+  deleted Boolean @default(false)
   studentFees StudentFees[]
 }
  model StudentFees {
@@ -198,6 +223,7 @@ model Fees {
    fees     Fees      @relation(fields: [FeesId], references: [id])
    schoolYear     Schoolyear      @relation(fields: [schoolYearId], references: [id])
    student     Student      @relation(fields: [studentId], references: [id])
+  deleted Boolean @default(false)
 
  }
 
@@ -207,6 +233,7 @@ model Result {
   examId       String? @db.Uuid
   exam         Exam?       @relation(fields: [examId], references: [id])
   studentId    String @db.Uuid
+  deleted Boolean @default(false)
   student      Student     @relation(fields: [studentId], references: [id])
 }
 
@@ -215,6 +242,7 @@ model Attendance {
   date    DateTime
   present Boolean
   studentId String @db.Uuid
+  deleted Boolean @default(false)
   student   Student @relation(fields: [studentId], references: [id])
   lessonId  String @db.Uuid
   lesson    Lesson  @relation(fields: [lessonId], references: [id])
@@ -225,7 +253,9 @@ model Event {
   title       String
   description String
   startTime   DateTime
+
   endTime     DateTime
+  deleted Boolean @default(false)
   eventClass EventClass[]
 }
 
@@ -235,6 +265,7 @@ model EventClass {
   classId String @db.Uuid
   event   Event @relation(fields: [eventId], references: [id])
   class   Class @relation(fields: [classId], references: [id])
+  deleted Boolean @default(false)
 
 }
 model Announcement {
@@ -244,6 +275,7 @@ model Announcement {
   date        DateTime
   classId String? @db.Uuid
   class   Class? @relation(fields: [classId], references: [id])
+  deleted Boolean @default(false)
 }
 
 enum UserSex {
