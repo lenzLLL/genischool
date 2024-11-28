@@ -13,9 +13,10 @@ import { connect } from "http2";
 import { getCurrentUser } from "./functs";
 
 type CurrentState = { success: boolean; error: boolean };
+type CurrentStateUpdate = { success: boolean; error: boolean,newImage:Boolean };
 
 cloudinary.v2.config({
-  cloud_name:process.env.CLOUDINARY_NAME,
+  cloud_name:process.env.CLOUD_NAME,
   api_key:process.env.CLOUDINARY_API_KEY,
   api_secret:process.env.CLOUDINARY_API_SECRET
 
@@ -225,36 +226,57 @@ export const updateTeacher = async (
     return { success: false, error: true };
   }
   try {
-    const user = await clerkClient.users.updateUser(data.id, {
-      username: data.username,
-      ...(data.password !== "" && { password: data.password }),
-      firstName: data.name,
-      lastName: data.surname,
-    });
+    // const user = await clerkClient.users.updateUser(data.id, {
+    //   username: data.username,
+    //   ...(data.password !== "" && { password: data.password }),
+    //   firstName: data.name,
+    //   lastName: data.surname,
+    // });
+    const t = await prisma.teacher.findUnique({
+        where:{
+          id:data.id
+        }  
+    })
+    if(data.newImage){
+      await cloudinary.v2.uploader.destroy(t?.imgKey? t.imgKey:"")
+    }
 
-    await prisma.teacher.update({
+     const user = await prisma.auth.findFirst({
+      where:{
+        email:t?.email? t.email:data.email
+      }
+     })
+
+     const r = await prisma.teacher.update({
       where: {
         id: data.id,
       },
       data: {
-        ...(data.password !== "" && { password: data.password }),
+        // ...(data.password !== "" && { password: data.password }),
         username: data.username,
-        name: data.name,
-        surname: data.surname,
         email: data.email || null,
         phone: data.phone || null,
         address: data.address,
-        img: data.img || null,
-        bloodType: data.bloodType,
+        img: data.img ,
+        imgKey:data.key,
         sex: data.sex,
-        birthday: data.birthday,
         subjects: {
           set: data.subjects?.map((subjectId: string) => ({
-            id: parseInt(subjectId),
+            id: subjectId,
           })),
         },
+          
       },
     });
+    await prisma.auth.update({
+      where:{
+        id:user?.id
+      },
+      data:{
+        email:data.email,
+        ...(data.password !== "" && { password: data.password }),
+      }
+    })
     // revalidatePath("/list/teachers");
     return { success: true, error: false };
   } catch (err) {

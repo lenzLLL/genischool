@@ -19,6 +19,7 @@ export type ClassSchema = z.infer<typeof classSchema>;
 export const teacherSchema = z.object({
   id: z.string().optional(),
   key:z.string().optional(),
+  newImage:z.boolean().optional(),
   username: z
     .string()
     .min(3, { message: "Username must be at least 3 characters long!" })

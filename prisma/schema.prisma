@@ -69,7 +69,7 @@ model Student {
 model Auth {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   password String @unique
-  email String   
+  email String  @unique 
   //  school      School?       @relation(fields: [schoolId], references: [id])
   // schoolId String? @db.Uuid
   schools AuthSchool[]

@@ -43,7 +43,7 @@ const TeacherForm = ({
 
   const onSubmit = handleSubmit((data) => {
     console.log(data);
-    formAction({ ...data, img: img?.secure_url,key:img?.public_id });
+    formAction({ ...data, img:img? img?.secure_url:data.img,key:img? img?.public_id:data.key,newImage:(img)? true:false });
   });
 
   const router = useRouter();
@@ -74,6 +74,7 @@ const TeacherForm = ({
           register={register}
           error={errors?.username}
         />
+        
         <InputField
           label="Email"
           name="email"
@@ -158,8 +159,9 @@ const TeacherForm = ({
             </p>
           )}
         </div>
+        
         <div>
-          { img && <img className="h-32 w-32 rounded-full" src = {img.secure_url}/>}
+           <img className="h-32 w-32 rounded-full" src = {img? img.secure_url:data?.img}/>
         </div>
         <CldUploadWidget
           uploadPreset="school"
