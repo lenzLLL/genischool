@@ -97,10 +97,20 @@ export const createClass = async (
   data: ClassSchema
 ) => {
   try {
-    await prisma.class.create({
-      data,
+    const currentUser = await getCurrentUser()
+    const lastSchoolYear = await prisma.schoolyear.findFirst({
+      orderBy: {
+          createdAt: 'desc', // Trier par la date de création en ordre décroissant
+      },
+  });
+    const c = await prisma.class.create({
+      data = {
+        schoolId:currentUser?.schoolId? currentUser.schoolId:"",
+        supervisorId:data.supervisorId,
+        name:data.name
+      },
     });
-
+   
     // revalidatePath("/list/class");
     return { success: true, error: false };
   } catch (err) {
@@ -359,6 +369,7 @@ export const createStudent = async (
         img: data.img || null,
         sex: data.sex,
         imgKey:data.key,
+        schoolId:currentUser?.schoolId? currentUser?.schoolId:"",
         currentClassId: data.classId,
         ...(data.parentId !== "" && { parentId: data.parentId }),
         
@@ -366,7 +377,7 @@ export const createStudent = async (
     });
 
     if (user){
-        const id = isExistAuth? isExistAuth.id:r?.id
+        const id = isExistAuth? isExistAuth.id:r.id
         await prisma.authSchool.create({
           data:{
             role:"s",
@@ -379,7 +390,19 @@ export const createStudent = async (
           }
         })  
     }
-
+    const sy = await prisma.schoolyear.findFirst({
+      where:{
+        current:true,
+        schoolId:currentUser?.schoolId
+      }
+    })
+    await prisma.classYear.create({
+        data = {
+            schoolYearId:sy?.id,
+            classId:data?.classId,
+            studentId:user?.id
+        }      
+    })
     // revalidatePath("/list/students");
     return { success: true, error: false };
   } catch (err) {
@@ -396,31 +419,31 @@ export const updateStudent = async (
     return { success: false, error: true };
   }
   try {
-    const user = await clerkClient.users.updateUser(data.id, {
-      username: data.username,
-      ...(data.password !== "" && { password: data.password }),
-      firstName: data.name,
-      lastName: data.surname,
-    });
-
+    const s = await prisma.student.findUnique({
+      where:{
+        id:data.id
+      }
+    })
+    if(data.newImage){
+      await cloudinary.v2.uploader.destroy(s?.imgKey? s.imgKey:"")
+    }
+    const user = await prisma.auth.findFirst({
+      where:{
+        email:s?.email? s.email:data.email
+      }
+     })
     await prisma.student.update({
       where: {
         id: data.id,
       },
       data: {
-        ...(data.password !== "" && { password: data.password }),
         username: data.username,
-        name: data.name,
-        surname: data.surname,
         email: data.email || null,
         phone: data.phone || null,
         address: data.address,
         img: data.img || null,
-        bloodType: data.bloodType,
         sex: data.sex,
-        birthday: data.birthday,
-        gradeId: data.gradeId,
-        classId: data.classId,
+        currentClassId: data.classId,
         parentId: data.parentId,
       },
     });
@@ -438,15 +461,39 @@ export const deleteStudent = async (
 ) => {
   const id = data.get("id") as string;
   try {
-    await clerkClient.users.deleteUser(id);
-
-    await prisma.student.delete({
-      where: {
-        id: id,
-      },
-    });
-
-    // revalidatePath("/list/students");
+      const s = await prisma.student.findUnique({
+        where:{
+          id
+        },
+        include:{
+          currentClass:{
+            include:{
+              
+            }
+          } 
+        },
+      })
+      const a = await prisma.auth.findFirst({
+        where:{
+          email:s?.email? s.email:""
+        }
+      })
+      await prisma.student.update({
+        where:{
+          id
+        },
+       
+        data:{
+          deleted:true
+        }
+      })
+      await prisma.authSchool.deleteMany({
+        where:{
+          userId:a?.id,
+          schoolId:s?.currentClass.? s.schoolId:""
+        }
+      })
+    // revalidatePath("/list/teachers");
     return { success: true, error: false };
   } catch (err) {
     console.log(err);

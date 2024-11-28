@@ -98,8 +98,7 @@ const StudentForm = ({
         }   
         setTimeout(() => {
           console.log("Une seconde s'est écoulée. Exécution du code !");
-        setLoadingParents(false)
-
+          setLoadingParents(false)
           // Placez ici le code à exécuter après l'attente
       }, 1000); 
         // }
