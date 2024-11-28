@@ -329,41 +329,56 @@ export const createStudent = async (
 ) => {
   console.log(data);
   try {
-    const classItem = await prisma.class.findUnique({
-      where: { id: data.classId },
-      include: { _count: { select: { students: true } } },
-    });
 
-    if (classItem && classItem.capacity === classItem._count.students) {
-      return { success: false, error: true };
+    const currentUser = await getCurrentUser()
+    const isExistAuth = await prisma.auth.findFirst({
+      where:{
+        email:data.email,
+      }
+    })
+    let r:any = null
+    if(!isExistAuth){
+      r = await prisma.auth.create({
+      data:{
+        password:data.password? data.password:"",
+        email:data.email? data.email:"",
+      }
+      })
+    }
+    if(!r && !isExistAuth){
+        return { success: false, error: true };    
     }
 
-    const user = await clerkClient.users.createUser({
-      username: data.username,
-      password: data.password,
-      firstName: data.name,
-      lastName: data.surname,
-      publicMetadata:{role:"student"}
-    });
 
-    await prisma.student.create({
+    const user = await prisma.student.create({
       data: {
-        id: user.id,
         username: data.username,
-        name: data.name,
-        surname: data.surname,
         email: data.email || null,
         phone: data.phone || null,
         address: data.address,
         img: data.img || null,
-        bloodType: data.bloodType,
         sex: data.sex,
-        birthday: data.birthday,
-        gradeId: data.gradeId,
-        classId: data.classId,
-        parentId: data.parentId,
+        imgKey:data.key,
+        currentClassId: data.classId,
+        ...(data.parentId !== "" && { parentId: data.parentId }),
+        
       },
     });
+
+    if (user){
+        const id = isExistAuth? isExistAuth.id:r?.id
+        await prisma.authSchool.create({
+          data:{
+            role:"s",
+            school:{
+              connect:{id:currentUser?.schoolId}
+            },
+            user:{
+              connect:{id}
+            }
+          }
+        })  
+    }
 
     // revalidatePath("/list/students");
     return { success: true, error: false };

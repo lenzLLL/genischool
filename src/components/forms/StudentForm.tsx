@@ -2,64 +2,127 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import Image from "next/image";
 import InputField from "../InputField";
-
-const schema = z.object({
-  username: z
-    .string()
-    .min(3, { message: "Username must be at least 3 characters long!" })
-    .max(20, { message: "Username must be at most 20 characters long!" }),
-  email: z.string().email({ message: "Invalid email address!" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters long!" }),
-  firstName: z.string().min(1, { message: "First name is required!" }),
-  lastName: z.string().min(1, { message: "Last name is required!" }),
-  phone: z.string().min(1, { message: "Phone is required!" }),
-  address: z.string().min(1, { message: "Address is required!" }),
-  bloodType: z.string().min(1, { message: "Blood Type is required!" }),
-  birthday: z.date({ message: "Birthday is required!" }),
-  sex: z.enum(["male", "female"], { message: "Sex is required!" }),
-  img: z.instanceof(File, { message: "Image is required" }),
-});
-
-type Inputs = z.infer<typeof schema>;
+import Image from "next/image";
+import { Dispatch, SetStateAction, use, useEffect, useState } from "react";
+import {
+  studentSchema,
+  StudentSchema,
+  teacherSchema,
+  TeacherSchema,
+} from "@/lib/formValidationSchemas";
+import { useFormState } from "react-dom";
+import {
+  createStudent,
+  createTeacher,
+  updateStudent,
+  updateTeacher,
+} from "@/lib/actions";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { CldUploadWidget } from "next-cloudinary";
+import { ImageUpIcon } from "lucide-react";
+import prisma from "@/lib/prisma";
+import { Parent, Prisma } from "@prisma/client";
 
 const StudentForm = ({
   type,
   data,
+  setOpen,
+  relatedData,
 }: {
   type: "create" | "update";
   data?: any;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  relatedData?: any;
 }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>({
-    resolver: zodResolver(schema),
+  } = useForm<StudentSchema>({
+    resolver: zodResolver(studentSchema),
   });
+
+  const [img, setImg] = useState<any>();
+  const [searchTerm,setSearchTerm] = useState<string>()
+  const [ps,setParents] = useState<Parent[]>([])
+  const [loadingParents,setLoadingParents] = useState<boolean>(false)
+  const [state, formAction] = useFormState(
+    type === "create" ? createStudent : updateStudent,
+    {
+      success: false,
+      error: false,
+    }
+  );
 
   const onSubmit = handleSubmit((data) => {
+    console.log("hello");
     console.log(data);
+    formAction({ ...data, img:img? img?.secure_url:data.img,key:img? img?.public_id:data.key,newImage:(img)? true:false  });
   });
 
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) {
+      toast(`Student has been ${type === "create" ? "created" : "updated"}!`);
+      setOpen(false);
+      router.refresh();
+    }
+  }, [state, router, type, setOpen]);
+
+  const {classes,parents } = relatedData;
+
+  const getAllParent =  () => {
+
+        
+        // setLoadingParents(true)
+        // const query: Prisma.ParentWhereInput = {}
+        // if(searchTerm){
+        //   query.username = { contains: searchTerm, mode: "insensitive" };
+        setLoadingParents(true)
+        if(searchTerm){
+          let r = []
+          for(let i = 0;i<parents.length;i++){
+            if(parents[i].username.toLowerCase().includes(searchTerm.toLowerCase())){
+                r.push({...parents[i]})
+            }
+
+          }
+          setParents(r)
+        } 
+        else{
+          setParents(parents)
+          
+        }   
+        setTimeout(() => {
+          console.log("Une seconde s'est écoulée. Exécution du code !");
+        setLoadingParents(false)
+
+          // Placez ici le code à exécuter après l'attente
+      }, 1000); 
+        // }
+        //   const p = await prisma.parent.findMany()
+        //   setParents(p)
+     
+  }
+
+  useEffect(
+    ()=>{
+        getAllParent() 
+    },[]
+  )
   return (
-    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
-      <h1 className="text-xl font-semibold">Create a new student</h1>
-      <span className="text-xs text-gray-400 font-medium">
+    <form className="flex flex-col gap-3" onSubmit={onSubmit}>
+      <h1 className="text-xl font-semibold">
+        {type === "create" ? "Create a new student" : "Update the student"}
+      </h1>
+      <span className="text-xs text-gray-400  font-medium">
         Authentication Information
       </span>
-      <div className="flex justify-between flex-wrap gap-4">
-        <InputField
-          label="Username"
-          name="username"
-          defaultValue={data?.username}
-          register={register}
-          error={errors?.username}
-        />
+      <div className="flex justify-start mb-3 flex-wrap gap-4">
+  
         <InputField
           label="Email"
           name="email"
@@ -75,24 +138,24 @@ const StudentForm = ({
           register={register}
           error={errors?.password}
         />
+        <div>
+           <img className="h-16 w-16 rounded-full" src = {img? img.secure_url:data?.img? data?.img:"/noAvatar.png"}/>
+        </div>
       </div>
       <span className="text-xs text-gray-400 font-medium">
         Personal Information
       </span>
-      <div className="flex justify-between flex-wrap gap-4">
+    
+    
+      <div className="flex justify-start flex-wrap gap-4">
+        
+        
         <InputField
-          label="First Name"
-          name="firstName"
-          defaultValue={data?.firstName}
+          label="User Name"
+          name="username"
+          defaultValue={data?.username}
           register={register}
-          error={errors.firstName}
-        />
-        <InputField
-          label="Last Name"
-          name="lastName"
-          defaultValue={data?.lastName}
-          register={register}
-          error={errors.lastName}
+          error={errors.username}
         />
         <InputField
           label="Phone"
@@ -108,21 +171,18 @@ const StudentForm = ({
           register={register}
           error={errors.address}
         />
-        <InputField
-          label="Blood Type"
-          name="bloodType"
-          defaultValue={data?.bloodType}
-          register={register}
-          error={errors.bloodType}
-        />
-        <InputField
-          label="Birthday"
-          name="birthday"
-          defaultValue={data?.birthday}
-          register={register}
-          error={errors.birthday}
-          type="date"
-        />
+
+
+        {data && (
+          <InputField
+            label="Id"
+            name="id"
+            defaultValue={data?.id}
+            register={register}
+            error={errors?.id}
+            hidden
+          />
+        )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Sex</label>
           <select
@@ -130,8 +190,8 @@ const StudentForm = ({
             {...register("sex")}
             defaultValue={data?.sex}
           >
-            <option value="male">Male</option>
-            <option value="female">Female</option>
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
           </select>
           {errors.sex?.message && (
             <p className="text-xs text-red-400">
@@ -139,23 +199,91 @@ const StudentForm = ({
             </p>
           )}
         </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/4 justify-center">
-          <label
-            className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-            htmlFor="img"
+    
+        <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Class</label>
+          <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("classId")}
+            defaultValue={data?.classId}
           >
-            <Image src="/upload.png" alt="" width={28} height={28} />
-            <span>Upload a photo</span>
-          </label>
-          <input type="file" id="img" {...register("img")} className="hidden" />
-          {errors.img?.message && (
+            {classes.map(
+              (classItem: {
+                id: number;
+                name: string;
+                _count: { students: number };
+              }) => (
+                <option value={classItem.id} key={classItem.id}>
+                  {classItem.name}
+                </option>
+              )
+            )}
+          </select>
+          {errors.classId?.message && (
             <p className="text-xs text-red-400">
-              {errors.img.message.toString()}
+              {errors.classId.message.toString()}
             </p>
           )}
         </div>
+        
       </div>
-      <button className="bg-blue-400 text-white p-2 rounded-md">
+      <div className="flex flex-col gap-2 w-full ">
+          <label className="text-xs text-gray-500">Parent</label>
+          <div className="flex gap-3">
+          <input
+                value={searchTerm}
+                onChange={(e)=>setSearchTerm(e.target.value)}
+                placeholder="type the parent's name"
+                 className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            />
+            <div onClick={()=>getAllParent()} className="bg-[#414141] text-white cursor-pointer py-2 px-5 rounded-md">Search</div>
+          </div>
+ {  !loadingParents &&       <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("parentId")}
+            defaultValue={data?.parentId}
+          >
+            <option value = "" key ="none">
+              none
+            </option>
+            {ps?.map(
+              (classItem:{username:string,id:string}) => (
+                <option value={classItem?.id} key={classItem?.id}>
+                  {classItem?.username}
+                </option>
+              )
+            )}
+          </select>}
+          {
+            loadingParents && (
+             <span>Loading</span> 
+            )
+          }
+          {errors.classId?.message && (
+            <p className="text-xs text-red-400">
+              {errors.classId.message.toString()}
+            </p>
+          )}
+        </div>
+      {state.error && (
+        <span className="text-red-500">Something went wrong!</span>
+      )}
+        <CldUploadWidget
+          uploadPreset="school"
+          onSuccess={(result, { widget }) => {
+            setImg(result.info);
+            widget.close();
+          }}
+        >
+          {({ open }) => {
+            return (
+              <label onClick={() => open()} htmlFor='cv' className='cursor-pointer shadow-sm hover:shadow-lg flex flex-row justify-center border w-full py-[10px] items-center gap-2 px-20 bg-[#414141] text-white rounded-lg '>
+                      <ImageUpIcon/> Upload profile picture  
+                   </label>
+            );
+          }}
+        </CldUploadWidget>
+      <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">
         {type === "create" ? "Create" : "Update"}
       </button>
     </form>

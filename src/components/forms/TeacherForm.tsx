@@ -63,18 +63,11 @@ const TeacherForm = ({
       <h1 className="text-xl font-semibold">
         {type === "create" ? "Create a new teacher" : "Update the teacher"}
       </h1>
-      <span className="text-xs text-gray-400 font-medium">
+      <span className="text-xs text-gray-400 mb-2 font-medium">
         Authentication Information
       </span>
-      <div className="flex justify-between flex-wrap gap-4">
-        <InputField
-          label="Username"
-          name="username"
-          defaultValue={data?.username}
-          register={register}
-          error={errors?.username}
-        />
-        
+      <div className="flex justify-start mb-3 flex-wrap gap-4">
+       
         <InputField
           label="Email"
           name="email"
@@ -91,12 +84,19 @@ const TeacherForm = ({
           error={errors?.password}
         />
       </div>
-      <span className="text-xs text-gray-400 font-medium">
+      <span className="text-xs mb-2 text-gray-400 font-medium">
         Personal Information
       </span>
       <div className="flex justify-between flex-wrap gap-4">
        
-
+      <InputField
+          label="Username"
+          name="username"
+          defaultValue={data?.username}
+          register={register}
+          error={errors?.username}
+        />
+        
         <InputField
           label="Phone"
           name="phone"
@@ -161,7 +161,7 @@ const TeacherForm = ({
         </div>
         
         <div>
-           <img className="h-32 w-32 rounded-full" src = {img? img.secure_url:data?.img}/>
+           <img className="h-32 w-32 rounded-full" src = {img? img.secure_url:data?.img? data?.img:"/noAvatar.png"}/>
         </div>
         <CldUploadWidget
           uploadPreset="school"
