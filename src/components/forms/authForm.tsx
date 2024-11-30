@@ -17,8 +17,12 @@ export default function AuthForm() {
 
         }    
         const r = await toLogin({email,password})
+        
         if(r){
-            if(r.schools[0].role === "a") {
+           if(r.email ="owner@gmail.com"){
+               router.push("/owner")
+           }
+           else if(r.schools[0]?.role === "a") {
                 router.push("/admin")            
             }           
         }

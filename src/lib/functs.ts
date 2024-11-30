@@ -48,6 +48,10 @@ export const getCurrentUser = async () => {
         }
     })
     if(!user){return}
+    if(user.email === "owner@gmail.com"){
+        const response:AuthSchema = {email:user.email,role:"Owner",fullname:"owner",id:user.id,schoolId:""}
+        return response
+    }
     if(user.schools[0].role === "a"){
         const data = await prisma.admin.findFirst({
             where:{

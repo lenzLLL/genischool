@@ -12,7 +12,9 @@ model School {
   name String @unique
   email String?
   logo String?
+  key String?
   address String
+  type String?
   createdAt   DateTime     @default(now())
   schoolyears Schoolyear[]
   admins Admin[]

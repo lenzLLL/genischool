@@ -1,10 +1,23 @@
 import { z } from "zod";
 
+export const schoolSchema = z.object({
+  id: z.coerce.string().optional(),
+  key:z.string().optional(),
+  newImage:z.boolean().optional(),
+  img:z.string().optional(),
+  name: z.string().min(1, { message: "School name is required!" }),
+  email: z.string().optional(),
+  address: z.string(),
+})
+
+export type SchoolSchema = z.infer<typeof schoolSchema>;
+
 export const subjectSchema = z.object({
   id: z.coerce.string().optional(),
   name: z.string().min(1, { message: "Subject name is required!" }),
   teachers: z.array(z.string()), //teacher ids
 });
+
 
 export type SubjectSchema = z.infer<typeof subjectSchema>;
 

@@ -8,6 +8,7 @@ export type FormContainerProps = {
     | "student"
     | "parent"
     | "subject"
+    | "school"
     | "class"
     | "lesson"
     | "exam"

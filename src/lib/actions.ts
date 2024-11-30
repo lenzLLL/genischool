@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import {
   ClassSchema,
   ExamSchema,
+  SchoolSchema,
   StudentSchema,
   SubjectSchema,
   TeacherSchema,
@@ -605,6 +606,30 @@ export const deleteExam = async (
       where: {
         id: parseInt(id),
         // ...(role === "teacher" ? { lesson: { teacherId: userId! } } : {}),
+      },
+    });
+
+    // revalidatePath("/list/subjects");
+    return { success: true, error: false };
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: true };
+  }
+};
+
+export const createSchool = async (
+  currentState: CurrentState,
+  data: SchoolSchema
+) => {
+  try {
+    const currentUser = await getCurrentUser()
+    await prisma.school.create({
+      data: {
+        name: data.name,
+        email:data.email,
+        logo:data.img || null,
+        key:data.key || null,
+        address:data?.address 
       },
     });
 
