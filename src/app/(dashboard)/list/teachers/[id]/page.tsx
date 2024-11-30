@@ -46,7 +46,7 @@ const SingleTeacherPage = async ({
           {/* USER INFO CARD */}
           <div className="bg-lamaSky py-6 px-4 rounded-md flex-1 flex gap-4">
             <div className="w-1/3">
-              <Image
+              <img
                 src={teacher.img || "/noAvatar.png"}
                 alt=""
                 width={100}

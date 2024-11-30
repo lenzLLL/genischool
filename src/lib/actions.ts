@@ -30,12 +30,16 @@ export const createSubject = async (
   data: SubjectSchema
 ) => {
   try {
+    const currentUser = await getCurrentUser()
     await prisma.subject.create({
       data: {
         name: data.name,
         teachers: {
           connect: data.teachers.map((teacherId) => ({ id: teacherId })),
         },
+        school:{
+          connect :{id:currentUser?.schoolId}
+        }
       },
     });
 
@@ -98,13 +102,9 @@ export const createClass = async (
 ) => {
   try {
     const currentUser = await getCurrentUser()
-    const lastSchoolYear = await prisma.schoolyear.findFirst({
-      orderBy: {
-          createdAt: 'desc', // Trier par la date de création en ordre décroissant
-      },
-  });
+ 
     const c = await prisma.class.create({
-      data = {
+      data : {
         schoolId:currentUser?.schoolId? currentUser.schoolId:"",
         supervisorId:data.supervisorId,
         name:data.name
@@ -247,7 +247,7 @@ export const updateTeacher = async (
           id:data.id
         }  
     })
-    if(data.newImage){
+    if(data.newImage && t?.imgKey){
       await cloudinary.v2.uploader.destroy(t?.imgKey? t.imgKey:"")
     }
 
@@ -397,8 +397,8 @@ export const createStudent = async (
       }
     })
     await prisma.classYear.create({
-        data = {
-            schoolYearId:sy?.id,
+        data : {
+            schoolYearId:sy?.id? sy.id:"",
             classId:data?.classId,
             studentId:user?.id
         }      
@@ -424,7 +424,7 @@ export const updateStudent = async (
         id:data.id
       }
     })
-    if(data.newImage){
+    if(data.newImage && s?.imgKey){
       await cloudinary.v2.uploader.destroy(s?.imgKey? s.imgKey:"")
     }
     const user = await prisma.auth.findFirst({
@@ -441,12 +441,23 @@ export const updateStudent = async (
         email: data.email || null,
         phone: data.phone || null,
         address: data.address,
-        img: data.img || null,
+        ...(data.img && { img: data.img }),
+        ...(data.key && {  imgKey:data.key}),
         sex: data.sex,
         currentClassId: data.classId,
-        parentId: data.parentId,
+        ...(data.parentId && {parentId: data.parentId})
       },
     });
+
+    await prisma.auth.update({
+      where:{
+        id:user?.id
+      },
+      data:{
+        email:data.email,
+        ...(data.password !== "" && { password: data.password }),
+      }
+    })
     // revalidatePath("/list/students");
     return { success: true, error: false };
   } catch (err) {
@@ -490,7 +501,7 @@ export const deleteStudent = async (
       await prisma.authSchool.deleteMany({
         where:{
           userId:a?.id,
-          schoolId:s?.currentClass.? s.schoolId:""
+          schoolId:s?.currentClass?.schoolId
         }
       })
     // revalidatePath("/list/teachers");

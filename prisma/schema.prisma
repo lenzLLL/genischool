@@ -21,6 +21,7 @@ model School {
   teachers Teacher[]
   classes Class[]
   students Student[]
+  subjects Subject[]
 }
 
 model Schoolyear {
@@ -156,6 +157,8 @@ model Subject {
   teachers Teacher[]
   lessons  Lesson[]
   exams       Exam[]
+  schoolId String @db.Uuid
+  school       School        @relation(fields: [schoolId], references: [id])
   deleted Boolean @default(false)
 
 }

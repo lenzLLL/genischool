@@ -57,12 +57,12 @@ const columns = [
     >
       <td className="flex items-center gap-4 p-4">
         <div className="flex flex-col">
-          <h3 className="font-semibold">{item.name}</h3>
+          <h3 className="font-semibold">{item.username}</h3>
           <p className="text-xs text-gray-500">{item?.email}</p>
         </div>
       </td>
       
-      <td className="hidden md:table-cell">{item.students.map((student) => student.name).join(",")}</td>
+      <td className="hidden md:table-cell">{item.students.map((student) => student.username).join(",")}</td>
       <td className="hidden md:table-cell">{item.phone}</td>
       <td className="hidden md:table-cell">{item.address}</td>
       <td>
@@ -90,7 +90,7 @@ const columns = [
       if (value !== undefined) {
         switch (key) {
           case "search":
-            query.name = { contains: value, mode: "insensitive" };
+            query.username = { contains: value, mode: "insensitive" };
             break;
           default:
             break;
