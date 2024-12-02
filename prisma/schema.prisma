@@ -33,10 +33,11 @@ model Schoolyear {
   schoolId String @db.Uuid
   school      School       @relation(fields: [schoolId], references: [id])
   classYears ClassYear[]
-  semestres Semestre[]
+  semestres Mestre[]
   studentFees StudentFees[]
   activate Boolean? @default(false)
   current Boolean  @default(false)
+  title String?
 }
 
 model Admin {
@@ -186,33 +187,47 @@ model Lesson {
 
 }
 
-model Semestre {
+model Mestre {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type String
-  startTime DateTime
-  endTime   DateTime
+  order Int
+  startTime DateTime?
+  endTime   DateTime?
   schoolYearId String @db.Uuid
-  schoolYear     Schoolyear      @relation(fields: [schoolYearId], references: [id])
-  examens Exam[]    
+  schoolYear     Schoolyear      @relation(fields: [schoolYearId], references: [id])    
   deleted Boolean @default(false)
-
+  session SessionSequence[]
 }
+
+model SessionSequence  {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type String 
+  order Int
+  startTime DateTime?
+  endTime   DateTime?
+  mestreId String @db.Uuid
+  mestre     Mestre      @relation(fields: [mestreId], references: [id])   
+  examen Exam[] 
+}
+
+
+
 model Exam {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title     String
   startTime DateTime
+  type String
   endTime   DateTime
   subjectId String @db.Uuid
   files String[]
   keys String[]
   lessonId String @db.Uuid
   lesson Lesson           @relation(fields: [lessonId], references: [id])
-  deleted Boolean @default(false)
-  
-  semestre     Semestre      @relation(fields: [semestreId], references: [id])
-  semestreId String @db.Uuid
+  deleted Boolean @default(false)  
   subject   Subject   @relation(fields: [subjectId], references: [id])
   results  Result[]
+  sessionId String @db.Uuid
+  session     SessionSequence      @relation(fields: [sessionId], references: [id])  
 }
 
 model Fees {

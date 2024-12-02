@@ -16,7 +16,9 @@ export type FormContainerProps = {
     | "result"
     | "attendance"
     | "event"
-    | "announcement";
+    | "announcement"
+     |"schoolyear"
+    ;
   type: "create" | "update" | "delete";
   data?: any;
   id?: number | string;
@@ -68,7 +70,10 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
         });
         relatedData = { lessons: examLessons };
         break;
-
+      case "schoolyear":
+        const school = await prisma.school.findUnique({where:{id:data}})
+        relatedData = {school}
+        break
       default:
         break;
     }

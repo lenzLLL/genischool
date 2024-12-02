@@ -5,6 +5,7 @@ import {
   ClassSchema,
   ExamSchema,
   SchoolSchema,
+  SchoolYearchema,
   StudentSchema,
   SubjectSchema,
   TeacherSchema,
@@ -629,7 +630,8 @@ export const createSchool = async (
         email:data.email,
         logo:data.img || null,
         key:data.key || null,
-        address:data?.address 
+        address:data?.address,
+        type:data.type
       },
     });
 
@@ -640,3 +642,92 @@ export const createSchool = async (
     return { success: false, error: true };
   }
 };
+
+export const createSchoolYear = async (  
+  data: any) =>{
+  
+    try{
+    
+    await prisma.schoolyear.updateMany({
+      data:{
+          current:false  
+      },
+      where:{
+        schoolId:data.schoolId
+      }
+    })
+    const sy = await prisma.schoolyear.create({
+      data:{
+           school:{
+            connect:{
+              id:data.schoolId
+            }
+           } ,
+           title:data.title,
+          
+      }
+    })
+    if(data.type === "Université"){
+        for(let i =0;i<2;i++){
+            const r = await prisma.mestre.create({
+                data:{
+                    type:"Semestre",
+                    order:i+1,
+                    schoolYear:{
+                      connect:{
+                        id:sy.id
+                      }
+                    }  
+                }  
+            })
+            
+            await prisma.sessionSequence.create({
+                data:{
+                    type:"sn",
+                    order:1,
+                    mestre:{
+                      connect:{
+                        id:r.id
+                      }
+                    }       
+                }
+            })  
+            
+        }         
+    }else{
+        for(let i =0;i<3;i++){
+          const r = await prisma.mestre.create({
+            data:{
+                type:"Trimestre",
+                order:i+1,
+                schoolYear:{
+                  connect:{
+                    id:sy.id
+                  }
+                }  
+            }  
+          })
+         for(let i = 0;i<2;i++){
+               
+          await prisma.sessionSequence.create({
+            data:{
+                type:"sq",
+                order:i+1,
+                mestre:{
+                  connect:{
+                    id:r.id
+                  }
+                }       
+            }
+        })  
+        }
+        }
+    }  
+    return { success: true, error: false };
+
+  }
+  catch(error:any){
+    console.log(error)   
+    return { success: false, error: true };
+  }
+}

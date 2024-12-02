@@ -21,6 +21,11 @@ const columns = [
     accessor: "info",
   },
   {
+    header: "Type",
+    accessor: "type",
+    className: "hidden md:table-cell",
+  },
+  {
     header: "Address",
     accessor: "address",
     className: "hidden md:table-cell",
@@ -58,13 +63,15 @@ const TeacherListPage = async ({
           <h3 className="font-semibold">{item.name}</h3>
         </div>
       </td>
+
+      <td className="hidden md:table-cell">{item.type}</td>
       <td className="hidden md:table-cell">{item.address}</td>
       <td className="hidden md:table-cell">
       {"Created At "}{new Intl.DateTimeFormat("en-GB").format(item.createdAt)}
       </td>
       <td>
         <div className="flex items-center gap-2">
-          <Link href={`/list/teachers/${item.id}`}>
+          <Link href={`/list/schools/${item.id}`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky">
               <Image src="/view.png" alt="" width={16} height={16} />
             </button>

@@ -8,6 +8,7 @@ export const schoolSchema = z.object({
   name: z.string().min(1, { message: "School name is required!" }),
   email: z.string().optional(),
   address: z.string(),
+  type: z.string()
 })
 
 export type SchoolSchema = z.infer<typeof schoolSchema>;
@@ -94,3 +95,12 @@ export const examSchema = z.object({
 });
 
 export type ExamSchema = z.infer<typeof examSchema>;
+
+export const schoolYearSchema = z.object({
+  id: z.coerce.number().optional(),
+  schoolId: z.string(),
+  title:z.string().min(1, { message: "Title is required!" }),
+  type: z.string()
+});
+
+export type SchoolYearchema = z.infer<typeof schoolYearSchema>;

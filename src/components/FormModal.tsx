@@ -14,10 +14,12 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useFormState } from "react-dom";
 import { toast } from "react-toastify";
 import { FormContainerProps } from "./FormContainer";
+import SchoolYearForm from "./forms/schoolYear";
 
 const deleteActionMap = {
   subject: deleteSubject,
   school:deleteSubject,
+  schoolyear:deleteSubject,
   class: deleteClass,
   teacher: deleteTeacher,
   student: deleteStudent,
@@ -100,6 +102,14 @@ const forms: {
    ),
    school: (setOpen, type, data, relatedData) => (
     <SchoolForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  schoolyear: (setOpen, type, data, relatedData) => (
+    <SchoolYearForm
       type={type}
       data={data}
       setOpen={setOpen}
