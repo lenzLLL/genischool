@@ -1,4 +1,5 @@
 import EmptyComponent from "@/components/emptyComponent";
+import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
@@ -7,10 +8,10 @@ import { announcementsData, role } from "@/lib/data";
 import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Announcement, Class, Prisma } from "@prisma/client";
+import { Announcement, AnnouncementClass, Class, Prisma } from "@prisma/client";
 import Image from "next/image";
 
-type AnnouncementList = Announcement & { class: Class };
+type AnnouncementList = Announcement & { announcementClass:(AnnouncementClass & {class:Class})[] };
 
 
 
@@ -55,17 +56,17 @@ const AnnouncementListPage = async  ({
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">{item.title}</td>
-      <td>{item.class?.name || "-"}</td>
+      <td>{item.announcementClass.map((item) => item.class.name).join(",")}</td>
       <td className="hidden md:table-cell">{item.description}</td>
       <td className="hidden md:table-cell">
-      {new Intl.DateTimeFormat("en-US").format(item.date)}
+      {item.date && new Intl.DateTimeFormat("en-US").format(item?.date)}
       </td>
       <td>
         <div className="flex items-center gap-2">
-        {role === "admin" && (
+        {currentUser?.role === "Admin" && (
             <>
-              {/* <FormContainer table="announcement" type="update" data={item} /> */}
-              {/* <FormContainer table="announcement" type="delete" id={item.id} /> */}
+               <FormContainer table="announcement" type="update" data={item} /> 
+               <FormContainer table="announcement" type="delete" id={item.id} /> 
             </>
           )}
         </div>
@@ -93,7 +94,46 @@ const AnnouncementListPage = async  ({
       }
     }
   }
-
+  if(currentUser?.role === "Student"){
+    query.announcementClass = {
+      some: {
+        class: {
+          currentStudents: {
+            some: {
+              id: currentUser.id
+            }
+          }
+        }
+      }
+    };
+  }
+  else if(currentUser?.role === "Parent"){
+    query.announcementClass = {
+      some:{
+        class:{
+          currentStudents:{
+            some:{
+              parentId:currentUser.id
+            }
+          }
+        }
+      }
+    } 
+  }
+  else if(currentUser?.role === "Teacher"){
+    query.announcementClass = {
+      some:{
+        class:{
+           lessons:{
+            some:{
+              teacherId:currentUser.id
+            }
+           }
+          }
+        }
+      }
+    } 
+  
   // ROLE CONDITIONS
 
   const roleConditions = {
@@ -102,18 +142,22 @@ const AnnouncementListPage = async  ({
     // parent: { students: { some: { parentId: currentUserId! } } },
   };
 
-  query.OR = [
-    { classId: null },
-    {
-      class: roleConditions[role as keyof typeof roleConditions] || {},
-    },
-  ];
+  // query.OR = [
+  //   { classId: null },
+  //   {
+  //     class: roleConditions[role as keyof typeof roleConditions] || {},
+  //   },
+  // ];
 
   const [data, count] = await prisma.$transaction([
     prisma.announcement.findMany({
       where: query,
       include: {
-        class: true,
+        announcementClass: {
+          include:{
+            class:true
+          }
+        },
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
@@ -136,8 +180,8 @@ const AnnouncementListPage = async  ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-             {role === "admin" && (
-              <FormModal table="announcement" type="create" />
+             {currentUser?.role === "Admin" && (
+              <FormContainer table="announcement" type="create" />
             )} 
           </div>
         </div>

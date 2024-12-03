@@ -2,6 +2,7 @@
 import cloudinary from "cloudinary"
 import { revalidatePath } from "next/cache";
 import {
+  AnnouncementSchema,
   ClassSchema,
   ExamSchema,
   SchoolSchema,
@@ -52,7 +53,6 @@ export const createSubject = async (
     return { success: false, error: true };
   }
 };
-
 export const updateSubject = async (
   currentState: CurrentState,
   data: SubjectSchema
@@ -77,7 +77,6 @@ export const updateSubject = async (
     return { success: false, error: true };
   }
 };
-
 export const deleteSubject = async (
   currentState: CurrentState,
   data: FormData
@@ -97,7 +96,6 @@ export const deleteSubject = async (
     return { success: false, error: true };
   }
 };
-
 export const createClass = async (
   currentState: CurrentState,
   data: ClassSchema
@@ -120,7 +118,6 @@ export const createClass = async (
     return { success: false, error: true };
   }
 };
-
 export const updateClass = async (
   currentState: CurrentState,
   data: any
@@ -140,7 +137,6 @@ export const updateClass = async (
     return { success: false, error: true };
   }
 };
-
 export const deleteClass = async (
   currentState: CurrentState,
   data: FormData
@@ -160,7 +156,6 @@ export const deleteClass = async (
     return { success: false, error: true };
   }
 };
-
 export const createTeacher = async (
   currentState: CurrentState,
   data: TeacherSchema
@@ -229,7 +224,6 @@ export const createTeacher = async (
     return { success: false, error: true };
   }
 };
-
 export const updateTeacher = async (
   currentState: CurrentState,
   data: TeacherSchema
@@ -296,7 +290,6 @@ export const updateTeacher = async (
     return { success: false, error: true };
   }
 };
-
 export const deleteTeacher = async (
   currentState: CurrentState,
   data: FormData
@@ -334,7 +327,6 @@ export const deleteTeacher = async (
     return { success: false, error: true };
   }
 };
-
 export const createStudent = async (
   currentState: CurrentState,
   data: StudentSchema
@@ -412,7 +404,6 @@ export const createStudent = async (
     return { success: false, error: true };
   }
 };
-
 export const updateStudent = async (
   currentState: CurrentState,
   data: StudentSchema
@@ -467,7 +458,6 @@ export const updateStudent = async (
     return { success: false, error: true };
   }
 };
-
 export const deleteStudent = async (
   currentState: CurrentState,
   data: FormData
@@ -513,7 +503,6 @@ export const deleteStudent = async (
     return { success: false, error: true };
   }
 };
-
 export const createExam = async (
   currentState: CurrentState,
   data: ExamSchema
@@ -551,7 +540,6 @@ export const createExam = async (
     return { success: false, error: true };
   }
 };
-
 export const updateExam = async (
   currentState: CurrentState,
   data: ExamSchema
@@ -592,7 +580,6 @@ export const updateExam = async (
     return { success: false, error: true };
   }
 };
-
 export const deleteExam = async (
   currentState: CurrentState,
   data: FormData
@@ -617,7 +604,6 @@ export const deleteExam = async (
     return { success: false, error: true };
   }
 };
-
 export const createSchool = async (
   currentState: CurrentState,
   data: SchoolSchema
@@ -642,7 +628,6 @@ export const createSchool = async (
     return { success: false, error: true };
   }
 };
-
 export const createSchoolYear = async (  
   data: any) =>{
   
@@ -731,3 +716,83 @@ export const createSchoolYear = async (
     return { success: false, error: true };
   }
 }
+export const createAnnouncement = async ( 
+  currentState: CurrentState,
+  data: AnnouncementSchema,
+  ) => {
+  try{
+    if(data.classes.length === 0 ){
+       return { success: false, error: true };
+    }
+    const a = await prisma.announcement.create({
+      data:{
+          title:data.title,
+          description:data.description,
+          ...(data.date && {date:data.date}),
+      }
+    })
+    if(!a){return { success: false, error: true }}
+    for(let i = 0;i<data.classes.length;i++){
+        await prisma.announcementClass.create({
+          data:{
+            announcementId:a.id,
+            classId:data.classes[i]
+          }
+        })  
+    }
+    return { success: true, error: false };
+     
+  }
+  catch(error:any){
+    console.log(error)
+    return { success: false, error: true };
+    
+  }
+}
+export const deleteAnnouncement = async (  currentState: CurrentState,
+  data: FormData,) => {
+  const id = data.get("id") as string;
+  try{
+      await prisma.announcementClass.deleteMany({
+        where:{
+          announcementId:id
+        }
+      })        
+      await prisma.announcement.delete({
+        where:{
+          id
+        }
+      })
+    return { success: true, error: false };
+
+  }
+  catch(error:any){
+    return { success: false, error: true };
+  }
+}
+export const updateAnnouncement = async (
+  currentState: CurrentState,
+  data: AnnouncementSchema
+) => {
+  if (!data.id) {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.announcement.update({
+      where:{
+        id:data.id
+      },
+      data:{
+        title:data.title,
+        description:data.description,
+        ...(data.date && {date:data.date})
+      }
+      
+    })
+    // revalidatePath("/list/students");
+    return { success: true, error: false };
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: true };
+  }
+};

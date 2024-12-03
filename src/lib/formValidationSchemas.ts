@@ -104,3 +104,16 @@ export const schoolYearSchema = z.object({
 });
 
 export type SchoolYearchema = z.infer<typeof schoolYearSchema>;
+
+
+export const announcementSchema = z.object({
+  id: z.coerce.string().optional(),
+  description: z.string().min(1, { message: "Description is required!" }),
+  title:z.string().min(1, { message: "Title is required!" }),
+  date: z.coerce.date().optional(),
+  classes: z.array(z.string()), //teacher ids
+});
+
+export type AnnouncementSchema = z.infer<typeof announcementSchema>;
+
+

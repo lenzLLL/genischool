@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  deleteAnnouncement,
   deleteClass,
   deleteExam,
   deleteStudent,
@@ -15,6 +16,8 @@ import { useFormState } from "react-dom";
 import { toast } from "react-toastify";
 import { FormContainerProps } from "./FormContainer";
 import SchoolYearForm from "./forms/schoolYear";
+import Announcements from "./Announcements";
+import AnnouncementForm from "./forms/AnnouncementForm";
 
 const deleteActionMap = {
   subject: deleteSubject,
@@ -31,7 +34,7 @@ const deleteActionMap = {
   result: deleteSubject,
   attendance: deleteSubject,
   event: deleteSubject,
-  announcement: deleteSubject,
+  announcement: deleteAnnouncement,
 };
 
 // USE LAZY LOADING
@@ -116,7 +119,15 @@ const forms: {
       relatedData={relatedData}
     />
   )
-
+  ,
+  announcement:(setOpen, type, data, relatedData) => (
+    <AnnouncementForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  )
   // exam: (setOpen, type, data, relatedData) => (
   //   <ExamForm
   //     type={type}
