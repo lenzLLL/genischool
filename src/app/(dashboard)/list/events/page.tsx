@@ -7,10 +7,10 @@ import { eventsData, role } from "@/lib/data";
 import { getCurrentUser, getFilterEvents } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Class, Event, EventClass, Prisma } from "@prisma/client";
+import { Class, Event, Prisma } from "@prisma/client";
 import Image from "next/image";
 
-type EventList = Event & { eventClass:(EventClass & {class:Class})[]  };
+type EventList = Event;
 
 
 
@@ -26,10 +26,7 @@ const EventListPage = async ({
       header: "Title",
       accessor: "title",
     },
-    {
-      header: "Classes",
-      accessor: "classes",
-    },
+  
     {
       header: "Description",
       accessor: "description",
@@ -65,20 +62,19 @@ const EventListPage = async ({
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">{item.title}</td>
-      <td>{item.eventClass.map((item)=><span className="flex items-center gap-1">{item.class.name? item.class.name:'_'}</span>)} {item.eventClass.length === 0 && "__________"}</td>
       <td className="hidden md:table-cell">{item.description}</td>
       <td className="hidden md:table-cell">
-         {item.startTime.toLocaleTimeString("en-US", {
+         {item.startTime && item.startTime.toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
           hour12: false,
         })}</td>
       <td className="hidden md:table-cell">
-      {new Intl.DateTimeFormat("en-US").format(item.startTime)}
+      {item.startTime && new Intl.DateTimeFormat("en-US").format(item.startTime)}
 
       </td>
       <td className="hidden md:table-cell">
-      {item.endTime.toLocaleTimeString("en-US", {
+      {item.endTime && item.endTime.toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
           hour12: false,
@@ -121,24 +117,11 @@ const EventListPage = async ({
 
   // ROLE CONDITIONS
 
-  if (currentUser?.role === "Parent"){
-      query.eventClass = {some:{class:{currentStudents:{some:{parentId:currentUser.id}}}}}
-  }
-  else if (currentUser?.role === "Student"){
-      query.eventClass = {some:{class:{currentStudents:{some:{id:currentUser.id}}}}}
-  }
-  else if(currentUser?.role === "Teacher"){
-    query.eventClass = {some:{class:{lessons:{some:{teacherId:currentUser.id}}}}}
-  }
   const [data, count] = await prisma.$transaction([
     prisma.event.findMany({
       where:query,
       include: {
-        eventClass: {
-          include:{
-            class:true
-          }
-        },
+      
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),

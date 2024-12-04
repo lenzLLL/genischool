@@ -116,4 +116,16 @@ export const announcementSchema = z.object({
 
 export type AnnouncementSchema = z.infer<typeof announcementSchema>;
 
+export const eventSchema = z.object({
+  id: z.coerce.string().optional(),
+  description: z.string().min(1, { message: "Description is required!" }),
+  title:z.string().min(1, { message: "Title is required!" }),
+  startTime: z.coerce.date().optional(),
+  endTime: z.coerce.date().optional(),
+});
+
+export type EventSchema = z.infer<typeof eventSchema>;
+
+
+
 

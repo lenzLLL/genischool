@@ -24,6 +24,7 @@ model School {
   classes Class[]
   students Student[]
   subjects Subject[]
+  events Event[]
 }
 model Schoolyear {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -135,7 +136,6 @@ model Class {
   classYears ClassYear[]
   fees Fees[]
   currentStudents Student[]
-  events EventClass[]
   announcements AnnouncementClass[]
   deleted Boolean @default(false)
   schoolId String @db.Uuid
@@ -270,20 +270,12 @@ model Event {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String
   description String
-  startTime   DateTime
-  endTime     DateTime
-  deleted Boolean @default(false)
-  eventClass EventClass[]
+  startTime   DateTime?
+  endTime     DateTime?
+  schoolId String @db.Uuid
+  school       School        @relation(fields: [schoolId], references: [id])
 }
-model EventClass {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  eventId String @db.Uuid
-  classId String @db.Uuid
-  event   Event @relation(fields: [eventId], references: [id])
-  class   Class @relation(fields: [classId], references: [id])
-  deleted Boolean @default(false)
-  
-}
+
 model AnnouncementClass {
    id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   announcementId String @db.Uuid

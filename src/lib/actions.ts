@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import {
   AnnouncementSchema,
   ClassSchema,
+  EventSchema,
   ExamSchema,
   SchoolSchema,
   SchoolYearchema,
@@ -24,10 +25,6 @@ cloudinary.v2.config({
   api_secret:process.env.CLOUDINARY_API_SECRET
 
 })
-
-
-
-
 export const createSubject = async (
   currentState: CurrentState,
   data: SubjectSchema
@@ -786,6 +783,80 @@ export const updateAnnouncement = async (
         title:data.title,
         description:data.description,
         ...(data.date && {date:data.date})
+      }
+      
+    })
+    // revalidatePath("/list/students");
+    return { success: true, error: false };
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: true };
+  }
+};
+export const createEvent = async ( 
+  currentState: CurrentState,
+  data: EventSchema,
+  ) => {
+  try{
+
+    const currentUser = await getCurrentUser()
+    const a = await prisma.event.create({
+      data:{
+          title:data.title,
+          description:data.description,
+          startTime:data.startTime,
+          endTime:data.endTime,
+          school:{
+            connect:{
+              id:currentUser?.schoolId
+            }
+          }
+      }
+    })
+
+    return { success: true, error: false };
+     
+  }
+  catch(error:any){
+    console.log(error)
+    return { success: false, error: true };
+    
+  }
+}
+export const deleteEvent = async (  currentState: CurrentState,
+  data: FormData,) => {
+  const id = data.get("id") as string;
+  try{
+
+      await prisma.event.delete({
+        where:{
+          id
+        }
+      })
+    return { success: true, error: false };
+
+  }
+  catch(error:any){
+    return { success: false, error: true };
+  }
+}
+export const updateEvent = async (
+  currentState: CurrentState,
+  data: EventSchema
+) => {
+  if (!data.id) {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.event.update({
+      where:{
+        id:data.id
+      },
+      data:{
+        title:data.title,
+        description:data.description,
+        startTime:data.startTime,
+        endTime:data.endTime,
       }
       
     })

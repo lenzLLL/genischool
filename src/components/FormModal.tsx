@@ -3,6 +3,7 @@
 import {
   deleteAnnouncement,
   deleteClass,
+  deleteEvent,
   deleteExam,
   deleteStudent,
   deleteSubject,
@@ -18,6 +19,7 @@ import { FormContainerProps } from "./FormContainer";
 import SchoolYearForm from "./forms/schoolYear";
 import Announcements from "./Announcements";
 import AnnouncementForm from "./forms/AnnouncementForm";
+import EventForm from "./forms/EventForm";
 
 const deleteActionMap = {
   subject: deleteSubject,
@@ -33,7 +35,7 @@ const deleteActionMap = {
   assignment: deleteSubject,
   result: deleteSubject,
   attendance: deleteSubject,
-  event: deleteSubject,
+  event: deleteEvent,
   announcement: deleteAnnouncement,
 };
 
@@ -127,7 +129,15 @@ const forms: {
       setOpen={setOpen}
       relatedData={relatedData}
     />
-  )
+  ),
+  event:(setOpen, type, data, relatedData) => (
+    <EventForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
   // exam: (setOpen, type, data, relatedData) => (
   //   <ExamForm
   //     type={type}
@@ -145,7 +155,8 @@ const FormModal = ({
   data,
   id,
   relatedData,
-}: FormContainerProps & { relatedData?: any }) => {
+  classes
+}: FormContainerProps & { relatedData?: any,classes?:Array<any> }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =
     type === "create"
@@ -182,8 +193,8 @@ const FormModal = ({
           Delete
         </button>
       </form>
-    ) : type === "create" || type === "update" ? (
-      forms[table](setOpen, type, data, relatedData)
+    ) : (type === "create" || type === "update") ? (
+       forms[table](setOpen, type, data, relatedData? relatedData:{d:classes})
     ) : (
       "Form not found!"
     );
