@@ -126,6 +126,16 @@ export const eventSchema = z.object({
 
 export type EventSchema = z.infer<typeof eventSchema>;
 
+export const lessonSchema = z.object({
+  id: z.coerce.string().optional(),
+  subjectId: z.string(),
+  teacherId:z.string(),
+  startTime: z.coerce.date(),
+  endTime: z.coerce.date(),
+  classes: z.array(z.string()), //teacher ids
+});
+
+export type LessonSchema = z.infer<typeof lessonSchema>;
 
 
 

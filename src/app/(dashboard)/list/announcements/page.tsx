@@ -126,7 +126,9 @@ const AnnouncementListPage = async  ({
         class:{
            lessons:{
             some:{
-              teacherId:currentUser.id
+              lesson:{
+                teacherId:currentUser?.id
+              }
             }
            }
           }

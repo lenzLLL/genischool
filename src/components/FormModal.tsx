@@ -5,6 +5,7 @@ import {
   deleteClass,
   deleteEvent,
   deleteExam,
+  deleteLesson,
   deleteStudent,
   deleteSubject,
   deleteTeacher,
@@ -18,8 +19,6 @@ import { toast } from "react-toastify";
 import { FormContainerProps } from "./FormContainer";
 import SchoolYearForm from "./forms/schoolYear";
 import Announcements from "./Announcements";
-import AnnouncementForm from "./forms/AnnouncementForm";
-import EventForm from "./forms/EventForm";
 
 const deleteActionMap = {
   subject: deleteSubject,
@@ -31,7 +30,7 @@ const deleteActionMap = {
   exam: deleteExam,
 // TODO: OTHER DELETE ACTIONS
   parent: deleteSubject,
-  lesson: deleteSubject,
+  lesson: deleteLesson,
   assignment: deleteSubject,
   result: deleteSubject,
   attendance: deleteSubject,
@@ -59,7 +58,17 @@ const SubjectForm = dynamic(() => import("./forms/SubjectForm"), {
  const SchoolForm = dynamic(() => import("./forms/schoolForm"), {
   loading: () => <h1>Loading...</h1>,
 });
-  
+const EventForm = dynamic(() => import("./forms/EventForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const AnnouncementForm = dynamic(() => import("./forms/AnnouncementForm"), {
+  loading: () => <h1>Loading...</h1>,
+}
+);
+const LessonForm = dynamic(() => import("./forms/lessonForm"), {
+  loading: () => <h1>Loading...</h1>,
+}
+);
 // const ExamForm = dynamic(() => import("./forms/ExamForm"), {
 //   loading: () => <h1>Loading...</h1>,
 // });
@@ -132,6 +141,14 @@ const forms: {
   ),
   event:(setOpen, type, data, relatedData) => (
     <EventForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  lesson:(setOpen, type, data, relatedData) => (
+    <LessonForm
       type={type}
       data={data}
       setOpen={setOpen}

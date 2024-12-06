@@ -32,11 +32,7 @@ const EventListPage = async ({
       accessor: "description",
       className: "hidden md:table-cell",
     },
-    {
-      header: "Date",
-      accessor: "date",
-      className: "hidden md:table-cell",
-    },
+    
     {
       header: "Start Time",
       accessor: "startTime",
@@ -63,22 +59,14 @@ const EventListPage = async ({
     >
       <td className="flex items-center gap-4 p-4">{item.title}</td>
       <td className="hidden md:table-cell">{item.description}</td>
-      <td className="hidden md:table-cell">
-         {item.startTime && item.startTime.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })}</td>
+     
       <td className="hidden md:table-cell">
       {item.startTime && new Intl.DateTimeFormat("en-US").format(item.startTime)}
 
       </td>
       <td className="hidden md:table-cell">
-      {item.endTime && item.endTime.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })}
+      {item.endTime && new Intl.DateTimeFormat("en-US").format(item.endTime)}
+       
       </td>
       <td>
         <div className="flex items-center gap-2">

@@ -1,4 +1,5 @@
 import EmptyComponent from "@/components/emptyComponent";
+import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
@@ -7,12 +8,10 @@ import { lessonsData, role } from "@/lib/data";
 import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
+import { Attendance, Class, Lesson, LessonClass, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 
-type LessonList = Lesson & { subject: Subject } & { class: Class } & {
-  teacher: Teacher;
-};
+type LessonList = Lesson & { subject: Subject }&{classes:(LessonClass & {class:Class})[]}  & {teacher: Teacher;} & {attendances:Attendance[]};
 
 
 const LessonListPage = async ({
@@ -20,7 +19,7 @@ const LessonListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
-  const currentser = await getCurrentUser()
+  const currentUser = await getCurrentUser()
   const columns = [
     {
       header: "Subject Name",
@@ -35,7 +34,18 @@ const LessonListPage = async ({
       accessor: "teacher",
       className: "hidden md:table-cell",
     },
-    ...(role === "admin"
+    
+    {
+      header: "Start Time",
+      accessor: "startTime",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "End Time",
+      accessor: "endTime",
+      className: "hidden md:table-cell",
+    },
+    ...(currentUser?.role === "Admin"
       ? [
           {
             header: "Actions",
@@ -51,16 +61,25 @@ const LessonListPage = async ({
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">{item.subject.name}</td>
-      <td>{item.class.name}</td>
+      <td>{item.classes.map((item) => item.class.name).join(",")}</td>
       <td className="hidden md:table-cell">
-      {item.teacher.name + " " + item.teacher.surname}
+      {item.teacher.username}
+      </td>
+      
+      <td className="hidden md:table-cell">
+      {item.startTime && new Intl.DateTimeFormat("en-US").format(item.startTime)}
+
+      </td>
+      <td className="hidden md:table-cell">
+      {item.endTime && new Intl.DateTimeFormat("en-US").format(item.endTime)}
+       
       </td>
       <td>
         <div className="flex items-center gap-2">
-           {currentser?.role === "Admin" && (
+           {currentUser?.role === "Admin" && (
             <>
-              <FormModal table="lesson" type="update" data={item} />
-              <FormModal table="lesson" type="delete" id={item.id} />
+              <FormContainer table="lesson" type="update" data={item} />
+              <FormContainer table="lesson" type="delete" id={item.id} />
             </>
           )} 
         </div>
@@ -81,7 +100,7 @@ const LessonListPage = async ({
       if (value !== undefined) {
         switch (key) {
           case "classId":
-            query.classId = (value);
+            query.classes = {some:{classId:value}};
             break;
           case "teacherId":
             query.teacherId = value;
@@ -89,7 +108,7 @@ const LessonListPage = async ({
           case "search":
             query.OR = [
               { subject: { name: { contains: value, mode: "insensitive" } } },
-              { teacher: { name: { contains: value, mode: "insensitive" } } },
+              { teacher: { username: { contains: value, mode: "insensitive" } } },
             ];
             break;
           default:
@@ -98,14 +117,55 @@ const LessonListPage = async ({
       }
     }
   }
-
+  if(currentUser?.role === "Student"){
+    query.classes = {
+      some: {
+        class: {
+          currentStudents: {
+            some: {
+              id: currentUser.id
+            }
+          }
+        }
+      }
+    };
+  }
+  else if(currentUser?.role === "Parent"){
+    query.classes = {
+      some:{
+        class:{
+          currentStudents:{
+            some:{
+              parentId:currentUser.id
+            }
+          }
+        }
+      }
+    } 
+  }
+  else if(currentUser?.role === "Teacher"){
+    query.classes = {
+      some:{
+        class:{
+           lessons:{
+            some:{
+              lesson:{
+                teacherId:currentUser?.id
+              }
+            }
+           }
+          }
+        }
+      }
+    } 
+  
   const [data, count] = await prisma.$transaction([
     prisma.lesson.findMany({
       where: query,
       include: {
         subject: { select: { name: true } },
-        class: { select: { name: true } },
-        teacher: { select: { name: true, surname: true } },
+        classes:{include:{class:true}},
+        teacher: { select: { username: true } },
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
@@ -127,7 +187,7 @@ const LessonListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-             {role === "admin" && <FormModal table="lesson" type="create" />} 
+             {currentUser?.role === "Admin" && <FormContainer table="lesson" type="create" />} 
           </div>
         </div>
       </div>

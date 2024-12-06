@@ -132,9 +132,9 @@ model Class {
   name     String  
   supervisorId  String? @db.Uuid
   supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
-  lessons       Lesson[]
   classYears ClassYear[]
   fees Fees[]
+  lessons LessonClass[]
   currentStudents Student[]
   announcements AnnouncementClass[]
   deleted Boolean @default(false)
@@ -154,25 +154,26 @@ model Subject {
   deleted Boolean @default(false)
 
 }
+model LessonClass {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lessonId   String @db.Uuid
+  lesson     Lesson      @relation(fields: [lessonId], references: [id])
+  classId   String @db.Uuid
+  class     Class      @relation(fields: [classId], references: [id])   
+}
 model Lesson {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  day       Day
-  credit Int @default(1)
+  classes LessonClass[]
   startTime DateTime
   endTime   DateTime
   subjectId   String @db.Uuid
   subject     Subject      @relation(fields: [subjectId], references: [id])
-  classId     String @db.Uuid
-  class       Class        @relation(fields: [classId], references: [id])
   teacherId   String @db.Uuid
   teacher     Teacher      @relation(fields: [teacherId], references: [id])
   attendances Attendance[]
-  files String[]
-  keys String[]
+  files String[] @default([])
+  keys String[] @default([])
   examens Exam[]
-  deleted Boolean @default(false)
-
 }
 model Mestre {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
