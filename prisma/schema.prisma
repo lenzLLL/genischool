@@ -19,7 +19,6 @@ model School {
   schoolyears Schoolyear[]
   admins Admin[]
   // auths Auth[]
-  users AuthSchool[]
   teachers Teacher[]
   classes Class[]
   students Student[]
@@ -69,22 +68,6 @@ model Student {
   schoolId String @db.Uuid
   school      School       @relation(fields: [schoolId], references: [id])
 }
-model Auth {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  password String @unique
-  email String  @unique 
-  //  school      School?       @relation(fields: [schoolId], references: [id])
-  // schoolId String? @db.Uuid
-  schools AuthSchool[]
-}
-model AuthSchool {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  school      School?       @relation(fields: [schoolId], references: [id])
-  user      Auth?       @relation(fields: [userId], references: [id])
-  role String
-  schoolId String @db.Uuid
-  userId String @db.Uuid
-}
 model ClassYear {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   schoolYearId String @db.Uuid
@@ -116,6 +99,7 @@ model Teacher {
   subjects  Subject[]
   lessons   Lesson[]
   classes   Class[]
+  exams Exam[]
 }
 model Parent {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -140,7 +124,7 @@ model Class {
   deleted Boolean @default(false)
   schoolId String @db.Uuid
   school       School        @relation(fields: [schoolId], references: [id])
-
+  exams Exam[]
 }
 model Subject {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -173,7 +157,7 @@ model Lesson {
   attendances Attendance[]
   files String[] @default([])
   keys String[] @default([])
-  examens Exam[]
+  
 }
 model Mestre {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -198,18 +182,20 @@ model SessionSequence  {
 }
 model Exam {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title     String
   startTime DateTime
   type String
+  credit Int @default(1)
   endTime   DateTime
   subjectId String @db.Uuid
-  files String[]
-  keys String[]
-  lessonId String @db.Uuid
-  lesson Lesson           @relation(fields: [lessonId], references: [id])
-  deleted Boolean @default(false)  
+  files String[] @default([])
+  keys String[] @default([])
+  teacherId   String @db.Uuid
+  teacher     Teacher      @relation(fields: [teacherId], references: [id])
+  classId   String @db.Uuid
+  class     Class      @relation(fields: [classId], references: [id]) 
   subject   Subject   @relation(fields: [subjectId], references: [id])
   results  Result[]
+  attendances Attendance[]
   sessionId String @db.Uuid
   session     SessionSequence      @relation(fields: [sessionId], references: [id])  
 }
@@ -264,8 +250,10 @@ model Attendance {
   studentId String @db.Uuid
   deleted Boolean @default(false)
   student   Student @relation(fields: [studentId], references: [id])
-  lessonId  String @db.Uuid
-  lesson    Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId  String? @db.Uuid
+  lesson    Lesson?  @relation(fields: [lessonId], references: [id])
+  examenId String? @db.Uuid
+  examen Exam? @relation(fields: [examenId],references:[id])
 }
 model Event {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

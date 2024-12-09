@@ -69,6 +69,10 @@ const LessonForm = dynamic(() => import("./forms/lessonForm"), {
   loading: () => <h1>Loading...</h1>,
 }
 );
+
+const ExamForm = dynamic(() => import("./forms/examenForm"), {
+  loading: () => <h1>Loading...</h1>,
+})
 // const ExamForm = dynamic(() => import("./forms/ExamForm"), {
 //   loading: () => <h1>Loading...</h1>,
 // });
@@ -155,6 +159,14 @@ const forms: {
       relatedData={relatedData}
     />
   ),
+  exam:(setOpen, type, data, relatedData) => (
+    <ExamForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  )
   // exam: (setOpen, type, data, relatedData) => (
   //   <ExamForm
   //     type={type}

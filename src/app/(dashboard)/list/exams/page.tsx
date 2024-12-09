@@ -1,4 +1,5 @@
 import EmptyComponent from "@/components/emptyComponent";
+import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
@@ -7,19 +8,11 @@ import { examsData, role } from "@/lib/data";
 import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Class, Exam, Prisma, Subject, Teacher } from "@prisma/client";
+import { Attendance, Class, Exam, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
+import { Result } from "postcss";
 
-type ExamList = Exam & {
-  lesson: {
-    subject: Subject;
-    class: Class;
-    teacher: Teacher;
-  };
-};
-
-
-
+type ExamList = Exam & {teacher:Teacher} & {class:Class} & {subject:Subject} & {results:Result[]} &{attendances:Attendance[]}
 const ExamListPage = async ({
   searchParams,
 }: {
@@ -32,12 +25,12 @@ const ExamListPage = async ({
       accessor: "name",
     },
     {
-      header: "Class",
-      accessor: "class",
-    },
-    {
       header: "Teacher",
       accessor: "teacher",
+    },
+    {
+      header: "Class",
+      accessor: "class",
       className: "hidden md:table-cell",
     },
     {
@@ -46,12 +39,25 @@ const ExamListPage = async ({
       className: "hidden md:table-cell",
     },
     {
-      header: "Date",
-      accessor: "date",
+      header: "Resultas",
+      accessor: "resultas",
+      className: "hidden md:table-cell",
+    },    {
+      header: "Attendances",
+      accessor: "attendances",
       className: "hidden md:table-cell",
     },
-  
-    ...(currentUser?.role === "Admin" || currentUser?.role === "Teacher"
+    {
+      header: "Start Time",
+      accessor: "startTime",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "End Time",
+      accessor: "endTime",
+      className: "hidden md:table-cell",
+    },
+    ...(currentUser?.role === "Admin" 
       ? [
           {
             header: "Actions",
@@ -65,23 +71,26 @@ const ExamListPage = async ({
       key={item.id}
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
-      <td className="flex items-center gap-4 p-4">{item.lesson.subject.name}</td>
-      <td>{item.lesson.class.name}</td>
+      <td className="flex items-center gap-4 p-4">{item.subject.name}</td>
+      <td>{item.teacher.username}</td>
       <td className="hidden md:table-cell">
-      {item.lesson.teacher.name + " " + item.lesson.teacher.surname}
-
+      {item.class.name}
       </td>
-      <td className="hidden md:table-cell">{item.lesson.subject.credit}</td>
+      <td className="hidden md:table-cell">{item.credit}</td>
+      <td className="hidden md:table-cell">{item.results.length}</td>
+      <td className="hidden md:table-cell">{item.attendances.length}</td>
       <td className="hidden md:table-cell">
       {new Intl.DateTimeFormat("en-US").format(item.startTime)}
-
+      </td>
+      <td className="hidden md:table-cell">
+      {new Intl.DateTimeFormat("en-US").format(item.endTime)}
       </td>
       <td>
         <div className="flex items-center gap-2">
-           {(currentUser?.role === "Admin" || currentUser?.role === "Teacher") && (
+           {(currentUser?.role === "Admin") && (
             <>
-              <FormModal table="exam" type="update" data={item} />
-              <FormModal table="exam" type="delete" id={item.id} />
+              <FormContainer table="exam" type="update" data={item} />
+              <FormContainer table="exam" type="delete" id={item.id} />
             </>
           )} 
         </div>
@@ -97,19 +106,19 @@ const ExamListPage = async ({
 
   const query: Prisma.ExamWhereInput = {};
 
-  query.lesson = {};
+
   if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {
       if (value !== undefined) {
         switch (key) {
           case "classId":
-            query.lesson.classId = (value);
+            query.classId = (value);
             break;
           case "teacherId":
-            query.lesson.teacherId = value;
+            query.teacherId = value;
             break;
           case "search":
-            query.lesson.subject = {
+            query.subject = {
               name: { contains: value, mode: "insensitive" },
             };
             break;
@@ -122,31 +131,18 @@ const ExamListPage = async ({
 
   // ROLE CONDITIONS
 
-  switch (role) {
+  switch (currentUser?.role) {
     case "Admin":
       break;
      case "Teacher":
-       query.lesson.teacherId = currentUser?.id;
+       query.teacherId = currentUser?.id;
        break;
      case "Student":
-       query.lesson.class = {
-         currentStudents: {
-           some: {
-             id: currentUser?.id,
-           },
-         },
-       };
+       query.class = {currentStudents:{some:{id:currentUser?.id}}};
        break;
      case "Parent":
-       query.lesson.class = {
-         currentStudents: {
-           some: {
-             parentId: currentUser?.id,
-           },
-         },
-       };
+       query.class = {currentStudents:{some:{parentId:currentUser?.id}}};
       break;
-
     default:
       break;
   }
@@ -155,13 +151,11 @@ const ExamListPage = async ({
     prisma.exam.findMany({
       where: query,
       include: {
-        lesson: {
-          select: {
-            subject: { select: { name: true } },
-            teacher: { select: { name: true, surname: true } },
-            class: { select: { name: true } },
-          },
-        },
+        teacher:true,
+        class:true,
+        subject:true,
+        results:true,
+        attendances:true
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
@@ -182,7 +176,7 @@ const ExamListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-             {currentUser?.role === "Admin" || currentUser?.role === "Teacher" && <FormModal table="exam" type="create" />} 
+             {currentUser?.role === "Admin"  && <FormContainer table="exam" type="create" />} 
           </div>
         </div>
       </div>
