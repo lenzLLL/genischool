@@ -2,8 +2,11 @@ import { Admin, Teacher } from "@prisma/client";
 
 export type AuthSchema = {
     email:string|null
-    fullname:string|null
+    matricule:string|null
     role:string|null
-    id:string
+    password:string|null
     schoolId:string
+    fullname:string|null
+    id:string|null
+    lang:string|null
 }

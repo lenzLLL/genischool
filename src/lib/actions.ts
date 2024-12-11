@@ -16,7 +16,8 @@ import {
 import prisma from "./prisma";
 import { connect } from "http2";
 import { getCurrentUser } from "./functs";
-type CurrentState = { success: boolean; error: boolean };
+type CurrentState = { success: boolean; error: boolean,eng:String,fr:String};
+type FinalCurrentState = { success: boolean; error: boolean;msg:String };
 type CurrentStateUpdate = { success: boolean; error: boolean,newImage:Boolean };
 cloudinary.v2.config({
   cloud_name:process.env.CLOUD_NAME,
@@ -499,11 +500,11 @@ export const deleteStudent = async (
   }
 };
 export const createSchool = async (
-  currentState: CurrentState,
+  currentState: FinalCurrentState,
   data: SchoolSchema
 ) => {
   try {
-    const currentUser = await getCurrentUser()
+    // const currentUser = await getCurrentUser()
     await prisma.school.create({
       data: {
         name: data.name,
@@ -511,15 +512,17 @@ export const createSchool = async (
         logo:data.img || null,
         key:data.key || null,
         address:data?.address,
-        type:data.type
+        type:data.type,
+        lang:data.lang,
+        inscription:parseInt(data.inscription)
       },
     });
 
     // revalidatePath("/list/subjects");
-    return { success: true, error: false };
-  } catch (err) {
+    return { success: true, error: false,msg:"Success" };
+  } catch (err:any) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,msg:err.message };
   }
 };
 export const createSchoolYear = async (  
@@ -613,10 +616,11 @@ export const createSchoolYear = async (
 export const createAnnouncement = async ( 
   currentState: CurrentState,
   data: AnnouncementSchema,
+  disabled:boolean
   ) => {
   try{
     if(data.classes.length === 0 ){
-       return { success: false, error: true };
+       return { success: false, error: true,fr:"Veillez choisir au moins une classe!",eng:"Please choose at least one class!" };
     }
     const a = await prisma.announcement.create({
       data:{
@@ -625,7 +629,7 @@ export const createAnnouncement = async (
           ...(data.date && {date:data.date}),
       }
     })
-    if(!a){return { success: false, error: true }}
+    if(!a){return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }}
     for(let i = 0;i<data.classes.length;i++){
         await prisma.announcementClass.create({
           data:{
@@ -634,12 +638,12 @@ export const createAnnouncement = async (
           }
         })  
     }
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
      
   }
   catch(error:any){
     console.log(error)
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
     
   }
 }
@@ -657,11 +661,11 @@ export const deleteAnnouncement = async (  currentState: CurrentState,
           id
         }
       })
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
 
   }
   catch(error:any){
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"",eng:"" };
   }
 }
 export const updateAnnouncement = async (
@@ -669,7 +673,7 @@ export const updateAnnouncement = async (
   data: AnnouncementSchema
 ) => {
   if (!data.id) {
-    return { success: false, error: true };
+    return { success: false, error: true ,fr:"",eng:""};
   }
   try {
     await prisma.announcement.update({
@@ -697,10 +701,11 @@ export const updateAnnouncement = async (
       })  
   }
     // revalidatePath("/list/students");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
+    
   }
 };
 export const createEvent = async ( 

@@ -1,12 +1,10 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model School {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name String @unique
@@ -14,7 +12,9 @@ model School {
   logo String?
   key String?
   address String
+  lang String
   type String?
+  inscription BigInt
   createdAt   DateTime     @default(now())
   schoolyears Schoolyear[]
   admins Admin[]
@@ -41,7 +41,8 @@ model Schoolyear {
 model Admin {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username String
-  email String @unique
+  email String 
+  password String
   schoolId String @db.Uuid
   school      School       @relation(fields: [schoolId], references: [id])
   deleted Boolean @default(false)
@@ -60,10 +61,12 @@ model Student {
   parent      Parent?       @relation(fields: [parentId], references: [id])
   attendances Attendance[]
   results     Result[]
+  password    String?
+  matricule String
   classYears ClassYear[]
   studentFees StudentFees[]
-  currentClassId String @db.Uuid
-  currentClass      Class       @relation(fields: [currentClassId], references: [id])
+  currentClassId String? @db.Uuid
+  currentClass      Class?       @relation(fields: [currentClassId], references: [id])
   deleted Boolean @default(false)
   schoolId String @db.Uuid
   school      School       @relation(fields: [schoolId], references: [id])
@@ -73,6 +76,7 @@ model ClassYear {
   schoolYearId String @db.Uuid
   createdAt DateTime @default(now())
   classId String @db.Uuid
+  Inscription BigInt
   studentId String @db.Uuid
   schoolYear       Schoolyear        @relation(fields: [schoolYearId], references: [id])
   class       Class        @relation(fields: [classId], references: [id])
@@ -80,15 +84,15 @@ model ClassYear {
   isSolded Boolean @default(false)
   fees HistoriqueFees[]
   result Result[]
-
   // cette table servira pour les historiques, en une année précise on pourra savoir tel élève fréquentait tel année 
 }
 model Teacher {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username  String
   email     String?   @unique
-  phone     String?   @unique
+  phone     String   @unique
   address   String
+  password String
   img       String?
   imgKey    String?
   deleted Boolean @default(false)
@@ -105,7 +109,8 @@ model Parent {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username  String    @unique
   email     String?   @unique
-  phone     String?    @unique
+  phone     String    @unique
+  password String
   address   String?
   createdAt DateTime  @default(now())
   students  Student[]
@@ -264,7 +269,6 @@ model Event {
   schoolId String @db.Uuid
   school       School        @relation(fields: [schoolId], references: [id])
 }
-
 model AnnouncementClass {
    id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   announcementId String @db.Uuid

@@ -7,7 +7,7 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Performance from "@/components/Performance";
 import Table from "@/components/Table";
-import { getCurrentUser } from "@/lib/functs";
+// import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { School, Schoolyear, Teacher } from "@prisma/client";
 import Image from "next/image";
@@ -21,7 +21,8 @@ const SingleTeacherPage = async ({
 }) => {
   
   type SchoolYearList = Schoolyear;
-  const currentUser = await getCurrentUser()
+  // const currentUser = await getCurrentUser()
+  const currentUser = {role:"Owner"}
   const school = await prisma.school.findUnique({
     where: { id },
     include: {

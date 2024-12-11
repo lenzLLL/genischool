@@ -122,6 +122,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
         type={type}
         data={data}
         id={id}
+        user = {currentUser}
         relatedData={relatedData}
         classes = {classes}
       />

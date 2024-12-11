@@ -38,6 +38,7 @@ const SchoolForm = ({
     {
       success: false,
       error: false,
+      msg:""
     }
   );
 
@@ -50,7 +51,7 @@ const SchoolForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(`Teacher has been ${type === "create" ? "created" : "updated"}!`);
+      toast(`School has been ${type === "create" ? "created" : "updated"}!`);
       setOpen(false);
       router.refresh();
     }
@@ -85,6 +86,13 @@ const SchoolForm = ({
           register={register}
           error={errors?.address}
         />
+          <InputField
+          label="Inscription (xaf)"
+          name="inscription"
+          defaultValue={data?.inscription}
+          register={register}
+          error={errors?.inscription}
+        />
 
 <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Category</label>
@@ -105,13 +113,34 @@ const SchoolForm = ({
               )
             )}
           </select>
+          </div>
+        
+<div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Langue</label>
+          <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("lang")}
+            defaultValue={data?.teachers}
+          >
+            {["Français",'Anglais'].map(
+        (item)=> (
+                <option
+                  value={item}
+                  key={item}
+                
+                >
+                  {item}
+                </option>
+              )
+            )}
+          </select>
         
         </div>
       </div>
 
      
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{state.msg? state.msg:"Someting went wrong"}</span>
       )}
               <CldUploadWidget
           uploadPreset="school"
@@ -124,7 +153,7 @@ const SchoolForm = ({
             return (
 
                       <label onClick={() => open()} htmlFor='cv' className='cursor-pointer shadow-sm hover:shadow-lg flex flex-row justify-center border w-full py-[10px] items-center gap-2 px-20 bg-[#414141] text-white rounded-lg '>
-                      <ImageUpIcon/> Upload profil picture  
+                      <ImageUpIcon/> Upload logo  
                    </label>
             );
           }}

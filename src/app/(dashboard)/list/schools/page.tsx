@@ -5,7 +5,7 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { role, teachersData } from "@/lib/data";
-import { getCurrentUser } from "@/lib/functs";
+// import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Prisma, School, Subject, Teacher } from "@prisma/client";
@@ -117,7 +117,7 @@ const TeacherListPage = async ({
     }),
     prisma.school.count({ where: query }),
   ]);
-  const currentUser = await getCurrentUser()
+  // const currentUser = await getCurrentUser()
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
@@ -132,7 +132,7 @@ const TeacherListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-             {currentUser?.role === "Owner" && (
+             {true && (
               
                <FormContainer   table="school" type="create"/>
             )} 
