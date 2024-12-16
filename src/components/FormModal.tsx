@@ -6,6 +6,7 @@ import {
   deleteEvent,
   deleteExam,
   deleteLesson,
+  deleteParent,
   deleteStudent,
   deleteSubject,
   deleteTeacher,
@@ -21,22 +22,35 @@ import SchoolYearForm from "./forms/schoolYear";
 import Announcements from "./Announcements";
 import { getCurrentUser } from "@/lib/functs";
 import { AuthSchema } from "@/lib/schemas";
-import { User } from "lucide-react";
+import { School, User } from "lucide-react";
+import { string } from "zod";
 
 const deleteActionMap = {
-  subject: deleteSubject,
+//   subject: deleteSubject,
+//   school:deleteSubject,
+//   schoolyear:deleteSubject,
+//   class: deleteClass,
+//   teacher: deleteTeacher,
+//   student: deleteStudent,
+//   exam: deleteExam,
+// // TODO: OTHER DELETE ACTIONS
+//   parent: deleteSubject,
+//   lesson: deleteLesson,
+//   assignment: deleteSubject,
+//   result: deleteSubject,
+//   attendance: deleteSubject,
+  attendance:deleteSubject,
+  result:deleteSubject,
+  assignment:deleteSubject,
+  lesson:deleteSubject,
+  parent:deleteParent,
+  exam:deleteSubject,
+  student:deleteSubject,
+  teacher:deleteSubject,
+  class:deleteClass,
   school:deleteSubject,
   schoolyear:deleteSubject,
-  class: deleteClass,
-  teacher: deleteTeacher,
-  student: deleteStudent,
-  exam: deleteExam,
-// TODO: OTHER DELETE ACTIONS
-  parent: deleteSubject,
-  lesson: deleteLesson,
-  assignment: deleteSubject,
-  result: deleteSubject,
-  attendance: deleteSubject,
+  subject:deleteSubject,
   event: deleteEvent,
   announcement: deleteAnnouncement,
 };
@@ -76,6 +90,8 @@ const LessonForm = dynamic(() => import("./forms/lessonForm"), {
 const ExamForm = dynamic(() => import("./forms/examenForm"), {
   loading: () => <h1>Loading...</h1>,
 })
+const ParentForm = dynamic(()=>import("./forms/parentForm"),{loading:()=><h1>Loading...</h1>})
+
 // const ExamForm = dynamic(() => import("./forms/ExamForm"), {
 //   loading: () => <h1>Loading...</h1>,
 // });
@@ -181,6 +197,16 @@ const forms: {
       relatedData={relatedData}
     />
   )
+  ,
+  parent:(setOpen, type, data, relatedData,user) => (
+    <ParentForm
+      type={type}
+      data={data}
+      user={user}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  )
   // exam: (setOpen, type, data, relatedData) => (
   //   <ExamForm
   //     type={type}
@@ -216,13 +242,15 @@ const FormModal = ({
     const [state, formAction] = useFormState(deleteActionMap[table], {
       success: false,
       error: false,
+      fr:"",
+      eng:""
     });
 
     const router = useRouter();
 
     useEffect(() => {
       if (state.success) {
-        toast(`${table} has been deleted!`);
+        toast(`${user?.lang === "Français"?"La donnée a été supprimée": "Data has been deleted"}!`);
         setOpen(false);
         router.refresh();
       }
@@ -241,15 +269,18 @@ const FormModal = ({
         </button>
       </form>
     ) : (type === "create" || type === "update") ? (
-       forms[table](setOpen, type, data, relatedData? relatedData:{d:classes},user)
+       forms[table](setOpen, type, data, relatedData? relatedData:{d:classes},user={...user})
     ) : (
       "Form not found!"
     )}
   </div>)  
   };
   
-
+ if(!user){
+  return
+ }
   return (
+    
     <>
       <button
         className={`${size} flex items-center justify-center rounded-full ${bgColor}`}

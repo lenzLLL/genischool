@@ -24,11 +24,11 @@ const AnnouncementListPage = async  ({
     
   const columns = [
     {
-      header: "Title",
+      header: currentUser?.lang === "Français"? "Titre":"Title",
       accessor: "title",
     },
     {
-      header: "Class",
+      header:"Classes",
       accessor: "class",
     },
     {
@@ -100,7 +100,7 @@ const AnnouncementListPage = async  ({
         class: {
           currentStudents: {
             some: {
-              id: currentUser.id
+              id: currentUser?.id? currentUser?.id:""
             }
           }
         }
@@ -171,10 +171,10 @@ const AnnouncementListPage = async  ({
       {/* TOP */}
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">
-          All Announcements
+          {currentUser?.lang === "Français"?"Annonces": "All Announcements"}
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch />
+          <TableSearch lang = {currentUser?.lang? currentUser?.lang:""} />
           <div className="flex items-center gap-4 self-end">
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
@@ -193,7 +193,7 @@ const AnnouncementListPage = async  ({
        <Pagination page={p} count={count} /> </>}
        {
         data.length === 0 &&  
-            <EmptyComponent msg = {'No Data'} />
+            <EmptyComponent msg = {currentUser?.lang === "Français"?'Aucunes données':'No Data'} />
        }
     </div>
   );

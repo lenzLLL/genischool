@@ -1,10 +1,11 @@
 import EmptyComponent from "@/components/emptyComponent";
+import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { eventsData, role } from "@/lib/data";
-import { getCurrentUser, getFilterEvents } from "@/lib/functs";
+import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Event, Prisma } from "@prisma/client";
@@ -23,7 +24,7 @@ const EventListPage = async ({
   const currentUser = await getCurrentUser()
   const columns = [
     {
-      header: "Title",
+      header: currentUser?.lang === "Français"? "Titre":"Title",
       accessor: "title",
     },
   
@@ -34,16 +35,16 @@ const EventListPage = async ({
     },
     
     {
-      header: "Start Time",
+      header: currentUser?.lang === "Français"?"Date de début":"Start time",
       accessor: "startTime",
       className: "hidden md:table-cell",
     },
     {
-      header: "End Time",
+      header: currentUser?.lang === "Français"?"Date de fin":"End time",
       accessor: "endTime",
       className: "hidden md:table-cell",
     },
-    ...(role === "admin"
+    ...(currentUser.role === "Admin"
       ? [
           {
             header: "Actions",
@@ -72,8 +73,8 @@ const EventListPage = async ({
         <div className="flex items-center gap-2">
            {currentUser?.role=== "Admin" && (
             <>
-              <FormModal table="event" type="update" data={item} />
-              <FormModal table="event" type="delete" id={item.id} />
+              <FormContainer table="event" type="update" data={item} />
+              <FormContainer table="event" type="delete" id={item.id} />
             </>
           )} 
           
@@ -121,9 +122,9 @@ const EventListPage = async ({
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Events</h1>
+        <h1 className="hidden md:block text-lg font-semibold">{currentUser?.lang === "Français"?"é".toUpperCase()+'vènements':"All Events"}</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch />
+          <TableSearch lang={currentUser?.lang? currentUser?.lang:""} />
           <div className="flex items-center gap-4 self-end">
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
@@ -131,7 +132,7 @@ const EventListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-             {currentUser?.role === "Admin" && <FormModal table="event" type="create" />} 
+             {currentUser?.role === "Admin" && <FormContainer table="event" type="create" />} 
           </div>
         </div>
       </div>
@@ -140,7 +141,7 @@ const EventListPage = async ({
        <Pagination page={p} count={count} /> </>}
        {
         data.length === 0 &&  
-            <EmptyComponent msg = {'No Data'} />
+            <EmptyComponent msg = {currentUser?.lang === "Français"?"Aucunes données":'No Data'} />
        }
     </div>
   );

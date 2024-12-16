@@ -56,8 +56,8 @@ import { Class, Event, Teacher } from "@prisma/client"
 
  export const getCurrentUser = async () => {
      const cookieStore = await cookies()
-     if(!cookieStore.get("auth") || !cookieStore.get("role")){
-         redirect("/sign-in")
+     if(!cookieStore.get("auth") || !cookieStore.get("role")){   
+      redirect("/sign-in")
      }
 
      const role = cookieStore.get("role")?.value

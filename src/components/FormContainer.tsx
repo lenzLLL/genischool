@@ -28,7 +28,9 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
   let relatedData = {};
   const currentUser = await getCurrentUser()
   const classes = await prisma.class.findMany()
-  
+  if(!currentUser){
+    return
+  }
   if (type !== "delete") {
     switch (table) {  
       case "subject":
@@ -111,6 +113,13 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
         })
         relatedData = {teachers,classes,subjects}
         break
+      case "parent":
+        const students = await prisma.student.findMany({
+          where:{
+            schoolId:currentUser?.schoolId
+          }
+        })
+        relatedData = {students}
       default:  
         break;
     }

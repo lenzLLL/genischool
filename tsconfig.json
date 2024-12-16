@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/Sidebar.jsx", "src/lib/sendMail.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/Sidebar.jsx", "src/lib/sendMail.js", "src/components/SelectMultiple.jsx", "src/components/selectComponents/SelectAnnounceMultiple.jsx"],
   "exclude": ["node_modules"]
 }

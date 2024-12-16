@@ -2,12 +2,14 @@
 import Image from "next/image";
 import React ,{useState,useCallback,useEffect} from "react"
 import { useSearchParams } from 'next/navigation';
+import { getCurrentUser } from "@/lib/functs";
 
 interface SearchProps {
   search?: string; // Paramètre optionnel
+  lang?:string
 }
 
-const TableSearch:React.FC<SearchProps> = ({search}) => {
+const TableSearch:React.FC<SearchProps> = ({search,lang}) => {
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const searchData = useCallback(() => {
@@ -35,7 +37,7 @@ const TableSearch:React.FC<SearchProps> = ({search}) => {
       <input
         onChange={(e)=>setSearchTerm(e.target.value)}
         type="text"
-        placeholder="Search..."
+        placeholder={lang === "Français"?"Rechercher...":"Search..."}
         className="w-[200px] p-2 bg-transparent outline-none"
       />
     </div>

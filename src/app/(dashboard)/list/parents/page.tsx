@@ -1,4 +1,5 @@
 import EmptyComponent from "@/components/emptyComponent";
+import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
@@ -20,23 +21,24 @@ const ParentListPage = async ({
 }) => {
 const currentUser = await getCurrentUser()
   
-const columns = [
+const columns =[
   {
-    header: "Info",
-    accessor: "info",
-  },
-  {
-    header: "Student Names",
+    header: currentUser?.lang === "Français"? "Nom":"Name",
     accessor: "students",
     className: "hidden md:table-cell",
   },
   {
-    header: "Phone",
+    header: currentUser?.lang === "Français"? "é".toUpperCase()+'tudiant(s)':"Student(s)+",
+    accessor: "students",
+    className: "hidden md:table-cell",
+  },
+  {
+    header: currentUser?.lang === "Français"?"Contact":"Phone",
     accessor: "phone",
     className: "hidden lg:table-cell",
   },
   {
-    header: "Address",
+    header: currentUser?.lang === "Français"?"Adresse":"Address",
     accessor: "address",
     className: "hidden lg:table-cell",
   },
@@ -62,15 +64,15 @@ const columns = [
         </div>
       </td>
       
-      <td className="hidden md:table-cell">{item.students.map((student) => student.username).join(",")}</td>
+      <td className="hidden md:table-cell">{item.students.map((student) => student.username).join(", ")}</td>
       <td className="hidden md:table-cell">{item.phone}</td>
       <td className="hidden md:table-cell">{item.address}</td>
       <td>
         <div className="flex items-center gap-2">
            {currentUser?.role === "Admin" && (
             <>
-              <FormModal table="parent" type="update" data={item} />
-              <FormModal table="parent" type="delete" id={item.id} />
+              <FormContainer table="parent" type="update" data={item} />
+              <FormContainer table="parent" type="delete" id={item.id} />
             </>
           )} 
         </div>
@@ -113,9 +115,9 @@ const columns = [
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Parents</h1>
+        <h1 className="hidden md:block text-lg font-semibold">{currentUser?.lang === "Français"?"Parents":"All Parents"}</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch />
+          <TableSearch lang={currentUser?.lang? currentUser?.lang:""} />
           <div className="flex items-center gap-4 self-end">
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
@@ -124,7 +126,7 @@ const columns = [
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
              {currentUser?.role === "Admin" && (
-              <FormModal table="teacher" type="create"/>
+              <FormContainer table="parent" type="create"/>
             )} 
           </div>
         </div>
@@ -136,7 +138,7 @@ const columns = [
        <Pagination page={p} count={count} /> </>}
        {
         data.length === 0 &&  
-            <EmptyComponent msg = {'No Data'} />
+            <EmptyComponent msg = {currentUser?.lang === "Français"?'Aucunes données':'No Data'} />
        }
     </div>
   );

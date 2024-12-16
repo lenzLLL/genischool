@@ -7,6 +7,6 @@ export type AuthSchema = {
     password:string|null
     schoolId:string
     fullname:string|null
-    id:string|null
+    id:string
     lang:string|null
 }

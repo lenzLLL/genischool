@@ -1,5 +1,11 @@
 import { z } from "zod";
+const arraySchema = z.object({
+  id: z.coerce.string(), // Identifiant de l'enseignant
+  name: z.coerce.string() // Sujet enseigné
+});
 
+
+const ArraySchema = z.array(arraySchema)
 export const schoolSchema = z.object({
   id: z.coerce.string().optional(),
   key:z.string().optional(),
@@ -54,7 +60,7 @@ export const teacherSchema = z.object({
   address: z.string(),
   img: z.string().optional(),
   sex: z.enum(["MALE", "FEMALE"], { message: "Sex is required!" }),
-  subjects: z.array(z.string()).optional(), // subject ids
+  subjects: ArraySchema.optional(), // subject ids
 });
 
 export type TeacherSchema = z.infer<typeof teacherSchema>;
@@ -99,12 +105,13 @@ export const schoolYearSchema = z.object({
 export type SchoolYearchema = z.infer<typeof schoolYearSchema>;
 
 
+
 export const announcementSchema = z.object({
   id: z.coerce.string().optional(),
   description: z.string().min(1, { message: "Description is required!" }),
   title:z.string().min(1, { message: "Title is required!" }),
   date: z.coerce.date().optional(),
-  classes: z.array(z.string()), //teacher ids
+  classes: ArraySchema.optional(), //teacher ids
 });
 
 export type AnnouncementSchema = z.infer<typeof announcementSchema>;
@@ -143,6 +150,18 @@ export const examSchema = z.object({
 });
 
 export type ExamSchema = z.infer<typeof examSchema>;
+
+export const parentSchema = z.object({
+  id: z.coerce.string().optional(),
+  username: z.string(),
+  email:z.string(),
+  phone:z.string().optional(),
+  password:z.string(),
+  address:z.string().optional(),
+   //teacher ids
+});
+
+export type ParentSchema = z.infer<typeof parentSchema>;
 
 
 

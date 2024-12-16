@@ -7,6 +7,7 @@ import {
   EventSchema,
   ExamSchema,
   LessonSchema,
+  ParentSchema,
   SchoolSchema,
   SchoolYearchema,
   StudentSchema,
@@ -108,10 +109,10 @@ export const createClass = async (
     });
    
     // revalidatePath("/list/class");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
   }
 };
 export const updateClass = async (
@@ -127,10 +128,11 @@ export const updateClass = async (
     });
 
     // revalidatePath("/list/class");
-    return { success: true, error: false };
+    return { success: true, error: false,eng:"",fr:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
+    
   }
 };
 export const deleteClass = async (
@@ -146,10 +148,11 @@ export const deleteClass = async (
     });
 
     // revalidatePath("/list/class");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
+    
   }
 };
 export const createTeacher = async (
@@ -158,66 +161,44 @@ export const createTeacher = async (
 ) => {
   try {
     const currentUser = await getCurrentUser()
-    const isExistAuth = await prisma.auth.findFirst({
+    const isExistPassword = await prisma.teacher.findFirst({
       where:{
-        email:data.email,
+        password:data.password,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
       }
     })
-    let r:any = null
-    if(!isExistAuth){
-      r = await prisma.auth.create({
-      data:{
-        password:data.password? data.password:"",
-        email:data.email? data.email:"",
-      }
-      })
+    if(isExistPassword){
+        return { success: false, error: true,fr:"L'enseignant de mot de passe "+data.password+" exsite déjà dans la base de données",eng:"The teacher with the password " + data.password + " already exists in the database." };
     }
-    if(!r && !isExistAuth){
-        return { success: false, error: true };    
-    }
-    let res:any  = null
 
-    const t = await prisma.teacher.create({
+    await prisma.teacher.create({
       data: {
         username: data.username,
-        email: data.email || null,
-        phone: data.phone || null,
+        email: data.email? data.email:"",
+        phone: data.phone? data.phone:"",
         address: data.address,
         img: data.img || null,
         imgKey:data.key || null,
-        sex: data.sex,
+        password:data.password? data?.password:"",
         subjects: {
-          connect: data.subjects?.map((subjectId: string) => ({
-            id: subjectId,
+          connect: data.subjects?.map((d:{id:string,name:string}) => ({
+            id: d.id,
           })),
         },
         school:{
           connect:{id:currentUser?.schoolId}
-        }
-      
+        },
+        
       },
     });
-
-    if (t){
-        const id = isExistAuth? isExistAuth.id:r?.id
-        await prisma.authSchool.create({
-          data:{
-            role:"t",
-            school:{
-              connect:{id:currentUser?.schoolId}
-            },
-            user:{
-              connect:{id}
-            }
-          }
-        })  
-    }
-
     // revalidatePath("/list/teachers");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
   }
 };
 export const updateTeacher = async (
@@ -225,29 +206,31 @@ export const updateTeacher = async (
   data: TeacherSchema
 ) => {
   if (!data.id) {
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"",eng:"" };
   }
   try {
-    // const user = await clerkClient.users.updateUser(data.id, {
-    //   username: data.username,
-    //   ...(data.password !== "" && { password: data.password }),
-    //   firstName: data.name,
-    //   lastName: data.surname,
-    // });
+ 
+    const currentUser = await getCurrentUser()
+    const isExistPassword = await prisma.teacher.findFirst({
+      where:{
+        password:data.password,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistPassword){
+        return { success: false, error: true,fr:"L'enseignant de mot de passe "+data.password+" exsite déjà dans la base de données",eng:"The teacher with the password " + data.password + " already exists in the database." };
+    }
     const t = await prisma.teacher.findUnique({
-        where:{
-          id:data.id
-        }  
+      where:{
+        id:data.id
+      }
     })
     if(data.newImage && t?.imgKey){
       await cloudinary.v2.uploader.destroy(t?.imgKey? t.imgKey:"")
     }
-
-     const user = await prisma.auth.findFirst({
-      where:{
-        email:t?.email? t.email:data.email
-      }
-     })
 
      const r = await prisma.teacher.update({
       where: {
@@ -256,12 +239,12 @@ export const updateTeacher = async (
       data: {
         // ...(data.password !== "" && { password: data.password }),
         username: data.username,
-        email: data.email || null,
+        password:data.password,
+        email: data.email? data.email:"",
         phone: data.phone || null,
         address: data.address,
         img: data.img ,
         imgKey:data.key,
-        sex: data.sex,
         subjects: {
           set: data.subjects?.map((subjectId: string) => ({
             id: subjectId,
@@ -270,20 +253,13 @@ export const updateTeacher = async (
           
       },
     });
-    await prisma.auth.update({
-      where:{
-        id:user?.id
-      },
-      data:{
-        email:data.email,
-        ...(data.password !== "" && { password: data.password }),
-      }
-    })
+
     // revalidatePath("/list/teachers");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
+    
   }
 };
 export const deleteTeacher = async (
@@ -292,16 +268,7 @@ export const deleteTeacher = async (
 ) => {
   const id = data.get("id") as string;
   try {
-      const t = await prisma.teacher.findUnique({
-        where:{
-          id
-        }
-      })
-      const a = await prisma.auth.findFirst({
-        where:{
-          email:t?.email? t.email:""
-        }
-      })
+      
       await prisma.teacher.update({
         where:{
           id
@@ -310,17 +277,11 @@ export const deleteTeacher = async (
           deleted:true
         }
       })
-      await prisma.authSchool.deleteMany({
-        where:{
-          userId:a?.id,
-          schoolId:t?.schoolId? t.schoolId:""
-        }
-      })
     // revalidatePath("/list/teachers");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
   }
 };
 export const createStudent = async (
@@ -615,11 +576,10 @@ export const createSchoolYear = async (
 }
 export const createAnnouncement = async ( 
   currentState: CurrentState,
-  data: AnnouncementSchema,
-  disabled:boolean
+  data: AnnouncementSchema
   ) => {
   try{
-    if(data.classes.length === 0 ){
+    if(data?.classes?.length === 0 || !data?.classes ){
        return { success: false, error: true,fr:"Veillez choisir au moins une classe!",eng:"Please choose at least one class!" };
     }
     const a = await prisma.announcement.create({
@@ -630,11 +590,11 @@ export const createAnnouncement = async (
       }
     })
     if(!a){return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }}
-    for(let i = 0;i<data.classes.length;i++){
+    for(let i = 0;i<data?.classes?.length;i++){
         await prisma.announcementClass.create({
           data:{
             announcementId:a.id,
-            classId:data.classes[i]
+            classId:data.classes[i].id
           }
         })  
     }
@@ -675,6 +635,10 @@ export const updateAnnouncement = async (
   if (!data.id) {
     return { success: false, error: true ,fr:"",eng:""};
   }
+  if(!data.classes)
+  {
+      return { success: false, error: true,fr:"Veillez choisir au moins une classe!",eng:"Please choose at least one class!" };
+  }
   try {
     await prisma.announcement.update({
       where:{
@@ -696,7 +660,7 @@ export const updateAnnouncement = async (
       await prisma.announcementClass.create({
         data:{
           announcementId:data.id,
-          classId:data.classes[i]
+          classId:data.classes[i].id
         }
       })  
   }
@@ -729,13 +693,12 @@ export const createEvent = async (
       }
     })
 
-    return { success: true, error: false };
+    return { success: true, error: false, eng:"",fr:"" };
      
   }
   catch(error:any){
     console.log(error)
-    return { success: false, error: true };
-    
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
   }
 }
 export const deleteEvent = async (  currentState: CurrentState,
@@ -748,11 +711,12 @@ export const deleteEvent = async (  currentState: CurrentState,
           id
         }
       })
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
 
   }
   catch(error:any){
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
+    
   }
 }
 export const updateEvent = async (
@@ -760,7 +724,7 @@ export const updateEvent = async (
   data: EventSchema
 ) => {
   if (!data.id) {
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
   }
   try {
     await prisma.event.update({
@@ -776,10 +740,11 @@ export const updateEvent = async (
       
     })
     // revalidatePath("/list/students");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
+    
   }
 };
 export const createLessons = async ( 
@@ -956,5 +921,82 @@ export const updateExam = async (
   } catch (err:any) {
     // console.log(err.message);
     return { success: false, error: true };
+  }
+};
+export const createParent = async ( 
+  currentState: CurrentState,
+  data: ParentSchema,
+  ) => {
+  try{
+
+    const currentUser = await getCurrentUser()
+    const a = await prisma.parent.create({
+      data:{
+          username:data.username,
+          email:data.email,
+          phone:data.phone,
+          password:data.password,
+          address:data.address,
+          school:{
+            connect:{
+              id:currentUser?.schoolId
+            }
+          }
+          
+      }
+    })
+
+    
+    return { success: true, error: false,fr:"",eng:"" };
+     
+  }
+  catch(error:any){
+    console.log(error)
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
+  }
+}
+export const deleteParent = async (  currentState: CurrentState,
+  data: FormData,) => {
+  const id = data.get("id") as string;
+  try{
+      await prisma.parent.delete( {
+        where:{
+          id
+        }
+      })
+      
+    return { success: true, error: false,fr:"",eng:"" };
+
+  }
+  catch(error:any){
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
+  }
+}
+export const updateParent = async (
+  currentState: CurrentState,
+  data: ParentSchema
+) => {
+  if (!data.id) {
+    return { success: false, error: true ,fr:"",eng:""};
+  }
+  try {
+    const a = await prisma.parent.update({
+      data:{
+        username:data.username,
+        phone:data.phone,
+        email:data.email,
+        password:data.password,
+        address:data.address
+      },
+      where:{
+          id:data.id
+      }
+    })
+  
+    
+    // revalidatePath("/list/students");
+    return { success: true, error: false,fr:"",eng:"" };
+  } catch (err:any) {
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
   }
 };

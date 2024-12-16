@@ -24,6 +24,7 @@ model School {
   students Student[]
   subjects Subject[]
   events Event[]
+  parents Parent[]
 }
 model Schoolyear {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -89,14 +90,13 @@ model ClassYear {
 model Teacher {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username  String
-  email     String?   @unique
-  phone     String   @unique
-  address   String
+  email     String   
+  phone     String?   
+  address   String?
   password String
   img       String?
   imgKey    String?
   deleted Boolean @default(false)
-  sex       UserSex
   schoolId String? @db.Uuid
   school       School?        @relation(fields: [schoolId], references: [id])
   createdAt DateTime  @default(now())
@@ -114,6 +114,9 @@ model Parent {
   address   String?
   createdAt DateTime  @default(now())
   students  Student[]
+  schoolId String @db.Uuid
+  school     School      @relation(fields: [schoolId], references: [id])    
+ 
   deleted Boolean @default(false)
 }
 model Class {
@@ -262,6 +265,7 @@ model Attendance {
 }
 model Event {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now())
   title       String
   description String
   startTime   DateTime?

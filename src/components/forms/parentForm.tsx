@@ -3,22 +3,34 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
-import { announcementSchema, AnnouncementSchema, EventSchema, eventSchema, subjectSchema, SubjectSchema } from "@/lib/formValidationSchemas";
-import { createAnnouncement, createEvent, createSubject, updateAnnouncement, updateEvent, updateSubject } from "@/lib/actions";
+import {
+  classSchema,
+  ClassSchema,
+  parentSchema,
+  ParentSchema,
+  subjectSchema,
+  SubjectSchema,
+} from "@/lib/formValidationSchemas";
+import {
+  createClass,
+  createParent,
+  createSubject,
+  updateClass,
+  updateParent,
+  updateSubject,
+} from "@/lib/actions";
 import { useFormState } from "react-dom";
 import { Dispatch,useTransition, SetStateAction, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import SelectComponents from "./selectComponents";
-import { getCurrentUser } from "@/lib/functs";
 import { AuthSchema } from "@/lib/schemas";
 
-const EventForm = ({
+const ParentForm = ({
   type,
   data,
   setOpen,
   relatedData,
-  user
+  user,
 }: {
   type: "create" | "update";
   data?: any;
@@ -30,14 +42,14 @@ const EventForm = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<EventSchema>({
-    resolver: zodResolver(eventSchema),
+  } = useForm<ParentSchema>({
+    resolver: zodResolver(parentSchema),
   });
 
   // AFTER REACT 19 IT'LL BE USEACTIONSTATE
- const currentUser = getCurrentUser()
+  const [isPending,startTransition] = useTransition()
   const [state, formAction] = useFormState(
-    type === "create" ? createEvent : updateEvent,
+    type === "create" ? createParent : updateParent,
     {
       success: false,
       error: false,
@@ -45,14 +57,14 @@ const EventForm = ({
       eng:""
     }
   );
-  const [isPending,startTransition] = useTransition()
+
   const onSubmit = handleSubmit((data) => {
-     startTransition(
-      ()=>{
-        console.log(data);
-        formAction(data);
-      }
-     )
+      startTransition(
+        ()=>{
+          console.log(data);
+          formAction(data);
+        }
+      )
   });
 
   const router = useRouter();
@@ -63,51 +75,57 @@ const EventForm = ({
       setOpen(false);
       router.refresh();
     }
+
     if (state.error) {
       toast(`${user?.lang === "Français"? state.fr:state.eng}`);
     }
   }, [state, router, type, setOpen]);
 
- const {d} = relatedData
+  const { students } = relatedData;
+
   return (
-    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
+    <form className="flex  flex-col  gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
-        {type === "create" ? user?.lang === "Français"? "Créer un évènement":"Create an event" : user?.lang === "Français"?"Modifier l'évènement":"Update the event"}
+        {type === "create" ? user?.lang === "Français"? "Enregistrez un parent":"Create Parent" : user?.lang === "Français"?"Modifier les données":"Update data"}
       </h1>
-      <div className="flex justify-start flex-wrap gap-4">
-      <InputField
-          label={user?.lang === "Français"?"Titre":"Title"}
-          name="title"
-          defaultValue={data?.title}
+
+      <div className="flex w-full flex-col md:flex-row md:justify-start   gap-4">
+        <InputField
+          label={user?.lang === "Français"? "Nom":"Name"}
+          name="username"
+          defaultValue={data?.username}
           register={register}
-          error={errors?.title}
+          error={errors?.username}
         />
         <InputField
-          label={user?.lang === "Français"? "Heure de début":"Start time"}
-          name="startTime"
-          defaultValue={data?.startTime}
+          label={"email"}
+          name="email"
+          defaultValue={data?.email}
           register={register}
-          error={errors?.startTime}
-          type="datetime-local"
-        />  
+          error={errors?.email}
+        /> 
          <InputField
-          label={user?.lang === "Français"? "Heure de fin":"End time"}
-          name="endTime"
-          defaultValue={data?.endTime}
+        label={user?.lang === "Français"? "Numéro Téléphonique":"Phone"}
+        name="phone"
+        defaultValue={data?.phone}
+        register={register}
+        error={errors?.phone}
+      /> 
+        </div>
+        <div className="flex w-full flex-col md:flex-row md:justify-start   gap-4">
+       <InputField
+      label={user?.lang === "Français"? "Adresse":"Address"}
+      name="address"
+      defaultValue={data?.address}
+      register={register}
+      error={errors?.address}
+    />
+     <InputField
+          label={user?.lang === "Français"? "Mot De Passe":"Password"}
+          name="password"
+          defaultValue={data?.password}
           register={register}
-          error={errors?.endTime}
-          type="datetime-local"
-        />  
-      </div>
-      <div className="flex justify-between flex-wrap gap-4">
-      
-                   <InputField
-          label="Description"
-          name="description"
-          type ="textarea"
-          defaultValue={data?.description}
-          register={register}
-          error={errors?.description}
+          error={errors?.password}
         />
         {data && (
           <InputField
@@ -120,8 +138,9 @@ const EventForm = ({
           />
         )}
        
+       
       </div>
-      
+    
       <button disabled={isPending} className={`bg-blue-400 text-white flex items-center justify-center p-2 rounded-md ${isPending && "opacity-50"}`}>
         {!isPending && (type === "create"? user?.lang === "Français"? "Créer":"Create" : user?.lang === "Français"?"Modifer":"Update")}
         {isPending &&    
@@ -132,4 +151,4 @@ const EventForm = ({
   );
 };
 
-export default EventForm;
+export default ParentForm;
