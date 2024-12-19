@@ -2,34 +2,63 @@ import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
-const Announcements = async () => {
+const Announcements = async ({lang,userId,role}:{lang:string,userId:string,role:string}) => {
   const currentUser = await getCurrentUser()
-  const roleConditions = {
-    Teacher: { lessons: { some: { teacherId: currentUser?.id } } },
-    Student: { currentStudents: { some: { id: currentUser?.id } } },
-    Parent: { currentStudents: { some: { parentId: currentUser?.id } } },
-  };
+
   const query: Prisma.AnnouncementWhereInput = {};
 
-
+  if(role === "Student"){
+    query.announcementClass = {
+      some: {
+        class: {
+          currentStudents: {
+            some: {
+              id:userId
+            }
+          }
+        }
+      }
+    };
+  }
+  else if(role === "Parent"){
+    query.announcementClass = {
+      some:{
+        class:{
+          currentStudents:{
+            some:{
+              parentId:userId
+            }
+          }
+        }
+      }
+    } 
+  }
+  else if(role === "Teacher"){
+    query.announcementClass = {
+      some:{
+        class:{
+           lessons:{
+            some:{
+              lesson:{
+                teacherId:userId
+              }
+            }
+           }
+          }
+        }
+      }
+    } 
   const data = await prisma.announcement.findMany({
     take: 4,
-    where: {
-      ...(currentUser?.role !== "Admin" && {
-        OR: [
-          { classId: null },
-          { class: roleConditions[currentUser?.role as keyof typeof roleConditions] || {} },
-        ],
-      }),
-    },
+    where:query,
     orderBy: { date: "desc" },
   });
-
+ 
   return (
     <div className="bg-white p-4 rounded-md">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Announcements</h1>
-        <span className="text-xs text-gray-400">View All</span>
+        <h1 className="text-xl font-semibold">{lang === "Français"?"Annonces":"Announcements"}</h1>
+        <span className="text-xs text-gray-400">{lang === "Français"?"Voir tout":"View All"}</span>
       </div>
       <div className="flex flex-col gap-4 mt-4">
         {data[0] && (
@@ -37,7 +66,7 @@ const Announcements = async () => {
             <div className="flex items-center justify-between">
               <h2 className="font-medium">{data[0].title}</h2>
               <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
-                {new Intl.DateTimeFormat("en-GB").format(data[0].date)}
+                {new Intl.DateTimeFormat("en-GB").format(data[0].date? data[0].date:new Date())}
               </span>
             </div>
             <p className="text-sm text-gray-400 mt-1">{data[0].description}</p>
@@ -48,7 +77,7 @@ const Announcements = async () => {
             <div className="flex items-center justify-between">
               <h2 className="font-medium">{data[1].title}</h2>
               <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
-                {new Intl.DateTimeFormat("en-GB").format(data[1].date)}
+                {new Intl.DateTimeFormat("en-GB").format(data[1].date? data[1].date:new Date())}
               </span>
             </div>
             <p className="text-sm text-gray-400 mt-1">{data[1].description}</p>
@@ -59,7 +88,7 @@ const Announcements = async () => {
             <div className="flex items-center justify-between">
               <h2 className="font-medium">{data[2].title}</h2>
               <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
-                {new Intl.DateTimeFormat("en-GB").format(data[2].date)}
+              {new Intl.DateTimeFormat("en-GB").format(data[2].date? data[2].date:new Date())}
               </span>
             </div>
             <p className="text-sm text-gray-400 mt-1">{data[2].description}</p>

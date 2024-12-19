@@ -23,11 +23,11 @@ const SubjectListPage = async ({
   const currentUser = await getCurrentUser()
   const columns = [
     {
-      header: "Subject Name",
+      header: currentUser?.lang === "Français"?"Nom":"Subject Name",
       accessor: "name",
     },
     {
-      header: "Teachers",
+      header: currentUser?.lang === "Français"? "Enseignants":"Teachers",
       accessor: "teachers",
       className: "hidden md:table-cell",
     },
@@ -94,9 +94,9 @@ const SubjectListPage = async ({
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Subjects</h1>
+        <h1 className="hidden md:block text-lg font-semibold">{currentUser?.lang === "Français"? "Matières":"All Subjects"}</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch />
+          <TableSearch lang = {currentUser?.lang? currentUser?.lang:""} />
           <div className="flex items-center gap-4 self-end">
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
@@ -104,7 +104,7 @@ const SubjectListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-           {role === "admin" && <FormContainer table="subject" type="create" />} 
+           {currentUser.role === "Admin" && <FormContainer table="subject" type="create" />} 
           </div>
         </div>
       </div>
@@ -113,7 +113,7 @@ const SubjectListPage = async ({
        <Pagination page={p} count={count} /> </>}
        {
         data.length === 0 &&  
-            <EmptyComponent msg = {'No Data'} />
+            <EmptyComponent msg = {currentUser?.lang === "Français"?'Aucunes données':'No Data'} />
        }
     </div>
   );

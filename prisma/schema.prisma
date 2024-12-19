@@ -25,6 +25,7 @@ model School {
   subjects Subject[]
   events Event[]
   parents Parent[]
+  lessons Lesson[]
 }
 model Schoolyear {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -50,10 +51,10 @@ model Admin {
 }
 model Student {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  username    String       @unique
+  username    String       
   email       String?      @unique
   phone       String?      @unique
-  address     String
+  address     String?
   img         String?
   imgKey String?
   sex         UserSex
@@ -62,7 +63,7 @@ model Student {
   parent      Parent?       @relation(fields: [parentId], references: [id])
   attendances Attendance[]
   results     Result[]
-  password    String?
+  password    String
   matricule String
   classYears ClassYear[]
   studentFees StudentFees[]
@@ -163,6 +164,8 @@ model Lesson {
   teacherId   String @db.Uuid
   teacher     Teacher      @relation(fields: [teacherId], references: [id])
   attendances Attendance[]
+  schoolId String @db.Uuid
+  school      School       @relation(fields: [schoolId], references: [id])
   files String[] @default([])
   keys String[] @default([])
   
@@ -186,7 +189,15 @@ model SessionSequence  {
   endTime   DateTime?
   mestreId String @db.Uuid
   mestre     Mestre      @relation(fields: [mestreId], references: [id])   
-  examen Exam[] 
+  sessions Session[] 
+}
+
+model Session {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  percentage Int
+  sessionSequenceId String @db.Uuid
+  exams Exam[]
+  sessionSequence     SessionSequence      @relation(fields: [sessionSequenceId], references: [id])     
 }
 model Exam {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -205,7 +216,7 @@ model Exam {
   results  Result[]
   attendances Attendance[]
   sessionId String @db.Uuid
-  session     SessionSequence      @relation(fields: [sessionId], references: [id])  
+  session     Session      @relation(fields: [sessionId], references: [id])  
 }
 model Fees {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

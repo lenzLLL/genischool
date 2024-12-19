@@ -25,7 +25,7 @@ const TeacherForm = ({
   data?: any;
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
-  user:AuthSchema
+  user?:AuthSchema
 }) => {
   const {
     register,
@@ -35,9 +35,9 @@ const TeacherForm = ({
   } = useForm<TeacherSchema>({
     resolver: zodResolver(teacherSchema),
   });
-
+  const { subjects } = relatedData;
+  
   const [img, setImg] = useState<any>();
-  const [image,setImage] = useState<any>("")
   const [isPending,startTransition] = useTransition()
   const [state, formAction] = useFormState(
     type === "create" ? createTeacher : updateTeacher,
@@ -74,12 +74,13 @@ const TeacherForm = ({
     }
   }, [state, router, type, setOpen]);
 
-  const { subjects } = relatedData;
   const animatedComponents = makeAnimated();
   const [finalSubjectsData,setFinalSubjectsData] = useState<selectSchema[]>([])
   const handleChangeClass = (data: selectSchema[]) => {
+    setFinalSubjectsData([])
     setFinalSubjectsData(prevData => {
       // Filtrer les doublons
+
       const updatedData = [...prevData, ...data].filter((item, index, self) =>
         index === self.findIndex((t) => (
           t.id === item.id // Remplacez `id` par la clé unique de votre objet
@@ -88,8 +89,17 @@ const TeacherForm = ({
       return updatedData;
     });
   };
+  useEffect(
+    ()=>{
+            for(let i = 0;i<data?.subjects?.length;i++)
+              {
+                setFinalSubjectsData((state)=>([...state,{name:data?.subjects[i]?.name,id:data.subjects[i]?.id}]))
+              }  
+    },[data]
+  )
   return (
     <form className="flex flex-col gap-2" onSubmit={onSubmit}>
+
       <h1 className="text-xl font-semibold">
         {type === "create" ? user?.lang === "Français"? "Enregistrez un enseignant":"Create a teacher" : user?.lang === "Français"?"Modifier les données de l'enseignant":"Update the Teacher"}
       </h1>
@@ -106,7 +116,7 @@ const TeacherForm = ({
           error={errors?.email}
         />
         <InputField
-          label={user.lang === "Français"? "Mot De Passe":"Password"}
+          label={user?.lang === "Français"? "Mot De Passe":"Password"}
           name="password"
           type="password"
           defaultValue={data?.password}
@@ -154,22 +164,7 @@ const TeacherForm = ({
           />
         )}
         
-        <div className="flex flex-col gap-2 w-full">
-          <label className="text-xs text-gray-500">Sexe</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("sex")}
-            defaultValue={data?.sex}
-          >
-            <option value="MALE">{user?.lang === "Français"?"Masculin": 'Male'}</option>
-            <option value="FEMALE">{user?.lang === "Français"?"Féminin":'Female'}</option>
-          </select>
-          {errors.sex?.message && (
-            <p className="text-xs text-red-400">
-              {errors.sex.message.toString()}
-            </p>
-          )}
-        </div>
+
 
         <Select
           onChange={(data:any)=>handleChangeClass(data)}

@@ -6,6 +6,14 @@ const arraySchema = z.object({
 
 
 const ArraySchema = z.array(arraySchema)
+
+const arraySchema2 = z.object({
+  id: z.coerce.string(), // Identifiant de l'enseignant
+  username: z.coerce.string() // Sujet enseigné
+});
+
+
+const ArraySchema2 = z.array(arraySchema2)
 export const schoolSchema = z.object({
   id: z.coerce.string().optional(),
   key:z.string().optional(),
@@ -24,7 +32,7 @@ export type SchoolSchema = z.infer<typeof schoolSchema>;
 export const subjectSchema = z.object({
   id: z.coerce.string().optional(),
   name: z.string().min(1, { message: "Subject name is required!" }),
-  teachers: z.array(z.string()), //teacher ids
+  teachers: ArraySchema2.optional(), //teacher ids
 });
 
 
@@ -59,7 +67,6 @@ export const teacherSchema = z.object({
   phone: z.string().optional(),
   address: z.string(),
   img: z.string().optional(),
-  sex: z.enum(["MALE", "FEMALE"], { message: "Sex is required!" }),
   subjects: ArraySchema.optional(), // subject ids
 });
 
@@ -74,7 +81,6 @@ export const studentSchema = z.object({
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters long!" })
-    .optional()
     .or(z.literal("")),
   email: z
     .string()
@@ -82,13 +88,14 @@ export const studentSchema = z.object({
     .optional()
     .or(z.literal("")),
   phone: z.string().optional(),
-  address: z.string(),
+  address: z.string().optional(),
   img: z.string().optional(),
   key: z.string().optional(),
   newImage: z.boolean().optional(),
   sex: z.enum(["MALE", "FEMALE"], { message: "Sex is required!" }),
-  classId: z.coerce.string().min(1, { message: "Class is required!" }),
+  classId: z.coerce.string().optional(),
   parentId: z.string().optional(),
+  matricule:z.string()
 
 });
 

@@ -23,21 +23,21 @@ const StudentListPage = async ({
   const currentUser = await getCurrentUser()
   const columns = [
     {
-      header: "Info",
+      header: "Informations",
       accessor: "info",
     },
     {
-      header: "Sex",
+      header: currentUser?.lang === "Français"? "Sexe":"Sex",
       accessor: "sex",
       className: "hidden md:table-cell",
     },
     {
-      header: "Phone",
+      header:currentUser?.lang === "Français"? "Contact":"Phone",
       accessor: "phone",
       className: "hidden lg:table-cell",
     },
     {
-      header: "Address",
+      header:currentUser?.lang === "Français"? "Adresse":"Address",
       accessor: "address",
       className: "hidden lg:table-cell",
     },
@@ -68,7 +68,7 @@ const StudentListPage = async ({
           <p className="text-xs text-gray-500">{item.currentClass.name}</p>
         </div>
       </td>
-      <td className="hidden md:table-cell">{item.sex}</td>
+      <td className="hidden md:table-cell">{currentUser?.lang === "Français"?  item.sex === "MALE"? "Masculin":"Féminin":item.sex}</td>
       <td className="hidden md:table-cell">{item.phone}</td>
       <td className="hidden md:table-cell">{item.address}</td>
       <td>
@@ -81,7 +81,7 @@ const StudentListPage = async ({
            {currentUser?.role === "Admin" && (
             <>
           
-            <FormModal table="student" type="delete" id={item.id}/>
+            <FormContainer table="student" type="delete" id={item.id}/>
             </>
           )} 
         </div>
@@ -105,7 +105,9 @@ const StudentListPage = async ({
             query.currentClass = {
               lessons: {
                 some: {
-                  teacherId: value,
+                  lesson:{
+                    teacherId:value
+                  }
                 },
               },
             };
@@ -124,8 +126,20 @@ const StudentListPage = async ({
     prisma.student.findMany({
       where: query,
       include: {
-        currentClass: true,
-
+        currentClass:{
+          include:{
+            lessons:{
+              include:{
+                lesson:{
+                  include:{
+                    teacher:true
+                  }
+                }
+              }
+            }
+          }
+        },
+           
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
@@ -138,7 +152,7 @@ const StudentListPage = async ({
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Students</h1>
+        <h1 className="hidden md:block text-lg font-semibold">{currentUser?.lang === "Français"?"é".toUpperCase()+"tudiants":"All Students"}</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
@@ -163,7 +177,7 @@ const StudentListPage = async ({
        <Pagination page={p} count={count} /> </>}
        {
         data.length === 0 &&  
-            <EmptyComponent msg = {'No Data'} />
+            <EmptyComponent msg = {currentUser?.lang === "Français"?'Aucunes données':'No Data'} />
        }
     </div>
   );

@@ -13,12 +13,16 @@ const BigCalendarContainer = async ({
     where: {
       ...(type === "teacherId"
         ? { teacherId: id as string }
-        : { classId: id as string }),
+        : { classes:{some:{classId:id as string}} }),
+        
     },
+    include:{
+      subject:true
+    }
   });
 
   const data = dataRes.map((lesson) => ({
-    title: lesson.name,
+    title: lesson.subject.name,
     start: lesson.startTime,
     end: lesson.endTime,
   }));

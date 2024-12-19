@@ -34,8 +34,10 @@ export const createSubject = async (
     await prisma.subject.create({
       data: {
         name: data.name,
-        teachers: {
-          connect: data.teachers.map((teacherId) => ({ id: teacherId })),
+        teachers:{
+          connect: data?.teachers?.map((d:{id:string,username:string}) => ({
+            id: d.id,
+          })),
         },
         school:{
           connect :{id:currentUser?.schoolId}
@@ -44,10 +46,10 @@ export const createSubject = async (
     });
 
     // revalidatePath("/list/subjects");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:""};
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
   }
 };
 export const updateSubject = async (
@@ -55,23 +57,34 @@ export const updateSubject = async (
   data: SubjectSchema
 ) => {
   try {
+
+    const existingSubject = await prisma.subject.findUnique({
+      where: { id: data.id },
+      include: { teachers: true }, // Inclure les enseignants actuels
+    });
+
+    const currentTeacherIds = existingSubject?.teachers.map(teacher => teacher.id)||[];
+    const newTeacherIds = data.teachers?.map(teacher => teacher.id) || [];
+    const teachersToDisconnect = currentTeacherIds.filter(id => !newTeacherIds.includes(id));
+
     await prisma.subject.update({
       where: {
         id: data.id,
       },
       data: {
         name: data.name,
-        teachers: {
-          set: data.teachers.map((teacherId) => ({ id: teacherId })),
+        teachers:{
+          connect: newTeacherIds.map(id => ({ id })), // Connecter les nouveaux enseignants
+          disconnect: teachersToDisconnect.map(id => ({ id })), // Déconnecter les enseignant
         },
       },
     });
 
     // revalidatePath("/list/subjects");
-    return { success: true, error: false };
+    return { success: true, error: false,eng:"",fr:""};
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
   }
 };
 export const deleteSubject = async (
@@ -87,10 +100,11 @@ export const deleteSubject = async (
     });
 
     // revalidatePath("/list/subjects");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
+    
   }
 };
 export const createClass = async (
@@ -173,7 +187,31 @@ export const createTeacher = async (
     if(isExistPassword){
         return { success: false, error: true,fr:"L'enseignant de mot de passe "+data.password+" exsite déjà dans la base de données",eng:"The teacher with the password " + data.password + " already exists in the database." };
     }
-
+    const isExistEmail = await prisma.teacher.findFirst({
+      where:{
+        email:data.email,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistEmail){
+        return { success: false, error: true,fr:"L'enseignant d'email "+data.email+" exsite déjà dans la base de données",eng:"The teacher with email " + data.email + " already exists in the database." };
+    }
+    const isExistPhone = await prisma.teacher.findFirst({
+      where:{
+        phone:data.phone,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistPhone){
+        return { success: false, error: true,fr:"L'enseignant avec le contact "+data.phone+" exsite déjà dans la base de données",eng:"The teacher with phone number " + data.phone + " already exists in the database." };
+    }
+    
     await prisma.teacher.create({
       data: {
         username: data.username,
@@ -223,6 +261,31 @@ export const updateTeacher = async (
     if(isExistPassword){
         return { success: false, error: true,fr:"L'enseignant de mot de passe "+data.password+" exsite déjà dans la base de données",eng:"The teacher with the password " + data.password + " already exists in the database." };
     }
+    const isExistEmail = await prisma.teacher.findFirst({
+      where:{
+        email:data.email,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistEmail){
+        return { success: false, error: true,fr:"L'enseignant d'email "+data.email+" exsite déjà dans la base de données",eng:"The teacher with email " + data.email + " already exists in the database." };
+    }
+    const isExistPhone = await prisma.teacher.findFirst({
+      where:{
+        phone:data.phone,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistPhone){
+        return { success: false, error: true,fr:"L'enseignant avec le contact "+data.phone+" exsite déjà dans la base de données",eng:"The teacher with phone number " + data.phone + " already exists in the database." };
+    }
+    
     const t = await prisma.teacher.findUnique({
       where:{
         id:data.id
@@ -231,6 +294,14 @@ export const updateTeacher = async (
     if(data.newImage && t?.imgKey){
       await cloudinary.v2.uploader.destroy(t?.imgKey? t.imgKey:"")
     }
+    const existingSubject = await prisma.teacher.findUnique({
+      where: { id: data.id },
+      include: { subjects: true }, // Inclure les enseignants actuels
+    });
+    const currentSubjectsIds = existingSubject?.subjects.map(s => s.id)||[];
+    const newSubjectIds = data.subjects?.map(s => s.id) || [];
+    const subjectsToDisconnect = currentSubjectsIds.filter(id => !newSubjectIds.includes(id));
+
 
      const r = await prisma.teacher.update({
       where: {
@@ -245,10 +316,9 @@ export const updateTeacher = async (
         address: data.address,
         img: data.img ,
         imgKey:data.key,
-        subjects: {
-          set: data.subjects?.map((subjectId: string) => ({
-            id: subjectId,
-          })),
+        subjects:{
+          connect: newSubjectIds.map(id => ({ id })), // Connecter les nouveaux enseignants
+          disconnect: subjectsToDisconnect.map(id => ({ id })), // Déconnecter les enseignant
         },
           
       },
@@ -292,31 +362,62 @@ export const createStudent = async (
   try {
 
     const currentUser = await getCurrentUser()
-    const isExistAuth = await prisma.auth.findFirst({
+    const isExistEmail = await prisma.student.findFirst({
       where:{
         email:data.email,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
       }
     })
-    let r:any = null
-    if(!isExistAuth){
-      r = await prisma.auth.create({
-      data:{
-        password:data.password? data.password:"",
-        email:data.email? data.email:"",
+    if(isExistEmail){
+        return { success: false, error: true,fr:"L'étudiant d'email "+data.email+" exsite déjà dans la base de données",eng:"The student with email " + data.email + " already exists in the database." };
+    }
+    const isExistMatricule = await prisma.student.findFirst({
+      where:{
+        matricule:data.matricule,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
       }
-      })
+    })
+    if(isExistMatricule){
+        return { success: false, error: true,fr:"L'étudiant de matricule "+data.matricule+" exsite déjà dans la base de données",eng:"The student with matricule " + data.matricule + " already exists in the database." };
     }
-    if(!r && !isExistAuth){
-        return { success: false, error: true };    
+    const isExistPhone = await prisma.student.findFirst({
+      where:{
+        phone:data.phone,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistPhone){
+        return { success: false, error: true,fr:"L'étudiant de contact "+data.phone+" exsite déjà dans la base de données",eng:"The student with contact " + data.phone + " already exists in the database." };
     }
-
-
+    const isExistPassword = await prisma.student.findFirst({
+      where:{
+        password:data.password,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistPassword){
+        return { success: false, error: true,fr:"L'étudiant de mot de passe "+data.password+" exsite déjà dans la base de données",eng:"The student with pzassword " + data.password + " already exists in the database." };
+    }
     const user = await prisma.student.create({
       data: {
         username: data.username,
         email: data.email || null,
         phone: data.phone || null,
         address: data.address,
+        password:data.password,
+        matricule:data.matricule,
         img: data.img || null,
         sex: data.sex,
         imgKey:data.key,
@@ -327,38 +428,31 @@ export const createStudent = async (
       },
     });
 
-    if (user){
-        const id = isExistAuth? isExistAuth.id:r.id
-        await prisma.authSchool.create({
-          data:{
-            role:"s",
-            school:{
-              connect:{id:currentUser?.schoolId}
-            },
-            user:{
-              connect:{id}
-            }
-          }
-        })  
-    }
     const sy = await prisma.schoolyear.findFirst({
       where:{
         current:true,
         schoolId:currentUser?.schoolId
+      },
+      include:{
+        school:true
       }
     })
     await prisma.classYear.create({
         data : {
             schoolYearId:sy?.id? sy.id:"",
             classId:data?.classId,
-            studentId:user?.id
+            studentId:user?.id,
+            Inscription:sy?.school.inscription? sy?.school?.inscription:0
         }      
     })
+    // fonction inachevé lorsqu'une personne est enregistrée dans la base de données, nous considérons qu'elle est obligatoirement
+    //inscripte dans une classe le classYear est alors créer ce qui servira de mémoire dans l'historique et une historique de
+    // de paiement devrait ainsi être crée
     // revalidatePath("/list/students");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:""};
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
   }
 };
 export const updateStudent = async (
@@ -366,22 +460,65 @@ export const updateStudent = async (
   data: StudentSchema
 ) => {
   if (!data.id) {
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"",eng:"" };
   }
   try {
     const s = await prisma.student.findUnique({
+      where:{id:data.id}
+    })
+    const currentUser = await getCurrentUser()
+    const isExistEmail = await prisma.student.findFirst({
       where:{
-        id:data.id
+        email:data.email,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
       }
     })
+    if(isExistEmail){
+        return { success: false, error: true,fr:"L'étudiant d'email "+data.email+" exsite déjà dans la base de données",eng:"The student with email " + data.email + " already exists in the database." };
+    }
+    const isExistMatricule = await prisma.student.findFirst({
+      where:{
+        matricule:data.matricule,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistMatricule){
+        return { success: false, error: true,fr:"L'étudiant de matricule "+data.matricule+" exsite déjà dans la base de données",eng:"The student with matricule " + data.matricule + " already exists in the database." };
+    }
+    const isExistPhone = await prisma.student.findFirst({
+      where:{
+        phone:data.phone,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistPhone){
+        return { success: false, error: true,fr:"L'étudiant de contact "+data.phone+" exsite déjà dans la base de données",eng:"The student with contact " + data.phone + " already exists in the database." };
+    }
+    const isExistPassword = await prisma.student.findFirst({
+      where:{
+        password:data.password,
+        schoolId:currentUser?.schoolId,
+        id:{
+          not:data.id
+        }
+      }
+    })
+    if(isExistPassword){
+        return { success: false, error: true,fr:"L'étudiant de mot de passe "+data.password+" exsite déjà dans la base de données",eng:"The student with pzassword " + data.password + " already exists in the database." };
+    }
     if(data.newImage && s?.imgKey){
       await cloudinary.v2.uploader.destroy(s?.imgKey? s.imgKey:"")
     }
-    const user = await prisma.auth.findFirst({
-      where:{
-        email:s?.email? s.email:data.email
-      }
-     })
+    
     await prisma.student.update({
       where: {
         id: data.id,
@@ -390,6 +527,8 @@ export const updateStudent = async (
         username: data.username,
         email: data.email || null,
         phone: data.phone || null,
+        password:data.password,
+        matricule:data.matricule,
         address: data.address,
         ...(data.img && { img: data.img }),
         ...(data.key && {  imgKey:data.key}),
@@ -398,21 +537,11 @@ export const updateStudent = async (
         ...(data.parentId && {parentId: data.parentId})
       },
     });
-
-    await prisma.auth.update({
-      where:{
-        id:user?.id
-      },
-      data:{
-        email:data.email,
-        ...(data.password !== "" && { password: data.password }),
-      }
-    })
     // revalidatePath("/list/students");
-    return { success: true, error: false };
+    return { success: true, error: false,eng:"",fr:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
   }
 };
 export const deleteStudent = async (
@@ -421,43 +550,21 @@ export const deleteStudent = async (
 ) => {
   const id = data.get("id") as string;
   try {
-      const s = await prisma.student.findUnique({
-        where:{
-          id
-        },
-        include:{
-          currentClass:{
-            include:{
-              
-            }
-          } 
-        },
-      })
-      const a = await prisma.auth.findFirst({
-        where:{
-          email:s?.email? s.email:""
-        }
-      })
+    
       await prisma.student.update({
         where:{
           id
         },
-       
         data:{
           deleted:true
         }
       })
-      await prisma.authSchool.deleteMany({
-        where:{
-          userId:a?.id,
-          schoolId:s?.currentClass?.schoolId
-        }
-      })
+      
     // revalidatePath("/list/teachers");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
   }
 };
 export const createSchool = async (
@@ -752,13 +859,13 @@ export const createLessons = async (
   data: LessonSchema,
   ) => {
   try{
-
     const currentUser = await getCurrentUser()
     const a = await prisma.lesson.create({
       data:{
           teacherId:data.teacherId,
           subjectId:data.subjectId,
           startTime:data.startTime,
+          schoolId:currentUser?.id,
           endTime:data.endTime
       }
     })
@@ -770,14 +877,11 @@ export const createLessons = async (
           }
         })  
     }
-    
-    return { success: true, error: false };
-     
+    return { success: true, error: false,fr:"",eng:"" };
   }
   catch(error:any){
     console.log(error)
-    return { success: false, error: true };
-    
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }  
   }
 }
 export const deleteLesson = async (  currentState: CurrentState,
@@ -794,11 +898,11 @@ export const deleteLesson = async (  currentState: CurrentState,
           id
         }
       })
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:"" };
 
   }
   catch(error:any){
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
   }
 }
 export const updateLesson = async (
@@ -806,7 +910,7 @@ export const updateLesson = async (
   data: LessonSchema
 ) => {
   if (!data.id) {
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"",eng:"" };
   }
   try {
     const a = await prisma.lesson.update({
@@ -834,10 +938,9 @@ export const updateLesson = async (
       })  
   }  
     // revalidatePath("/list/students");
-    return { success: true, error: false };
+    return { success: true, error: false,fr:"",eng:""};
   } catch (err:any) {
-    // console.log(err.message);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
   }
 };
 export const createExam = async ( 
