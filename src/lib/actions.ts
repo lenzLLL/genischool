@@ -614,6 +614,7 @@ export const createSchoolYear = async (
             }
            } ,
            title:data.title,
+           current:true
           
       }
     })
@@ -631,7 +632,7 @@ export const createSchoolYear = async (
                 }  
             })
             
-            await prisma.sessionSequence.create({
+            const ss = await prisma.sessionSequence.create({
                 data:{
                     type:"sn",
                     order:1,
@@ -642,6 +643,19 @@ export const createSchoolYear = async (
                     }       
                 }
             })  
+
+            await prisma.session.create({
+              data:{
+                percentage:100,
+                sessionSequence:{
+                  connect:{
+                    id:ss.id
+                  }
+                
+                },
+                title:"Normal"
+              }
+            })
             
         }         
     }else{
@@ -659,7 +673,7 @@ export const createSchoolYear = async (
           })
          for(let i = 0;i<2;i++){
                
-          await prisma.sessionSequence.create({
+          const ss = await prisma.sessionSequence.create({
             data:{
                 type:"sq",
                 order:i+1,
@@ -669,6 +683,19 @@ export const createSchoolYear = async (
                   }
                 }       
             }
+        })
+        
+        await prisma.session.create({
+          data:{
+            percentage:100,
+            sessionSequence:{
+              connect:{
+                id:ss.id
+              }
+            
+            },
+            title:"Principal"
+          }
         })  
         }
         }
@@ -859,20 +886,23 @@ export const createLessons = async (
   data: LessonSchema,
   ) => {
   try{
+    if(data.classes?.length === 0 || !data.classes){
+    return { success: false, error: true,fr:"Veillez selectionner au moins une classe!",eng:"Please select at least one class!" }  
+    }
     const currentUser = await getCurrentUser()
     const a = await prisma.lesson.create({
       data:{
-          teacherId:data.teacherId,
-          subjectId:data.subjectId,
+          teacherId:data.teacherId? data.teacherId:"",
+          subjectId:data.subjectId? data.subjectId:"",
           startTime:data.startTime,
           schoolId:currentUser?.id,
           endTime:data.endTime
       }
     })
-    for(let i = 0;i<data.classes.length;i++){
+    for(let i = 0;i<data?.classes.length;i++){
         await prisma.lessonClass.create({
           data:{
-            classId:data.classes[i],
+            classId:data.classes[i].id,
             lessonId:a.id
           }
         })  
@@ -913,6 +943,9 @@ export const updateLesson = async (
     return { success: false, error: true,fr:"",eng:"" };
   }
   try {
+    if(data.classes?.length === 0 || !data.classes){
+      return { success: false, error: true,fr:"Veillez selectionner au moins une classe!",eng:"Please select at least one class!" }  
+      }
     const a = await prisma.lesson.update({
       data:{
           ...(data.teacherId && {teacherId:data.teacherId}),
@@ -932,7 +965,7 @@ export const updateLesson = async (
     for(let i = 0;i<data.classes.length;i++){
       await prisma.lessonClass.create({
         data:{
-          classId:data.classes[i],
+          classId:data.classes[i].id,
           lessonId:a.id
         }
       })  

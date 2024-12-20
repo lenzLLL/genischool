@@ -3,16 +3,11 @@ const arraySchema = z.object({
   id: z.coerce.string(), // Identifiant de l'enseignant
   name: z.coerce.string() // Sujet enseigné
 });
-
-
 const ArraySchema = z.array(arraySchema)
-
 const arraySchema2 = z.object({
   id: z.coerce.string(), // Identifiant de l'enseignant
   username: z.coerce.string() // Sujet enseigné
 });
-
-
 const ArraySchema2 = z.array(arraySchema2)
 export const schoolSchema = z.object({
   id: z.coerce.string().optional(),
@@ -26,26 +21,19 @@ export const schoolSchema = z.object({
   inscription: z.string(),
   lang:z.string()
 })
-
 export type SchoolSchema = z.infer<typeof schoolSchema>;
-
 export const subjectSchema = z.object({
   id: z.coerce.string().optional(),
   name: z.string().min(1, { message: "Subject name is required!" }),
   teachers: ArraySchema2.optional(), //teacher ids
 });
-
-
 export type SubjectSchema = z.infer<typeof subjectSchema>;
-
 export const classSchema = z.object({
   id: z.coerce.string().optional(),
   name: z.string().min(1, { message: "Subject name is required!" }),
   supervisorId: z.coerce.string().optional(),
 });
-
 export type ClassSchema = z.infer<typeof classSchema>;
-
 export const teacherSchema = z.object({
   id: z.string().optional(),
   key:z.string().optional(),
@@ -69,9 +57,7 @@ export const teacherSchema = z.object({
   img: z.string().optional(),
   subjects: ArraySchema.optional(), // subject ids
 });
-
 export type TeacherSchema = z.infer<typeof teacherSchema>;
-
 export const studentSchema = z.object({
   id: z.string().optional(),
   username: z
@@ -98,21 +84,14 @@ export const studentSchema = z.object({
   matricule:z.string()
 
 });
-
 export type StudentSchema = z.infer<typeof studentSchema>;
-
-
 export const schoolYearSchema = z.object({
   id: z.coerce.number().optional(),
   schoolId: z.string(),
   title:z.string().min(1, { message: "Title is required!" }),
   type: z.string()
 });
-
 export type SchoolYearchema = z.infer<typeof schoolYearSchema>;
-
-
-
 export const announcementSchema = z.object({
   id: z.coerce.string().optional(),
   description: z.string().min(1, { message: "Description is required!" }),
@@ -120,9 +99,7 @@ export const announcementSchema = z.object({
   date: z.coerce.date().optional(),
   classes: ArraySchema.optional(), //teacher ids
 });
-
 export type AnnouncementSchema = z.infer<typeof announcementSchema>;
-
 export const eventSchema = z.object({
   id: z.coerce.string().optional(),
   description: z.string().min(1, { message: "Description is required!" }),
@@ -130,34 +107,28 @@ export const eventSchema = z.object({
   startTime: z.coerce.date().optional(),
   endTime: z.coerce.date().optional(),
 });
-
 export type EventSchema = z.infer<typeof eventSchema>;
-
 export const lessonSchema = z.object({
   id: z.coerce.string().optional(),
-  subjectId: z.string(),
-  teacherId:z.string(),
+  subjectId: z.string().optional(),
+  teacherId:z.string().optional(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
-  classes: z.array(z.string()), //teacher ids
+  classes: ArraySchema.optional(), //teacher ids
 });
-
 export type LessonSchema = z.infer<typeof lessonSchema>;
-
 export const examSchema = z.object({
   id: z.coerce.string().optional(),
-  subjectId: z.string(),
-  teacherId:z.string(),
-  classId:z.string(),
-  sessionId:z.string(),
+  subjectId: z.string().optional(),
+  teacherId:z.string().optional(),
+  classId:z.string().optional(),
+  sessionId:z.string().optional(),
   credit:z.number(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
    //teacher ids
 });
-
 export type ExamSchema = z.infer<typeof examSchema>;
-
 export const parentSchema = z.object({
   id: z.coerce.string().optional(),
   username: z.string(),
@@ -167,7 +138,6 @@ export const parentSchema = z.object({
   address:z.string().optional(),
    //teacher ids
 });
-
 export type ParentSchema = z.infer<typeof parentSchema>;
 
 

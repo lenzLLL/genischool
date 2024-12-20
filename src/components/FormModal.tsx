@@ -42,7 +42,7 @@ const deleteActionMap = {
   attendance:deleteSubject,
   result:deleteSubject,
   assignment:deleteSubject,
-  lesson:deleteSubject,
+  lesson:deleteLesson,
   parent:deleteParent,
   exam:deleteSubject,
   student:deleteSubject,

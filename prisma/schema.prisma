@@ -195,6 +195,7 @@ model SessionSequence  {
 model Session {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   percentage Int
+  title String
   sessionSequenceId String @db.Uuid
   exams Exam[]
   sessionSequence     SessionSequence      @relation(fields: [sessionSequenceId], references: [id])     

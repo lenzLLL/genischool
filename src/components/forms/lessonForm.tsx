@@ -1,5 +1,4 @@
 "use client";
-import makeAnimated from 'react-select/animated';
 import Select from "react-select"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -7,10 +6,12 @@ import InputField from "../InputField";
 import { announcementSchema, AnnouncementSchema, lessonSchema, LessonSchema, subjectSchema, SubjectSchema } from "@/lib/formValidationSchemas";
 import { createAnnouncement, createLessons, createSubject, updateAnnouncement, updateLesson, updateSubject } from "@/lib/actions";
 import { useFormState } from "react-dom";
-import { Dispatch, SetStateAction,useTransition,useEffect } from "react";
+import { Dispatch, SetStateAction,useTransition,useEffect,useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { AuthSchema } from '@/lib/schemas';
+import makeAnimated from 'react-select/animated';
+import { getCurrentUser } from "@/lib/functs";
 
 const LessonForm = ({
   type,
@@ -32,6 +33,18 @@ const LessonForm = ({
   } = useForm<LessonSchema>({
     resolver: zodResolver(lessonSchema),
   });
+  const [finalTeacherData,setFinalTeacherData] = useState<selectSchema2>()
+  const [finalSubjectData,setFinalSubjectData] = useState<selectSchema>()
+  const [finalClassesData,setFinalClassesData] = useState<selectSchema[]>([])
+  const animatedComponents = makeAnimated();
+  type selectSchema = {
+    name:string,
+    id:string
+  }
+  type selectSchema2 = {
+    username:string,
+    id:string
+  }
   const [state, formAction] = useFormState(
     type === "create" ? createLessons : updateLesson,
     {
@@ -45,7 +58,7 @@ const LessonForm = ({
   const onSubmit = handleSubmit((data) => {
     startTransition(
       ()=>{
-        formAction(data);
+        formAction({...data,classes:finalClassesData,subjectId:finalSubjectData?.id,teacherId:finalTeacherData?.id});
       }
     )
   });
@@ -61,10 +74,23 @@ const LessonForm = ({
     }
   }, [state, router, type, setOpen]);
   const { classes,teachers,subjects } = relatedData;
+  const handleChangeClass = (data: selectSchema[]) => {
+    setFinalClassesData([])
+    setFinalClassesData(prevData => {
+      // Filtrer les doublons
+
+      const updatedData = [...prevData, ...data].filter((item, index, self) =>
+        index === self.findIndex((t) => (
+          t.id === item.id // Remplacez `id` par la clé unique de votre objet
+        ))
+      );
+      return updatedData;
+    });
+  };
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
-      {type === "create" ? user?.lang === "Français"? "Créer une leçon":"Create a lesson" : user?.lang === "Français"?"Modifier les données de la leçon":"Update the lesson"}
+      {type === "create" ? user?.lang === "Français"? "Enregistrer une leçon":"Create a lesson" : user?.lang === "Français"?"Modifier les données de la leçon":"Update the lesson"}
         
       </h1>
       <div className="flex justify-start flex-wrap gap-4">
@@ -95,67 +121,40 @@ const LessonForm = ({
             hidden
           />
         )}
-       
-          <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Subject</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("subjectId")}
-            defaultValue={data?.subjectId}
-          >
-            {subjects.map((subject: { id: number; name: string }) => (
-              <option value={subject.id} key={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-       
-          {errors.subjectId?.message && (
-            <p className="text-xs text-red-400">
-              {errors.subjectId.message.toString()}
-            </p>
-          )}
-        </div>
-       
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Select classes</label>
-          <select
-            multiple
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("classes")}
-            defaultValue={data?.classes}
-          >
-            {classes.map((subject: { id: number; name: string }) => (
-              <option value={subject.id} key={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-          {errors.classes?.message && (
-            <p className="text-xs text-red-400">
-              {errors.classes.message.toString()}
-            </p>
-          )}
-        </div>
-        <div className="w-full md:w-1/2">
-        <label className="text-xs text-gray-500">Select teacher</label>
-        <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("teacherId")}
-            defaultValue={data?.teacherId}
-          >
-            {teachers.map((subject: { id: number; username: string }) => (
-              <option value={subject.id} key={subject.id}>
-                {subject.username}
-              </option>
-            ))}
-          </select>
-          {errors.teacherId?.message && (
-            <p className="text-xs text-red-400">
-              {errors.teacherId.message.toString()}
-            </p>
-          )}   
-        </div>
+        <Select
+          onChange={(data:any)=>setFinalClassesData(data)}
+          className="w-full"
+          getOptionLabel ={(classes:{name:string,id:string})=>classes.name}
+          getOptionValue={(name:{name:string,id:string})=>name.id}
+          placeholder={user?.lang === "Français"? "Selectionnez une ou plusieurs classes":"Select one or more classes"}   
+          closeMenuOnSelect={false}
+          isMulti
+          components={animatedComponents}
+          options={classes}
+          value={finalClassesData}
+        />
+        <Select
+          onChange={(data:any)=>setFinalSubjectData(data)}
+          className="w-full"
+          getOptionLabel ={(classes:{name:string,id:string})=>classes.name}
+          getOptionValue={(name:{name:string,id:string})=>name.id}
+          placeholder={user?.lang === "Français"? "Selectionnez un sujet":"Select one subject"}   
+          closeMenuOnSelect={false}
+          components={animatedComponents}
+          options={subjects}
+          value={finalSubjectData}
+        />
+        <Select
+          onChange={(data:any)=>setFinalTeacherData(data)}
+          className="w-full"
+          getOptionLabel ={(classes:{username:string,id:string})=>classes.username}
+          getOptionValue={(name:{username:string,id:string})=>name.id}
+          placeholder={user?.lang === "Français"? "Selectionnez un enseignant":"Select one teacher"}   
+          closeMenuOnSelect={false}
+          components={animatedComponents}
+          options={teachers}
+          value={finalTeacherData}
+        />
       </div>
     
     
