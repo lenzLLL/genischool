@@ -121,9 +121,9 @@ export const examSchema = z.object({
   id: z.coerce.string().optional(),
   subjectId: z.string().optional(),
   teacherId:z.string().optional(),
-  classId:z.string().optional(),
+  classes:ArraySchema.optional(),
   sessionId:z.string().optional(),
-  credit:z.number(),
+  credit:z.string(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date(),
    //teacher ids

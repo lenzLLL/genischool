@@ -440,7 +440,7 @@ export const createStudent = async (
     await prisma.classYear.create({
         data : {
             schoolYearId:sy?.id? sy.id:"",
-            classId:data?.classId,
+            classId:data?.classId? data.classId:"",
             studentId:user?.id,
             Inscription:sy?.school.inscription? sy?.school?.inscription:0
         }      
@@ -634,8 +634,8 @@ export const createSchoolYear = async (
             
             const ss = await prisma.sessionSequence.create({
                 data:{
-                    type:"sn",
-                    order:1,
+                    type:"Session Normale",
+                    order:i+1,
                     mestre:{
                       connect:{
                         id:r.id
@@ -653,7 +653,7 @@ export const createSchoolYear = async (
                   }
                 
                 },
-                title:"Normal"
+                title:"Session Normale"
               }
             })
             
@@ -675,7 +675,7 @@ export const createSchoolYear = async (
                
           const ss = await prisma.sessionSequence.create({
             data:{
-                type:"sq",
+                type:"Séquence",
                 order:i+1,
                 mestre:{
                   connect:{
@@ -694,7 +694,7 @@ export const createSchoolYear = async (
               }
             
             },
-            title:"Principal"
+            title:"Session Principale"
           }
         })  
         }
@@ -895,7 +895,7 @@ export const createLessons = async (
           teacherId:data.teacherId? data.teacherId:"",
           subjectId:data.subjectId? data.subjectId:"",
           startTime:data.startTime,
-          schoolId:currentUser?.id,
+          schoolId:currentUser?.schoolId,
           endTime:data.endTime
       }
     })
@@ -981,29 +981,37 @@ export const createExam = async (
   data: ExamSchema,
   ) => {
   try{
-
+    console.log("start begining")
     const currentUser = await getCurrentUser()
-    const a = await prisma.exam.create({
-      data:{
-          teacherId:data.teacherId,
-          subjectId:data.subjectId,
-          startTime:data.startTime,
-          endTime:data.endTime,
-          classId:data.classId,
-          credit:data.credit,
-          sessionId:data.sessionId,
-          type:""
-      }
-    })
+    if(!data.teacherId || !data.subjectId || !data.sessionId){
+      return { success: false, error: true,fr:"Une erreur s'est produite, veillez remplir tous les champs s'il vous plaît!",eng:"An error has occurred, please fill in all fields!" }
+    }
 
     
-    return { success: true, error: false };
+    console.log("second begining")
+
+    const a = await prisma.exam.create({
+      data:{
+          teacherId:data.teacherId? data.teacherId:"",
+          subjectId:data.subjectId? data.subjectId:"",
+          startTime:data.startTime,
+          endTime:data.endTime,
+          classes:{
+            connect: data.classes?.map((d:{id:string,name:string}) => ({
+              id: d.id,
+            })),
+          },
+          credit:parseInt(data.credit),
+          sessionId:data.sessionId? data.sessionId:"",
+          type:""
+      }
+    })   
+    return { success: true, error: false,eng:"",fr:""};
      
   }
   catch(error:any){
     console.log(error)
-    return { success: false, error: true };
-    
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
   }
 }
 export const deleteExam = async (  currentState: CurrentState,
@@ -1021,11 +1029,11 @@ export const deleteExam = async (  currentState: CurrentState,
         }
       })
       
-    return { success: true, error: false };
+    return { success: true, error: false,eng:"",fr:""};
 
   }
   catch(error:any){
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
   }
 }
 export const updateExam = async (
@@ -1033,7 +1041,7 @@ export const updateExam = async (
   data: ExamSchema
 ) => {
   if (!data.id) {
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"",eng:"" };
   }
   try {
     const a = await prisma.exam.update({
@@ -1042,8 +1050,12 @@ export const updateExam = async (
         subjectId:data.subjectId,
         startTime:data.startTime,
         endTime:data.endTime,
-        classId:data.classId,
-        credit:data.credit,
+        classes:{
+          connect: data.classes?.map((d:{id:string,name:string}) => ({
+            id: d.id,
+          })),
+        },
+        credit:parseInt(data.credit),
         sessionId:data.sessionId,
       },
       where:{
@@ -1053,10 +1065,10 @@ export const updateExam = async (
   
     
     // revalidatePath("/list/students");
-    return { success: true, error: false };
+    return { success: true, error: false,eng:"",fr:"" };
   } catch (err:any) {
     // console.log(err.message);
-    return { success: false, error: true };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
   }
 };
 export const createParent = async ( 

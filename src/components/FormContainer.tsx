@@ -17,7 +17,8 @@ export type FormContainerProps = {
     | "attendance"
     | "event"
     | "announcement"
-     |"schoolyear"
+    |"schoolyear"
+    |"session"
     ;
   type: "create" | "update" | "delete";
   data?: any;
@@ -93,9 +94,10 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
         const sb = await prisma.subject.findMany({where:{schoolId:currentUser?.schoolId},
           orderBy:[{name:"asc"}]
         })
-        const ss = await prisma.sessionSequence.findMany({where:{mestre:{schoolYear:{schoolId:currentUser?.schoolId}}},orderBy:[{order:"asc"}]})
+        const ss = await prisma.sessionSequence.findMany({where:{mestre:{schoolYear:{schoolId:currentUser?.schoolId,current:true}}},orderBy:[{order:"asc"}]})
         const m = await prisma.mestre.findMany({where:{schoolYear:{schoolId:currentUser?.schoolId}},orderBy:[{order:"asc"}]})
-        relatedData = { teachers:ts,classes:cls,subjects:sb,sessions:ss,mestres:m };
+        const s = await prisma.session.findMany({where:{sessionSequence:{mestre:{schoolYear:{schoolId:currentUser?.schoolId,current:true}}}}})
+        relatedData = { teachers:ts,classes:cls,subjects:sb,sessions:s,mestres:m,sessionSequences:ss };
         break;
       case "schoolyear":
         const school = await prisma.school.findUnique({where:{id:data}})

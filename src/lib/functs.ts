@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 import { AuthSchema } from "./schemas"
 import { Class, Event, Teacher } from "@prisma/client"
 
- export const toLogin =  async ({data}:{data:AuthSchema}) => {
+export const toLogin =  async ({data}:{data:AuthSchema}) => {
      const cookieStore = await cookies()
      let res = null
      let route = ""
@@ -20,7 +20,7 @@ import { Class, Event, Teacher } from "@prisma/client"
         prisma.schoolyear.findFirst({where:{schoolId:data.schoolId,current:true}}),
         prisma.schoolyear.count({ where:{schoolId:data.schoolId} }),
       ]);
-     if(current){
+     if(!current){
         return  {error:"Error School",route}
      }
 

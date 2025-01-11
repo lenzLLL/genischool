@@ -10,6 +10,7 @@ import {
   deleteStudent,
   deleteSubject,
   deleteTeacher,
+  
 } from "@/lib/actions";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -44,7 +45,7 @@ const deleteActionMap = {
   assignment:deleteSubject,
   lesson:deleteLesson,
   parent:deleteParent,
-  exam:deleteSubject,
+  exam:deleteExam,
   student:deleteSubject,
   teacher:deleteTeacher,
   class:deleteClass,

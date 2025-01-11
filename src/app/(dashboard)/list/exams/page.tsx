@@ -12,7 +12,7 @@ import { Attendance, Class, Exam, Prisma, Subject, Teacher } from "@prisma/clien
 import Image from "next/image";
 import { Result } from "postcss";
 
-type ExamList = Exam & {teacher:Teacher} & {class:Class} & {subject:Subject} & {results:Result[]} &{attendances:Attendance[]}
+type ExamList = Exam & {teacher:Teacher} & {subject:Subject} & {results:Result[]} &{attendances:Attendance[]} & {classes:Class[]}
 const ExamListPage = async ({
   searchParams,
 }: {
@@ -21,16 +21,16 @@ const ExamListPage = async ({
   const currentUser = await getCurrentUser()
   const columns = [
     {
-      header: "Subject Name",
+      header: currentUser?.lang === "Français"? "Matière":"Subject Name",
       accessor: "name",
     },
     {
-      header: "Teacher",
+      header: currentUser?.lang === "Français"? "Enseignant":"Teacher",
       accessor: "teacher",
     },
     {
-      header: "Class",
-      accessor: "class",
+      header: "Classes",
+      accessor: "classes",
       className: "hidden md:table-cell",
     },
     {
@@ -43,17 +43,17 @@ const ExamListPage = async ({
       accessor: "resultas",
       className: "hidden md:table-cell",
     },    {
-      header: "Attendances",
+      header: currentUser?.lang === "Français"? "Absences": "Attendances",
       accessor: "attendances",
       className: "hidden md:table-cell",
     },
     {
-      header: "Start Time",
+      header: currentUser?.lang === "Français"? "Date de début":"Start Time",
       accessor: "startTime",
       className: "hidden md:table-cell",
     },
     {
-      header: "End Time",
+      header: currentUser?.lang === "Français"?"Date de fin":"End Time",
       accessor: "endTime",
       className: "hidden md:table-cell",
     },
@@ -74,7 +74,7 @@ const ExamListPage = async ({
       <td className="flex items-center gap-4 p-4">{item.subject.name}</td>
       <td>{item.teacher.username}</td>
       <td className="hidden md:table-cell">
-      {item.class.name}
+      {item.classes.map((item) => item.name).join(", ")}
       </td>
       <td className="hidden md:table-cell">{item.credit}</td>
       <td className="hidden md:table-cell">{item.results.length}</td>
@@ -112,7 +112,7 @@ const ExamListPage = async ({
       if (value !== undefined) {
         switch (key) {
           case "classId":
-            query.classId = (value);
+            query.classes = {some:{id:value}};
             break;
           case "teacherId":
             query.teacherId = value;
@@ -131,28 +131,46 @@ const ExamListPage = async ({
 
   // ROLE CONDITIONS
 
-  switch (currentUser?.role) {
-    case "Admin":
-      break;
+  switch(currentUser?.role){
+     case "Admin":
+       break;
      case "Teacher":
-       query.teacherId = currentUser?.id;
-       break;
-     case "Student":
-       query.class = {currentStudents:{some:{id:currentUser?.id}}};
-       break;
-     case "Parent":
-       query.class = {currentStudents:{some:{parentId:currentUser?.id}}};
-      break;
-    default:
-      break;
+        query.teacherId = currentUser?.id;
+        break;
+      case "Student":
+        query.classes = {some:{currentStudents:{some:{id:currentUser?.id}}}};
+        break;
+      case "Parent":
+        query.classes = {some:{currentStudents:{some:{parentId:currentUser?.id}}}};
+        break;
+     default:
+       break  
   }
+
 
   const [data, count] = await prisma.$transaction([
     prisma.exam.findMany({
       where: query,
       include: {
         teacher:true,
-        class:true,
+        classes:{
+          include:{
+            currentStudents:{
+              include:{
+                parent:true
+              }
+            }
+          }
+        },
+        session:{
+          include:{
+            sessionSequence:{
+              include:{
+                mestre:true
+              }
+            }
+          }
+        },
         subject:true,
         results:true,
         attendances:true
@@ -166,9 +184,9 @@ const ExamListPage = async ({
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Exams</h1>
+        <h1 className="hidden md:block text-lg font-semibold">{currentUser?.lang === "Français"?"Examens":"All Exams"}</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch />
+          <TableSearch  lang={currentUser?.lang? currentUser?.lang:"Français"}/>
           <div className="flex items-center gap-4 self-end">
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
@@ -186,7 +204,7 @@ const ExamListPage = async ({
        <Pagination page={p} count={count} /> </>}
        {
         data.length === 0 &&  
-            <EmptyComponent msg = {'No Data'} />
+            <EmptyComponent msg = {currentUser?.lang === "Français"?'Aucunes données':'No Data'} />
        }
     </div>
   );

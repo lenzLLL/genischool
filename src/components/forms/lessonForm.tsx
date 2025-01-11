@@ -73,6 +73,20 @@ const LessonForm = ({
       toast(`${user?.lang === "Français"? state.fr:state.eng}`);
     }
   }, [state, router, type, setOpen]);
+  useEffect(
+    ()=>{
+        setFinalSubjectData({id:data?.subject?.id as string,name:data?.subject.name as string})
+        setFinalTeacherData({id:data?.teacher?.id as string,username:data?.teacher.username as string})
+        for(let i = 0;i<data?.classes?.length;i++)
+        {  
+            setFinalClassesData([...finalClassesData,{id:data?.subject?.id as string,name:data?.subject.name as string}])
+        }
+        // setMestre({type:data?.session?.sessionSequence?.mestre?.type as string,id: data?.session?.sessionSequence?.mestre?.id,order:data?.session?.sessionSequence?.mestre?.order})
+        // setSessionSequence({type:data?.session?.sessionSequence?.type as string,id: data?.session?.sessionSequence?.id,order:data?.session?.sessionSequence?.order,mestreId:data?.session?.sessionSequence?.mestreId})
+        // setSession({id: data?.session?.id,title:data?.session?.title})
+        
+      },[data]
+  )
   const { classes,teachers,subjects } = relatedData;
   const handleChangeClass = (data: selectSchema[]) => {
     setFinalClassesData([])
@@ -122,7 +136,7 @@ const LessonForm = ({
           />
         )}
         <Select
-          onChange={(data:any)=>setFinalClassesData(data)}
+          onChange={(data:any)=>handleChangeClass(data)}
           className="w-full"
           getOptionLabel ={(classes:{name:string,id:string})=>classes.name}
           getOptionValue={(name:{name:string,id:string})=>name.id}

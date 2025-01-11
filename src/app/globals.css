@@ -73,6 +73,16 @@
 @tailwind components;
 @tailwind utilities;
 
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 8px; /* Largeur de la barre de défilement */
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color:#60A5FA; /* Couleur de la barre de défilement */
+        border-radius: 10px; /* Coins arrondis */
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: #e5e7eb; /* Couleur de la piste */
+    }
 .react-calendar {
   width: 100% !important;
   border: none !important;

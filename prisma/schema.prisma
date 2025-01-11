@@ -191,7 +191,6 @@ model SessionSequence  {
   mestre     Mestre      @relation(fields: [mestreId], references: [id])   
   sessions Session[] 
 }
-
 model Session {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   percentage Int
@@ -203,7 +202,6 @@ model Session {
 model Exam {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   startTime DateTime
-  type String
   credit Int @default(1)
   endTime   DateTime
   subjectId String @db.Uuid
@@ -211,8 +209,8 @@ model Exam {
   keys String[] @default([])
   teacherId   String @db.Uuid
   teacher     Teacher      @relation(fields: [teacherId], references: [id])
-  classId   String @db.Uuid
-  class     Class      @relation(fields: [classId], references: [id]) 
+  classes Class[]
+  type String
   subject   Subject   @relation(fields: [subjectId], references: [id])
   results  Result[]
   attendances Attendance[]
