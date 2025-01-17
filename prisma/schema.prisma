@@ -263,10 +263,8 @@ model Result {
 }
 model Attendance {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  date    DateTime
-  present Boolean
+  time BigInt
   studentId String @db.Uuid
-  deleted Boolean @default(false)
   student   Student @relation(fields: [studentId], references: [id])
   lessonId  String? @db.Uuid
   lesson    Lesson?  @relation(fields: [lessonId], references: [id])

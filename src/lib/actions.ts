@@ -3,6 +3,7 @@ import cloudinary from "cloudinary"
 import { revalidatePath } from "next/cache";
 import {
   AnnouncementSchema,
+  AttendanceSchema,
   ClassSchema,
   EventSchema,
   ExamSchema,
@@ -1148,3 +1149,67 @@ export const updateParent = async (
     return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
   }
 };
+export const createAttendance =  async (
+  data: AttendanceSchema
+) => {
+    try{
+        if(data.type){
+            if(data.examenId){
+                await prisma.attendance.create({
+                  data:{
+                    time:parseInt(data.time),
+                    studentId:data.studentId,
+                    examenId:data.examenId
+                  }
+                })
+            }
+            else{
+              await prisma.attendance.create({
+                data:{
+                  time:parseInt(data.time),
+                  studentId:data.studentId,
+                  lessonId:data.lessonId
+                }
+              })
+            }
+        }
+        else{
+          if(data.examenId){
+            await prisma.attendance.deleteMany({
+              where:{
+                studentId:data.studentId,
+                examenId:data.examenId
+              }
+            })
+          }
+          else{
+            await prisma.attendance.deleteMany({
+              where:{
+                studentId:data.studentId,
+                lessonId:data.lessonId
+              }
+            })
+          }
+        }
+    }
+    catch(error:any){
+           
+    }
+}
+
+export const getAllAttendances = async () => {
+  try{
+      const user = await getCurrentUser()
+      const attendances = await prisma.attendance.findMany({
+          where:{
+            student:{
+              schoolId: user.schoolId
+            }
+          }
+      })
+      return attendances 
+  }
+  catch(error:any){
+       
+  }
+}

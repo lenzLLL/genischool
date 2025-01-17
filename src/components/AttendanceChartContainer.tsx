@@ -11,17 +11,18 @@ const AttendanceChartContainer = async () => {
 
   lastMonday.setDate(today.getDate() - daysSinceMonday);
 
-  const resData = await prisma.attendance.findMany({
-    where: {
-      date: {
-        gte: lastMonday,
-      },
-    },
-    select: {
-      date: true,
-      present: true,
-    },
-  });
+  // const resData = await prisma.attendance.findMany({
+  //   where: {
+  //     date: {
+  //       gte: lastMonday,
+  //     },
+  //   },
+  //   select: {
+  //     date: true,
+  //     present: true,
+  //   },
+  // });
+  const resData:any = []
 
   // console.log(data)
 

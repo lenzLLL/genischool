@@ -48,3 +48,21 @@ export const adjustScheduleToCurrentWeek = (
     };
   });
 };
+
+export function millisecondsToHoursMinutes(milliseconds:string) {
+  // Convertir les millisecondes en secondes
+  let message =""
+  const seconds = parseInt(milliseconds)/ 1000;
+  
+  // Calculer les heures et les minutes
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if(hours>0){
+    message += hours+"h"
+  }
+  if(minutes>0){
+    message += minutes+"min"
+  }
+  return message ;
+}
+

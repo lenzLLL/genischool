@@ -139,6 +139,15 @@ export const parentSchema = z.object({
    //teacher ids
 });
 export type ParentSchema = z.infer<typeof parentSchema>;
-
+export const attendanceSchema = z.object({
+  id: z.coerce.string().optional(),
+  time: z.coerce.string(),
+  type:z.boolean(),
+  studentId: z.string(),
+  lessonId:z.string().optional(),
+  examenId:z.string().optional(),
+   //teacher ids
+});
+export type AttendanceSchema = z.infer<typeof attendanceSchema>
 
 
