@@ -47,7 +47,6 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
   const [isLoading,setIsLoading] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  const [attendances,setAttendaces] = useState<AttendanceSchema[]>([])
   const [isPending,startTransition] = useTransition()
   const addSearch = () => {
       setIsLoading(true)
@@ -79,13 +78,13 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
     })  
   const params = new URLSearchParams(searchParams.toString()); 
   const currentQuery = Object.fromEntries(searchParams.entries());
-  const {fixAttendace,isSaving,initData} = useAttendance()
+  const {fixAttendace,isSaving,attendances,setAttendances,getAttendances} = useAttendance()
   const addAttendance = (s:Student,isChecked:boolean|string) => {
 
     if(isChecked){
         if(attendances.find(a=>a.studentId === s.id))
         {
-          setAttendaces(prevTableau => 
+          setAttendances(prevTableau => 
             prevTableau.map(item => 
                 item.studentId === s.id ? { ...item, type: true } : item
             )
@@ -93,7 +92,7 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
         }
         else
         {
-        setAttendaces([...attendances,{
+        setAttendances([...attendances,{
         time:'2000' ,
         type:isChecked as boolean,
         studentId:s.id,
@@ -105,7 +104,7 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
   else{
     if(attendances.find(a=>a.studentId === s.id))
       {
-        setAttendaces(prevTableau => 
+        setAttendances(prevTableau => 
           prevTableau.map(item => 
               item.studentId === s.id ? { ...item, type: false } : item
           )
@@ -113,7 +112,7 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
       }
       else
       {
-      setAttendaces([...attendances,{
+      setAttendances([...attendances,{
       time:'2000' ,
       type:false,
       studentId:s.id,
@@ -122,9 +121,9 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
     }])
     }
   }
-
+  
 }
-  useEffect(
+useEffect(
     ()=>{
         const currentQuery = Object.fromEntries(searchParams.entries());
         setSearchTerm(currentQuery.search)
@@ -153,6 +152,10 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
               const totalTime = s.attendances.reduce((sum, attendance) => {
                 return sum + Number(attendance.time); // Assurez-fvous de convertir en Number si nécessaire
               }, 0);
+            let exam =  currentQuery.exam
+            let lesson =  currentQuery.lesson
+            let isCheckedExam = (exam && attendances.find((a)=>a.examenId === exam && a.studentId === s.id))? true:false
+            let isCheckedLesson = (lesson && attendances.find((a)=>a.lessonId === lesson && a.studentId === s.id))? true:false
             return(
             <Card className='mb-2 p-6 flex items-center justify-between'>
                         <div  className='flex items-center gap-2'>
@@ -169,7 +172,7 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
                         </div>
                         </div>
                         <div className="flex items-center space-x-2 cursor-pointer">
-                            <Checkbox disabled = {!(currentQuery.lesson || currentQuery.exam)} onCheckedChange={(e)=>addAttendance(s,e)} id={s.id} />
+                            <Checkbox     disabled = {!(currentQuery.lesson || currentQuery.exam)} onCheckedChange={(e)=>addAttendance(s,e)} id={s.id} />
                            <label
                               htmlFor={s.id}
                                className="text-sm cursor-pointer font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"

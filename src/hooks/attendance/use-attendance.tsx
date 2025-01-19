@@ -22,24 +22,26 @@ export const useAttendance = () => {
     const getAttendances = async () => {
         try{
             const data = await getAllAttendances()||[]
+            setAttendances([])
             for(let i = 0;i<data.length;i++){
-                setAttendances([...attendances,{  id:data[i].id,
+                setAttendances((state)=>[...state,{  id:data[i].id,
                   time:data[i].time.toString(),
                   type:true,
                   studentId:data[i].studentId,
                   lessonId:data[i].lessonId||"",
                   examenId:data[i].examenId||""}])
             }
-
+            
+            
         }
         catch(error:any){
             return {status:500}
         }
     }
-    useEffect(
-        ()=>{
-            getAttendances()  
-        },[isSaving]
-    )
-    return {isSaving,fixAttendace,initData:attendances}
+    // useEffect(
+    //     ()=>{
+    //         getAttendances()  
+    //     },[isSaving]
+    // )
+    return {isSaving,fixAttendace,setAttendances,attendances,getAttendances}
 }
