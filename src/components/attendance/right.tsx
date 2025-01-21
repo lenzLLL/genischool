@@ -1,5 +1,5 @@
 "use client"
-import React,{useEffect, useState, useTransition} from 'react'
+import React,{useEffect,useRef,useState, useTransition} from 'react'
 import Image from 'next/image'
 import {
     Select,
@@ -31,7 +31,7 @@ import { Label } from '../ui/label'
 import { Separator } from '@radix-ui/react-select'
 import { Checkbox } from '../ui/checkbox'
 import { Attendance, Class, Exam, Lesson, Student } from '@prisma/client'
-import { LibraryBig, SaveAll } from 'lucide-react'
+import { LibraryBig, RefreshCcw, SaveAll } from 'lucide-react'
 import { millisecondsToHoursMinutes } from '@/lib/utils'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
@@ -47,8 +47,13 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
   const [isLoading,setIsLoading] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
+  const [currentUserId,setCurrentUserId] = useState<string>("")
+  const [currentValue,setCurrentValue] = useState<string>("")
+  const [isHover,setIsHover] = useState<boolean>(false)
+
   const [isPending,startTransition] = useTransition()
   const addSearch = () => {
+      
       setIsLoading(true)
       const params = new URLSearchParams(searchParams.toString()); 
         
@@ -75,26 +80,42 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
       formState: { errors },
     } = useForm<ExamSchema>({
       resolver: zodResolver(attendanceSchema),
-    })  
+    })
+
   const params = new URLSearchParams(searchParams.toString()); 
   const currentQuery = Object.fromEntries(searchParams.entries());
+  const deleteSearch = () =>{
+    setIsLoading(true) 
+    setSearchTerm("")
+     delete currentQuery.search
+     // Construire la nouvelle URL avec les paramètres mis à jour
+     const newSearch = new URLSearchParams(currentQuery).toString();
+     const newUrl = `${pathname}?${newSearch}`;
+     // Pousser la nouvelle route avec l'URL complète
+     router.push(newUrl);
+  }  
   const {fixAttendace,isSaving,attendances,setAttendances,getAttendances} = useAttendance()
-  const addAttendance = (s:Student,isChecked:boolean|string) => {
-
-    if(isChecked){
-        if(attendances.find(a=>a.studentId === s.id))
+  const addAttendance = (s:Student,isChecked:string,item:string,time:number) => {
+    if(!(currentQuery.time&&(currentQuery.exam||currentQuery.lesson))){
+      toast("Veillez choisir une lesson ou un examen avant toute opération!")
+      return
+    }
+    if(isChecked === "a"){
+        setCurrentValue("a")
+        if(attendances.find(a=>a.studentId === s.id&&(a.examenId === item||a.lessonId === item)))
         {
           setAttendances(prevTableau => 
-            prevTableau.map(item => 
-                item.studentId === s.id ? { ...item, type: true } : item
+            prevTableau.map(i => 
+              (i.studentId === s.id&&(i.examenId === item||i.lessonId === item)) ? { ...i, type: true } : i
             )
         );
         }
         else
         {
+
         setAttendances([...attendances,{
-        time:'2000' ,
-        type:isChecked as boolean,
+        time:currentQuery.time ,
+        type:true,
         studentId:s.id,
         ...(currentQuery.lesson && {lessonId:currentQuery.lesson}),
         ...(currentQuery.exam && {examenId:currentQuery.exam}),  
@@ -102,11 +123,12 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
       }
   }
   else{
-    if(attendances.find(a=>a.studentId === s.id))
+    setCurrentUserId("p")
+    if(attendances.find(a=>a.studentId === s.id&&(a.examenId === item||a.lessonId === item)))
       {
         setAttendances(prevTableau => 
-          prevTableau.map(item => 
-              item.studentId === s.id ? { ...item, type: false } : item
+          prevTableau.map(i => 
+            (i.studentId === s.id&&(i.examenId === item||i.lessonId === item)) ? { ...i, type: false } : i
           )
       );
       }
@@ -122,18 +144,19 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
     }
   }
   
+  // setTimeout(()=>{fixAttendace(attendances)},1500)
 }
 useEffect(
     ()=>{
         const currentQuery = Object.fromEntries(searchParams.entries());
         setSearchTerm(currentQuery.search)
         setIsLoading(false)
-    },[students,searchParams]
+    },[students,searchParams,currentValue]
   )
   
   return (
     <Card className='col-span-6 bg-white  p-5 rounded-lg '>
-            <Tabs>
+            <Tabs defaultValue='1'>
             <TabsList className="grid w-full grid-cols-5 mb-5">
               <TabsTrigger value="1">Tout</TabsTrigger>
               <TabsTrigger value="2">0h-5h</TabsTrigger>
@@ -141,24 +164,31 @@ useEffect(
               <TabsTrigger value="4">11h-15h</TabsTrigger>
               <TabsTrigger value="5">16h et plus</TabsTrigger>
             </TabsList>
-        <div className='flex items-center gap-3 mb-5'>
+            <div className='flex items-center gap-3 mb-5'>
           <Input value={searchTerm} onChange = {(e)=>setSearchTerm(e.target.value)} placeholder="veillez entrer le nom d'un étudiant"/>
+           {    currentQuery.search &&      <div onClick={deleteSearch} className='w-10 h-9 cursor-pointer flex items-center justify-center px-2 rounded-md bg-gray-100'>
+            <RefreshCcw/>
+          </div>}
           <button onClick={addSearch} className={`bg-blue-400 text-sm text-white flex items-center justify-center p-2 rounded-md`}>
               Rechercher
           </button>
+
         </div>
+        <TabsContent value="1">
         <div className='overflow-y-scroll pr-2 h-[100vh] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-300'>
           {!isLoading ? <><div className='relative'>{students.map((s)=>{
               const totalTime = s.attendances.reduce((sum, attendance) => {
+                let add = attendance.examenId? 0:Number(attendance.time)
                 return sum + Number(attendance.time); // Assurez-fvous de convertir en Number si nécessaire
               }, 0);
             let exam =  currentQuery.exam
             let lesson =  currentQuery.lesson
-            let isCheckedExam = (exam && attendances.find((a)=>a.examenId === exam && a.studentId === s.id))? true:false
-            let isCheckedLesson = (lesson && attendances.find((a)=>a.lessonId === lesson && a.studentId === s.id))? true:false
+            let isCheckedExam = (exam && attendances.find((a)=>a.examenId === exam && a.studentId === s.id && a.type))? true:false
+            let isCheckedLesson = (lesson && attendances.find((a)=>a.lessonId === lesson && a.studentId === s.id && a.type))? true:false
             return(
-            <Card className='mb-2 p-6 flex items-center justify-between'>
+            <Card onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
                         <div  className='flex items-center gap-2'>
+                            {attendances.length}
                         <Image
                           src={s.img || "/noAvatar.png"}
                           alt=""
@@ -168,17 +198,32 @@ useEffect(
                         />
                         <div className='flex flex-col'>
                           <h2 className='text-md text-black-900'>{s.username}</h2>
-                          <p className='text-gray-400 text-[13px]'>{totalTime === 0? "0h d'absence":millisecondsToHoursMinutes(s.totalTime.toString())}</p>
+                          <p className='text-gray-400 text-[13px]'>{totalTime === 0? "pas d'absence":millisecondsToHoursMinutes(s.totalTime.toString())}</p>
                         </div>
                         </div>
-                        <div className="flex items-center space-x-2 cursor-pointer">
-                            <Checkbox     disabled = {!(currentQuery.lesson || currentQuery.exam)} onCheckedChange={(e)=>addAttendance(s,e)} id={s.id} />
-                           <label
-                              htmlFor={s.id}
-                               className="text-sm cursor-pointer font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                               >
-                                    marquer comme absent
-                               </label>
+                        <div  className="flex items-center space-x-2 cursor-pointer">
+                         {!(isHover&&currentUserId === s.id) ?                        <Select    value={((isCheckedExam||isCheckedLesson)?"a":"p")}   onValueChange={(e)=>{addAttendance(s,e,exam||lesson,totalTime)}}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Statut" />
+                             </SelectTrigger>
+                             <SelectContent>
+                                 <SelectGroup>
+                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="a">Absent</SelectItem>
+                                 </SelectGroup>
+                             </SelectContent>
+                        </Select>:
+                                               <Select  disabled = {!(currentQuery.time&&(exam||lesson))}      onValueChange={(e)=>{addAttendance(s,e,exam||lesson,totalTime)}}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Statut"  />
+                             </SelectTrigger>
+                             <SelectContent>
+                                 <SelectGroup>
+                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="a">Absent</SelectItem>
+                                 </SelectGroup>
+                             </SelectContent>
+                        </Select>}
                          </div>
             </Card>
           )})}
@@ -194,10 +239,12 @@ useEffect(
     
           </>:
           <div className='flex w-full items-center justify-center mt-24'>
-          < div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
+          < div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
           </div>
           }
         </div>
+        </TabsContent>
+        
        </Tabs>   
     </Card>
   )

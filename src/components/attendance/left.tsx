@@ -58,7 +58,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
   // Ajouter ou mettre à jour le paramètre de date
 
 
-  const fixSelectedLesson = (id:string) => {
+  const fixSelectedLesson = (id:string,time:number) => {
       setSelectedLesson(id)
       setSelectedExamen("")
       const currentQuery = Object.fromEntries(searchParams.entries());
@@ -66,6 +66,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
         delete currentQuery.exam
       }
       currentQuery.lesson = id
+      currentQuery.time = time.toString()
       const newSearch = new URLSearchParams(currentQuery).toString();
       const newUrl = `${pathname}?${newSearch}`;
 
@@ -73,7 +74,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
       router.push(newUrl);
   }
 
-  const fixSelectedExamen = (id:string) => {
+  const fixSelectedExamen = (id:string,time:number) => {
     setSelectedExamen(id)
     setSelectedLesson("") 
     const currentQuery = Object.fromEntries(searchParams.entries());
@@ -81,6 +82,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
       delete currentQuery.lesson
     }
     currentQuery.exam = id
+    currentQuery.time = time.toString()
     const newSearch = new URLSearchParams(currentQuery).toString();
     const newUrl = `${pathname}?${newSearch}`;
     // Pousser la nouvelle route avec l'URL complète
@@ -202,7 +204,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
       <TabsContent value="account" >
         <div className='h-[100vh] p-2 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-300'>
 
-      {  !isLoading?    <>{      data1.length>0 && data1.map((d)=>(    <Card onClick={()=>fixSelectedLesson(d.id)}  key={d.id} className='p-5 mb-2  cursor-pointer relative'>
+      {  !isLoading?    <>{      data1.length>0 && data1.map((d)=>(    <Card onClick={()=>fixSelectedLesson(d.id,d.endTime.getTime()-d.startTime.getTime())}  key={d.id} className='p-5 mb-2  cursor-pointer relative'>
           {(selectedLesson === d.id) && <CircleCheck className='absolute text-green-600 top-2 right-5'/>}
             <div className='flex justify-start gap-3 items-center'>
             <CardTitle className='text-md flex items-center gap-2'><BookOpenCheck size={20} />{d.subject.name}</CardTitle>
@@ -227,7 +229,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
       <TabsContent value="password">
       <div className='h-[100vh] p-2 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-300'>
 
-{      data2.length>0 && data2.map((d)=>(    <Card onClick={()=>fixSelectedExamen(d.id)}  key={d.id} className='p-5 mb-2 relative  cursor-pointer'>
+{      !isLoading? <>{ data2.length>0 && data2.map((d)=>(    <Card onClick={()=>fixSelectedExamen(d.id,d.endTime.getTime()-d.startTime.getTime())}  key={d.id} className='p-5 mb-2 relative  cursor-pointer'>
         {selectedExamen === d.id && <CircleCheck className='absolute text-green-600 top-2 right-5'/>}
        
        <div className='flex justify-start gap-3 items-center'>
@@ -244,8 +246,12 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
    
    data2.length === 0  && <div className='flex justify-center flex-col items-center mt-32'> <CircleOff size={50} color='#555' /> Aucune donnée</div>       
    
-   }
-   </div>      </TabsContent>
+   }</>:      <div className='flex w-full items-center justify-center mt-24'>
+   < div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+   </div>}
+   </div>   
+   
+   </TabsContent>
     </Tabs>
     </Card>
   )

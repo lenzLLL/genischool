@@ -2,10 +2,16 @@
 import { createAttendance, getAllAttendances } from "@/lib/actions"
 import { AttendanceSchema } from "@/lib/formValidationSchemas"
 import React,{useState,useEffect} from "react"
+import { useCallback } from "react"
+import { useRouter } from "next/navigation"
 export const useAttendance = () => {
     const [isSaving,setIsSaving] = useState(false)
+    const router = useRouter()
     const [attendances,setAttendances] = useState<AttendanceSchema[]>([])
-    const fixAttendace = async (attendaces:AttendanceSchema[]) => {
+    const fixAttendace = useCallback(async (attendaces:AttendanceSchema[]) => {
+        if(isSaving){
+            return
+        }
         try{
             setIsSaving(true)
             for(let i =0;i<attendaces.length;i++){
@@ -18,7 +24,7 @@ export const useAttendance = () => {
             setIsSaving(false)
             return {status:500}
         }
-    }
+    },[isSaving])
     const getAttendances = async () => {
         try{
             const data = await getAllAttendances()||[]
@@ -27,21 +33,23 @@ export const useAttendance = () => {
                 setAttendances((state)=>[...state,{  id:data[i].id,
                   time:data[i].time.toString(),
                   type:true,
+                  create:false,
                   studentId:data[i].studentId,
                   lessonId:data[i].lessonId||"",
                   examenId:data[i].examenId||""}])
             }
-            
+
+            router.refresh()
             
         }
         catch(error:any){
             return {status:500}
         }
     }
-    // useEffect(
-    //     ()=>{
-    //         getAttendances()  
-    //     },[isSaving]
-    // )
+     useEffect(
+         ()=>{
+             getAttendances()  
+         },[isSaving]
+     )
     return {isSaving,fixAttendace,setAttendances,attendances,getAttendances}
 }

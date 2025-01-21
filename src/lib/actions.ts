@@ -1155,6 +1155,13 @@ export const createAttendance =  async (
     try{
         if(data.type){
             if(data.examenId){
+                const verify = await prisma.attendance.findFirst({
+                  where:{
+                    studentId:data.studentId,
+                    examenId:data.examenId
+                  }
+                })
+                if(verify){return}
                 await prisma.attendance.create({
                   data:{
                     time:parseInt(data.time),
@@ -1164,6 +1171,13 @@ export const createAttendance =  async (
                 })
             }
             else{
+              const verify = await prisma.attendance.findFirst({
+                where:{
+                  studentId:data.studentId,
+                  lessonId:data.lessonId
+                }
+              })
+              if(verify){return}
               await prisma.attendance.create({
                 data:{
                   time:parseInt(data.time),
