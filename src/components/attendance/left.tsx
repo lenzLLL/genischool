@@ -130,7 +130,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
      
   }  ,[classId,searchParams])
   const onSetClassId = (id:string)=>{
-    setSecondClass(id)
+    // setSecondClass(id)
     setClassId(id)
   }
   useEffect(
