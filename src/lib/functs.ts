@@ -35,6 +35,7 @@ export const toLogin =  async ({data}:{data:AuthSchema}) => {
         const role = data.role? data.role:""
         cookieStore.set("auth",res.id,{expires:new Date(new Date().getTime() + 1000 * 60 * 60 * 24)})
         cookieStore.set("role",role,{expires:new Date(new Date().getTime() + 1000 * 60 * 60 * 24)})
+        cookieStore.set("current",current.id,{expires:new Date(new Date().getTime() + 1000 * 60 * 60 * 24)})
         cookieStore.set("school",data.schoolId,{expires:new Date(new Date().getTime() + 1000 * 60 * 60 * 24)})
         return {error:null,route}
      }
@@ -63,16 +64,23 @@ export const toLogin =  async ({data}:{data:AuthSchema}) => {
      const role = cookieStore.get("role")?.value
      const school = cookieStore.get("school")?.value
      const id = cookieStore.get("auth")?.value
+     const current = cookieStore.get("current")?.value
      let user = null
      if(role === "Administrateur"){
          user = await prisma.admin.findUnique({where:{id},include:{school:true}})
          if(!user){
              redirect("/sign-in")
          }
-         const response:AuthSchema = {lang:user.school.lang,email:user.email,role:"Admin",fullname:user.username,id:user.id,schoolId:user.schoolId,password:"",matricule:""}
+         const response:AuthSchema = {
+            lang: user.school.lang, email: user.email, role: "Admin", fullname: user.username, id: user.id, schoolId: user.schoolId, password: "", matricule: "",
+            currentSchoolYear: current? current:""
+         }
          return response                 
      }
-     const response:AuthSchema = {lang:"", email:"",role:"",fullname:"",id:"",schoolId:"",password:"",matricule:""}
+     const response:AuthSchema = {
+        lang: "", email: "", role: "", fullname: "", id: "", schoolId: "", password: "", matricule: "",
+        currentSchoolYear: current? current:""
+     }
      return response
 
  }

@@ -1,11 +1,11 @@
 "use client"
 import React,{useState} from 'react'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { Class, School, Subject } from '@prisma/client'
+import { Class, Mestre, School, Schoolyear, Session, SessionSequence, Subject } from '@prisma/client'
 import { AuthSchema } from '@/lib/schemas'
 import { TableResult } from './result-table'
 
-export default function ResultComponent({classes,subjects,user,school}:{school:School|null,user:AuthSchema, classes:Class[],subjects:Subject[]}) {
+export default function ResultComponent({classes,subjects,user,school,current}:{current:Schoolyear&{semestres:(Mestre&{session:(SessionSequence&{sessions:Session[]})[]})[]}|null,school:School|null,user:AuthSchema, classes:Class[],subjects:Subject[]}) {
   const [classId,setClassId] = useState<string>("")
   const [subjectId,setSubjectId] = useState<string>("")
   return (
@@ -56,7 +56,7 @@ export default function ResultComponent({classes,subjects,user,school}:{school:S
     </Select>
 
         </div>
-        <TableResult school = {school} user={user}/>
+        <TableResult  user={user}/>
     </div>
   )
 }

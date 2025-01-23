@@ -1210,7 +1210,6 @@ export const createAttendance =  async (
            
     }
 }
-
 export const getAllAttendances = async () => {
   try{
       const user = await getCurrentUser()

@@ -37,7 +37,12 @@ export default function AuthForm({school}:{school:School[]}) {
     //     }
     // }
     const submit  = async () =>{
-        const r = await toLogin({data:{email,password,matricule,role,schoolId:institut}}) 
+        const r = await toLogin({data:{
+            email, password, matricule, role, schoolId: institut, fullname: null,
+            currentSchoolYear: null,
+            id: null,
+            lang: null
+        }}) 
         if(r.error){
             toast(r.error)    
         }else if(r.route){

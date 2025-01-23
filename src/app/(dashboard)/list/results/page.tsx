@@ -26,16 +26,31 @@ export default async function page({
       schoolId:currentUser.schoolId,
     }
   })
-
+  const currentYear = await prisma.schoolyear.findUnique({
+    include:{
+        semestres:{
+          include:{
+            session:{
+              include:{
+                sessions:true
+              }
+            }
+          }
+        }  
+    },
+    where:{id:currentUser.currentSchoolYear? currentUser.currentSchoolYear:""}})
   const school = await prisma.school.findUnique({
     where:{ 
         id:currentUser?.schoolId
+    },
+    include:{
+      schoolyears:true,  
     }
   })
   
   return (
     <div className='gap-5 p-5'>
-        <ResultComponent school = {school} user = {currentUser} subjects = {subjects} classes={classes}/>
+        <ResultComponent current = {currentYear} school = {school} user = {currentUser} subjects = {subjects} classes={classes}/>
     </div>
   )
 }
