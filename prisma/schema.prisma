@@ -252,7 +252,7 @@ model HistoriqueFees {
 
 model Result {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  score Int
+  rating Int
   examId       String? @db.Uuid
   exam         Exam?       @relation(fields: [examId], references: [id])
   studentId    String @db.Uuid

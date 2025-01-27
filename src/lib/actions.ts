@@ -1226,3 +1226,19 @@ export const getAllAttendances = async () => {
        
   }
 }
+export const getResultStudent = async ({classId}:{classId:string})=> {
+  try{
+      const r = await prisma.student.findMany({
+        where:{
+          currentClass:{
+            id:classId
+          }
+        }
+      })
+      return {status:200,data:r} 
+  }
+  catch(error:any){
+    return {status:200,data:null} 
+      
+  }
+}

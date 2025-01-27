@@ -58,7 +58,46 @@
     --chart-5: 340 75% 55%;
   }
 }
-
+.pagination{
+margin-bottom: 2rem;
+display: flex;
+flex-direction: row;
+justify-content: center;
+list-style-type: none;
+padding: 0 5rem;
+margin: 30px 0;
+gap:"5px";
+background-color: white;
+}
+.pagination li a {
+  border-radius: 7px;
+  padding: 0.1rem 1rem;
+  border: gray 1px solid;
+  margin: 0 3px;
+  cursor: pointer;
+}
+.pagination li.previous a,
+.pagination li.next a,
+.pagination li.break a {
+  border-color: transparent;
+  border: 1px solid gray;
+}
+.pagination li.active a{
+  background-color: yellow !important;
+}
+.pagination li.active a {
+  background-color: #0366d6 !important;
+  border-color: transparent;
+  color: white;
+  min-width: 32px;
+}
+.pagination li.disabled a {
+  color: grey;
+}
+.pagination li.disable,
+.pagination li.disabled a {
+  cursor: default;
+}
 @layer base {
   * {
     @apply border-border;
