@@ -1,5 +1,5 @@
 "use client"
-import React,{useState,useEffect} from 'react'
+import React,{useState,useEffect,useCallback} from 'react'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Class, Mestre, School, Schoolyear, Session, SessionSequence, Subject } from '@prisma/client'
 import { AuthSchema } from '@/lib/schemas'
@@ -14,6 +14,8 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
   const [mesterId,setMesterId] = useState<string>("")
   const [isLoading,setIsLoading] = useState<boolean>(false)
   const [sequenceId,setSequenceId] = useState<string>("")
+  const [sessions,setSession] = useState()
+
   const params = new URLSearchParams(searchParams.toString()); 
   const currentQuery = Object.fromEntries(searchParams.entries());
   let msg1 = current?.semestres[0].type === "Semestre"? "Semestre":"Trimestre"
@@ -22,12 +24,29 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
     const changeClass = (value:string) => {
       setClassId(value)
     }
-
+    const changeMestre = (value:string) => {
+      setMesterId(value)
+      if(msg1 = "Semestre"){
+        setSequenceId(current?.semestres.filter((s)=>s.id === value)[0].session[0].id||"")
+      }
+    }
+    const getCurrentSession =  useCallback(
+      ()=>{
+          const semester = current?.semestres.find(s=>s.id === mesterId)
+          const sequence = semester?.session.find((s:any)=>s?.id === sequenceId)
+          alert(JSON.stringify(sequence))
+      },[sequenceId,mesterId]
+    )
+  useEffect(
+    ()=>{
+        getCurrentSession() 
+    },[sequenceId,mesterId]
+  )
   return (
     <div className='p-5 min-h-screen w-full bg-white rounded-lg'>
         <h1 className="hidden md:block text-lg font-semibold mb-2">{  user?.lang === "Français"?"Résultats": 'Results'}</h1>
         <div className='flex justify-between items-center gap-5'>
-        <Select value = {mesterId} onValueChange={(e)=>setMesterId(e)} >
+        <Select value = {mesterId} onValueChange={(e)=>changeMestre(e)} >
     <SelectTrigger className="w-full">
       <SelectValue placeholder={user?.lang === "Français"? `Selectionnez un ${msg1}`:`Select a ${msg2}`} />
     </SelectTrigger>
@@ -89,7 +108,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
     </Select>
 
         </div>
-        <TableResult classId = {classId} subjectId = {subjectId} mesterId = {mesterId} sequenceId = {sequenceId}   user={user}/>
+        <TableResult current = {current} sequenceId = {sequenceId} classId = {classId} subjectId = {subjectId} mesterId = {mesterId}    user={user}/>
     </div>
   )
 }

@@ -607,6 +607,11 @@ export const createSchoolYear = async (
         schoolId:data.schoolId
       }
     })
+    const sessions = await prisma.defaultSession.findMany({
+      where:{
+        schoolId:data.schoolId
+      }
+    })
     const sy = await prisma.schoolyear.create({
       data:{
            school:{
@@ -645,9 +650,26 @@ export const createSchoolYear = async (
                 }
             })  
 
+
+            let total = 0
+            for(let i = 0;i<sessions.length;i++){
+               total += sessions[i].precentage
+              await prisma.session.create({
+                data:{
+                  percentage:sessions[i].precentage,
+                  sessionSequence:{
+                    connect:{
+                      id:ss.id
+                    }
+                  
+                  },
+                  title:sessions[i].title
+                }
+              })
+            }
             await prisma.session.create({
               data:{
-                percentage:100,
+                percentage:total,
                 sessionSequence:{
                   connect:{
                     id:ss.id
@@ -660,6 +682,7 @@ export const createSchoolYear = async (
             
         }         
     }else{
+        let current = 0;
         for(let i =0;i<3;i++){
           const r = await prisma.mestre.create({
             data:{
@@ -673,11 +696,11 @@ export const createSchoolYear = async (
             }  
           })
          for(let i = 0;i<2;i++){
-               
+          current++    
           const ss = await prisma.sessionSequence.create({
             data:{
                 type:"Séquence",
-                order:i+1,
+                order:current,
                 mestre:{
                   connect:{
                     id:r.id
@@ -686,16 +709,32 @@ export const createSchoolYear = async (
             }
         })
         
+        let total = 0
+        for(let i = 0;i<sessions.length;i++){
+           total += sessions[i].precentage
+          await prisma.session.create({
+            data:{
+              percentage:sessions[i].precentage,
+              sessionSequence:{
+                connect:{
+                  id:ss.id
+                }
+              
+              },
+              title:sessions[i].title
+            }
+          })
+        }
         await prisma.session.create({
           data:{
-            percentage:100,
+            percentage:total,
             sessionSequence:{
               connect:{
                 id:ss.id
               }
             
             },
-            title:"Session Principale"
+            title:"Session Normale"
           }
         })  
         }

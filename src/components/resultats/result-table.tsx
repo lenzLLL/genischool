@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import  React,{useState,useEffect} from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -23,19 +23,14 @@ import { useResult } from "@/hooks/result/use-result"
 import EmptyComponent from "../emptyComponent"
 import Table from "../Table"
 import FormContainer from "../FormContainer"
-import { Student } from "@prisma/client"
+import { Mestre, Schoolyear, Session, SessionSequence, Student } from "@prisma/client"
 import Secondpagination from "../pagination2"
 
 type StudentItem = Student
 
-export function TableResult({user,classId,sequenceId,mesterId,subjectId}:{classId:string,sequenceId:string,mesterId:string,subjectId:string, user:AuthSchema}) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
+export function TableResult({user,classId,sequenceId,mesterId,subjectId,current}:{current:Schoolyear&{semestres:(Mestre&{session:(SessionSequence&{sessions:Session[]})[]})[]}|null,classId:string,sequenceId:string,mesterId:string,subjectId:string, user:AuthSchema}) {
+  const {students,setIsChanging,isChanging,allStudents}  = useResult({classe:classId,sequence:sequenceId,mestre:mesterId,subject:subjectId})
 
-  const {students,setIsChanging,isChanging}  = useResult({classe:classId,sequence:sequenceId,mestre:mesterId,subject:subjectId})
- 
   if(isChanging){
     return   <div className='flex w-full items-center justify-center mt-24'>
     < div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -72,7 +67,7 @@ export function TableResult({user,classId,sequenceId,mesterId,subjectId}:{classI
   return (
     <div className="w-full mt-14">
       <Table columns={columns} renderRow={renderRow} data={students} /> 
-      <Secondpagination itemsPerPage={10} itemsCount={50}/>
+      <Secondpagination itemsPerPage={1} itemsCount={allStudents?.length}/>
     </div>
   )
 }

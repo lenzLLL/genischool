@@ -7,6 +7,7 @@ export default function Secondpagination({itemsPerPage,itemsCount}:{itemsPerPage
   const searchParams = useSearchParams();
   const pathname = usePathname(); 
   const currentQuery = Object.fromEntries(searchParams.entries());
+  const initPage = currentQuery.endOffset? Math.floor(parseInt(currentQuery.endOffset)/itemsCount):0
   const router = useRouter()
     const handlePageClick = (event:any) => {
         const newOffset = (event.selected * itemsPerPage) % itemsCount;
@@ -22,6 +23,7 @@ export default function Secondpagination({itemsPerPage,itemsCount}:{itemsPerPage
     previousLabel="previous"
     nextLabel="next"
     breakLabel="..."
+    initialPage={initPage}
     breakClassName="page-item"
     breakLinkClassName="page-link"
     pageCount={pageCount}

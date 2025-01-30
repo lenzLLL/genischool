@@ -17,25 +17,7 @@ export default function AuthForm({school}:{school:School[]}) {
     const [institut,setInstitut] = useState("Choisir un établissement")
     const [role,setRole] = useState("Rôle")
     const router = useRouter()
-    // const signIn = async () => {
-    //     if(!email || !password){
-    //     alert("Error, empty fields!")
-
-    //     }    
-    //     const r = await toLogin({email,password})
-        
-    //     if(r){
-    //        if(r.email ="owner@gmail.com"){
-    //            router.push("/owner")
-    //        }
-    //        else if(r.schools[0]?.role === "a") {
-    //             router.push("/admin")            
-    //         }           
-    //     }
-    //     else{
-    //         alert("Error")
-    //     }
-    // }
+ 
     const submit  = async () =>{
         const r = await toLogin({data:{
             email, password, matricule, role, schoolId: institut, fullname: null,
