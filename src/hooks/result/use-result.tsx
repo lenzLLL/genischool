@@ -1,13 +1,24 @@
-import { getResultStudent } from "@/lib/actions"
-import { Student } from "@prisma/client"
+import { getResult, getResultStudent } from "@/lib/actions"
+import prisma from "@/lib/prisma"
+import { Result, Student } from "@prisma/client"
 import { usePathname, useSearchParams } from "next/navigation"
 import React,{useEffect,useState,useCallback} from "react"
 import { toast } from "react-toastify"
 export const useResult = ({classe,subject,mestre,sequence}:{classe:string,subject:string,mestre:string,sequence:string})=>{
-    const [students,setStudents] = useState<any>([])
+  const [students,setStudents] = useState<any>([])
+  const [results,setResults] = useState<any>([])
+  const [newResults,setNewResults] = useState<Result[]>([])
   const searchParams = useSearchParams();
   const currentQuery = Object.fromEntries(searchParams.entries());
-
+  const getResults = async () => {
+    try{
+        const r = await getResult({classId:classe,subjectId:subject,sessionId:sequence})
+        setResults(r.data) 
+    }
+    catch(error:any){
+        alert(error.message)
+    }
+  }
  
     const [allStudents,setAllStudents] = useState<any>([])
     const [isChanging,setIsChanging] = useState<boolean>(false)
@@ -27,13 +38,17 @@ export const useResult = ({classe,subject,mestre,sequence}:{classe:string,subjec
     }
     useEffect(
         ()=>{
-          
             if(classe){
                 getCurrentUser()
             }
-
-         
         },[classe,searchParams]
     )
-    return {students,setIsChanging,isChanging,getCurrentUser,allStudents}
+    useEffect(
+        ()=>{
+            if(classe && subject && sequence){
+                getResults()
+            }    
+        },[classe,subject,sequence]
+    )
+    return {students,setIsChanging,isChanging,getCurrentUser,allStudents,setNewResults,results}
 }

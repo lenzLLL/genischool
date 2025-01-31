@@ -279,7 +279,6 @@ model Attendance {
   examenId String? @db.Uuid
   examen Exam? @relation(fields: [examenId],references:[id])
 }
-
 model Event {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now())

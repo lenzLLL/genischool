@@ -14,7 +14,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
   const [mesterId,setMesterId] = useState<string>("")
   const [isLoading,setIsLoading] = useState<boolean>(false)
   const [sequenceId,setSequenceId] = useState<string>("")
-  const [sessions,setSession] = useState()
+  const [sessions,setSession] = useState<any[]>([])
 
   const params = new URLSearchParams(searchParams.toString()); 
   const currentQuery = Object.fromEntries(searchParams.entries());
@@ -34,7 +34,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
       ()=>{
           const semester = current?.semestres.find(s=>s.id === mesterId)
           const sequence = semester?.session.find((s:any)=>s?.id === sequenceId)
-          alert(JSON.stringify(sequence))
+          setSession(sequence?.sessions||[])
       },[sequenceId,mesterId]
     )
   useEffect(
@@ -61,7 +61,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
         }
       </SelectGroup>
     </SelectContent>
-    </Select>
+        </Select>
    {msg1 !== "Semestre" && <Select value = {sequenceId} onValueChange={(e)=>setSequenceId(e)} >
     <SelectTrigger className="w-full">
       <SelectValue placeholder={user?.lang === "Français"? `Selectionnez une séquence`:"Select a sequence"} />
@@ -108,7 +108,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
     </Select>
 
         </div>
-        <TableResult current = {current} sequenceId = {sequenceId} classId = {classId} subjectId = {subjectId} mesterId = {mesterId}    user={user}/>
+        <TableResult sessions = {sessions}  sequenceId = {sequenceId} classId = {classId} subjectId = {subjectId} mesterId = {mesterId}    user={user}/>
     </div>
   )
 }

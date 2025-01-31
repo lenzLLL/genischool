@@ -669,7 +669,7 @@ export const createSchoolYear = async (
             }
             await prisma.session.create({
               data:{
-                percentage:total,
+                percentage:100-total,
                 sessionSequence:{
                   connect:{
                     id:ss.id
@@ -727,7 +727,7 @@ export const createSchoolYear = async (
         }
         await prisma.session.create({
           data:{
-            percentage:total,
+            percentage:100-total,
             sessionSequence:{
               connect:{
                 id:ss.id
@@ -1277,7 +1277,38 @@ export const getResultStudent = async ({classId}:{classId:string})=> {
       return {status:200,data:r} 
   }
   catch(error:any){
-    return {status:200,data:null} 
+    return {status:500,data:null} 
+      
+  }
+}
+export const getResult = async ({classId,subjectId,sessionId}:{classId:string,subjectId:string,sessionId:string}) => {
+  try{
+      const result = await prisma.result.findMany({
+        where:{
+          student:{
+            currentClassId:classId,
+          },
+          exam:{
+            session:{
+              sessionSequenceId:sessionId
+            },
+            subjectId:subjectId
+          }           
+        },
+        include:{
+          student:true,
+          exam:{
+            include:{
+              session:true
+            }
+          }
+        }
+      })
+      return {status:200,data:result} 
+
+  }
+  catch(error:any){
+    return {status:500,data:null} 
       
   }
 }
