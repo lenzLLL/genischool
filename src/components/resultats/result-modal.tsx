@@ -4,9 +4,11 @@ import { AuthSchema } from '@/lib/schemas'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { X } from 'lucide-react'
+import { useResult } from '@/hooks/result/use-result'
 
 export default function ResultModal({sessions,user}:{sessions:any[],user:AuthSchema}) {
   const [session,setSession] = useState("")
+  const {} = useResult()
   return (
     <div className='fixed top-0 bottom-0 right-0 left-0 bg-black bg-opacity-40 flex items-center justify-center'>
         <div className='bg-white relative flex flex-col gap-3 w-[50%] h-[80%] p-10 rounded-md'>
