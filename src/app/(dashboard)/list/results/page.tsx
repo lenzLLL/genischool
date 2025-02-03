@@ -1,5 +1,4 @@
 import React from 'react'
-
 import AttendanceLeft from '@/components/attendance/left'
 import AttendanceRight from '@/components/attendance/right'
 import prisma from '@/lib/prisma';
@@ -47,7 +46,6 @@ export default async function page({
       schoolyears:true,  
     }
   })
-  
   return (
     <div className='gap-5 p-5'>
         <ResultComponent current = {currentYear} school = {school} user = {currentUser} subjects = {subjects} classes={classes}/>

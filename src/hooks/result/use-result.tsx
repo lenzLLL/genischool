@@ -6,6 +6,7 @@ import React,{useEffect,useState,useCallback} from "react"
 import { toast } from "react-toastify"
 export const useResult = ({classe,subject,mestre,sequence}:{classe:string,subject:string,mestre:string,sequence:string})=>{
   const [students,setStudents] = useState<any>([])
+  const [showModal,setShowModal] = useState<boolean>(false)
   const [results,setResults] = useState<any>([])
   const [newResults,setNewResults] = useState<Result[]>([])
   const searchParams = useSearchParams();
@@ -50,5 +51,5 @@ export const useResult = ({classe,subject,mestre,sequence}:{classe:string,subjec
             }    
         },[classe,subject,sequence]
     )
-    return {students,setIsChanging,isChanging,getCurrentUser,allStudents,setNewResults,results}
+    return {students,setIsChanging,isChanging,getCurrentUser,allStudents,setNewResults,results,showModal,setShowModal}
 }

@@ -16,8 +16,6 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
   const [sequenceId,setSequenceId] = useState<string>("")
   const [sessions,setSession] = useState<any[]>([])
 
-  const params = new URLSearchParams(searchParams.toString()); 
-  const currentQuery = Object.fromEntries(searchParams.entries());
   let msg1 = current?.semestres[0].type === "Semestre"? "Semestre":"Trimestre"
   let msg2 = current?.semestres[0].type === "Semestre"? "Semester":"Trimester"
   const {setIsChanging} = useResult({classe:classId,subject:subjectId,mestre:mesterId,sequence:sequenceId})
