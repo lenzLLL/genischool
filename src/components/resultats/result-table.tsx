@@ -1,18 +1,7 @@
 "use client"
 
 import  React,{useState,useEffect} from "react"
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
+
 import { ArrowUpDown, ChevronDown, MoreHorizontal, Pen, Pencil, PenIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -29,19 +18,20 @@ import { headers } from "next/headers"
 import ResultModal from "./result-modal"
 
 type StudentItem = Student
-
+export function formatNumber(num:number) {
+  // Vérifie si le nombre est décimal
+  if (num % 1 !== 0) {
+    return num.toFixed(2); // Formate avec deux décimales
+  }
+  return num; // Retourne le nombre tel quel
+}
 export function TableResult({sessions, user,classId,sequenceId,mesterId,subjectId}:{sessions:any[],classId:string,sequenceId:string,mesterId:string,subjectId:string, user:AuthSchema}) {
-  const {students,setIsChanging,isChanging,allStudents,results,showModal,setShowModal}  = useResult({classe:classId,sequence:sequenceId,mestre:mesterId,subject:subjectId})
-  if(isChanging){
-    return   <div className='flex w-full items-center justify-center mt-24'>
-    < div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-    </div>
-  }
-  if(students?.length === 0){
-    return <div>
-      <EmptyComponent msg={"Aucune donnée"}  />
-    </div>
-  }
+  const {students,setIsChanging,isChanging,allStudents,results,loading,getResults}  = useResult({classe:classId,sequence:sequenceId,mestre:mesterId,subject:subjectId})
+  const [showModal,setShowModal] = useState<boolean>(false)
+  const [currentResults,setCurrentResults]  = useState<any[]>(results)
+  const [currentUser,setCurrentUser] = useState("")
+  const [refresh,setRefresh] = useState(false)
+
   const columns = [
     {
       header: user?.lang === "Français" ? "Etudiant(s)" : "Student(s)",
@@ -77,34 +67,7 @@ export function TableResult({sessions, user,classId,sequenceId,mesterId,subjectI
     //     ]
     //   : []),
   ];
- const getClassName = (value:number) => {
-  let msg ="py-3 border flex items-center justify-center rounded-xl text-white text-md font-bold ";
-  if(!value){
-    msg += "bg-gray-500"
-  }
-  else if(value<5){
-    msg += "bg-red-300"
-  }
-  else if(value<10){
-    msg += "bg-red-200"
-  }
-  else if(value<12){
-    msg += "bg-orange-200"
-  }
-  else if(value<14){
-    msg += "bg-orange-300"
-  }
-  else if(value<16){
-    msg += "bg-blue-200"
-  }
-  else if(value<18){
-    msg += "bg-green-200"
-  }
-  else{
-    msg += "bg-green-300"
-  }
-  return msg
- }
+ 
 
  const getTotal = (user:string) => {
   let t = 0;
@@ -122,8 +85,9 @@ export function TableResult({sessions, user,classId,sequenceId,mesterId,subjectI
   return t
  }
 
- const openModal = () =>{
-     setShowModal(true) 
+ const openModal = (id:string) =>{
+  setCurrentUser(id)   
+  setShowModal(true) 
  }
   const renderRow = (item:Student) => (
     <tr
@@ -152,18 +116,61 @@ export function TableResult({sessions, user,classId,sequenceId,mesterId,subjectI
 
                     </td>})
                }
-            <td className="pr-5"><div className={getClassName(getTotal(item.id))}>{getTotal(item.id)? getTotal(item.id)+"/20":"......"}</div></td>
+            <td className="pr-5"><div className={getClassName(getTotal(item.id))}>{getTotal(item.id)? formatNumber(getTotal(item.id))+"/20":"......"}</div></td>
             <td className="pr-5"><div className={getClassName(getTotal(item.id))}>{results[0]?.exam?.credit? results[0]?.exam?.credit:"......"}</div></td>
-            <td className="pr-5"><div className={getClassName(getTotal(item.id))}>{getTotal(item.id)? getTotal(item.id)*results[0]?.exam?.credit+'/'+20*results[0]?.exam?.credit:"......"}</div></td>
-            <td onClick={()=>openModal()}><div className="bg-blue-500 cursor-pointer border-dashed px-2 py-2 text-white flex items-center justify-center rounded-xl"><Pencil/></div></td>
+            <td className="pr-5"><div className={getClassName(getTotal(item.id))}>{getTotal(item.id)? formatNumber(getTotal(item.id)*results[0]?.exam?.credit)+'/'+formatNumber(20*results[0]?.exam?.credit):"......"}</div></td>
+            <td onClick={()=>openModal(item.id)}><div className="bg-blue-500 cursor-pointer border-dashed px-2 py-2 text-white flex items-center justify-center rounded-xl"><Pencil/></div></td>
     </tr>
   )
+ useEffect(
+  ()=>{
+      getResults() 
+  },[refresh]
+ )
+ if(students?.length === 0){
+  return <div>
+    <EmptyComponent msg={"Aucune donnée"}  />
+  </div>
+}
+ if(isChanging){
+  return   <div className='flex w-full items-center justify-center mt-24'>
+  < div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+  </div>
+}
   return (
     <div className="w-full mt-14">
-       {sessions.length}
       <Table columns={columns} renderRow={renderRow} data={students} /> 
       <Secondpagination itemsPerPage={1} itemsCount={allStudents?.length}/>
-      {showModal && <ResultModal sessions = {sessions}/>}
+      {showModal && <ResultModal setRefresh={setRefresh} refresh = {refresh} subjectId={subjectId} sequenceId={sequenceId}  currentUser={currentUser} students={allStudents} setShowModal={setShowModal} user={user} sessions={sessions} classe={classId}/>}
     </div>
   )
 }
+
+export const getClassName = (value:number) => {
+  let msg ="py-3 border flex items-center justify-center rounded-xl text-white text-md font-bold ";
+  if(!value){
+    msg += "bg-gray-500"
+  }
+  else if(value<6){
+    msg += "bg-red-400"
+  }
+  else if(value<10){
+    msg += "bg-red-200"
+  }
+  else if(value<12){
+    msg += "bg-orange-200"
+  }
+  else if(value<14){
+    msg += "bg-orange-300"
+  }
+  else if(value<16){
+    msg += "bg-blue-200"
+  }
+  else if(value<18){
+    msg += "bg-blue-400"
+  }
+  else{
+    msg += "bg-green-400"
+  }
+  return msg
+ }

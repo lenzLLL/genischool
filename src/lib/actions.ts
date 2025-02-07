@@ -18,6 +18,7 @@ import {
 import prisma from "./prisma";
 import { connect } from "http2";
 import { getCurrentUser } from "./functs";
+import { id } from "date-fns/locale";
 type CurrentState = { success: boolean; error: boolean,eng:String,fr:String};
 type FinalCurrentState = { success: boolean; error: boolean;msg:String };
 type CurrentStateUpdate = { success: boolean; error: boolean,newImage:Boolean };
@@ -1311,4 +1312,90 @@ export const getResult = async ({classId,subjectId,sessionId}:{classId:string,su
     return {status:500,data:null} 
       
   }
+}
+export const addResult = async ({session,classe,student,rating}:{rating:number, session:string,classe:string,student:string}) => {
+  try{
+      const isExistExam = await prisma.exam.findFirst({
+        where:{
+          sessionId:session,
+          classes:{
+            some:{
+              id:classe
+            }
+          }
+        }
+      })
+      if (!isExistExam) {
+        return {
+            status: 403,
+            fr: "L'examen correspondant à cette session n'a pas encore été programmé. Vous n'êtes pas en mesure d'ajouter une moyenne à cet(te) étudiant(e).",
+            eng: "The exam corresponding to this session has not yet been scheduled. You are not able to add an average for this student"
+        };
+    }
+    
+    let date = Date.now();
+    let currentDate = new Date(date);
+    let examDate = new Date(isExistExam.endTime);
+    
+    // Format JJ/MM/YY
+    let formattedCurrentDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear().toString().slice(-2)}`;
+    let formattedExamDate = `${String(examDate.getDate()).padStart(2, '0')}/${String(examDate.getMonth() + 1).padStart(2, '0')}/${examDate.getFullYear().toString().slice(-2)}`;
+    
+    if (isExistExam.endTime.getTime() > date) {
+        return {
+            status: 403,
+            fr: `Cet examen a été programmé pour le ${formattedExamDate} et nous sommes le ${formattedCurrentDate}.`,
+            eng: "This exam is scheduled for " + formattedExamDate + " and today is " + formattedCurrentDate + "."
+        };
+    }
+   const isResultExist = await prisma.result.findFirst({
+       where:{
+           studentId:student,
+           exam:{
+            sessionId:session
+           }
+       } 
+   })
+   if(isResultExist){
+       await prisma.result.update({
+        where:{
+          id:isResultExist.id
+        },
+        data:{
+          rating
+        }
+       })
+       return {status:200,fr:"Enregistrement terminé",eng:"Saved"}
+
+   }
+   else{
+    const user = await prisma.student.findUnique({
+      where:{
+        id:student
+      },
+      include:{
+        classYears:{
+        orderBy: {
+          createdAt: 'desc', // Tri par date de création en ordre décroissant
+        },
+        take: 1
+      }
+      }
+    })
+    await prisma.result.create({
+        data:{
+          rating,
+          exam:{connect:{id:isExistExam.id}},
+          student:{connect:{id:student}},
+          classYear:{connect:{id:user?.classYears[0].id}}
+        }
+       })
+       return {status:200,fr:"Enregistrement terminé",eng:"Saved"}
+   } 
+  }
+  catch(error:any){
+    return {status:500,fr:error.message,eng:error.message}
+      
+  }
+
 }
