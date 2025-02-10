@@ -2,16 +2,17 @@ import Menu from "@/components/Menu";
 import Navbar from "@/components/Navbar";
 import { Sidebar } from "@/components/sidebar/sidebar";
 import { useSidebar } from "@/hooks/use-sidebar";
+import { getCurrentUser } from "@/lib/functs";
 import Image from "next/image";
 import Link from "next/link";
 import React,{useState} from "react"
 import { useStore } from "zustand";
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
+ const user = await getCurrentUser()
   return (
     <div className="h-auto flex">
       {/* LEFT */}
@@ -23,11 +24,11 @@ export default function DashboardLayout({
           <Image src="/logo.png" alt="logo" width={32} height={32} />
           <span className="hidden lg:block font-bold">SchooLama</span>
         </Link> */}
-        <Sidebar  />
+        <Sidebar user = {user}  />
       {/* </div> */}
       {/* RIGHT */}
       <div className={` lg:flex-1 w-[100%] z-[0] pt-20 lg:pt-0 bg-[#F7F8FA] overflow-scroll flex flex-col`}>
-        <Navbar />
+        <Navbar currentUser={user} />
         {children}
       </div>
     </div>

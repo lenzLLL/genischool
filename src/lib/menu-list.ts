@@ -178,7 +178,7 @@ export function getMenuList(pathname: string): Group[] {
           label: "Dashboard",
           libelle:"Dasboard",
           icon: LayoutGrid,
-          submenus: []
+          visible: ["Admin"]
         }
       ]
     },
@@ -305,15 +305,19 @@ export function getMenuList(pathname: string): Group[] {
       menus: [
         {
           href: "/profil",
-          label: "Profil",
+          label: "Profile",
           libelle:"Profil",
-          icon: User
+          icon: User,
+          visible: ["Admin"]
+
         },
         {
           href: "/account",
           label: "Setting",
           libelle:"Paramètres",
-          icon: Settings
+          icon: Settings,
+          visible: ["Admin"]
+
         }
       ]
     }

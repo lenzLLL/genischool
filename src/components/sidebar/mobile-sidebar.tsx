@@ -6,22 +6,24 @@ import { useSidebar } from "@/hooks/use-sidebar";
 import { useStore } from "@/hooks/use-store";
 import { AuthSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
-import { PanelsTopLeft } from "lucide-react";
+import { PanelsTopLeft, X } from "lucide-react";
 import Link from "next/link";
 
-export function Sidebar({user}:{user:AuthSchema}) {
+export function MobileSidebar({user,onClose}:{user:AuthSchema,onClose:(v:boolean)=>void}) {
   const sidebar = useStore(useSidebar, (x:any) => x);
   if (!sidebar) return null;
   const { isOpen, toggleOpen, getOpenState, setIsHover, settings } = sidebar;
   return (
     <div
       className={cn(
-        "hidden lg:block top-0 left-0 z-20 max-h-screen sticky  -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
+        "block lg:hidden h-screen  fixed top-0 left-0 z-[99999] bg-white right-0",
         !getOpenState() ? "w-[90px]" : "w-[200px]",
         settings.disabled && "hidden"
       )}
     >
+
       {/* <SidebarToggle isOpen={isOpen} setIsOpen={toggleOpen} /> */}
+      <X onClick={()=>onClose(true)} className="m-2 cursor-pointer absolute z-[9999999]"/> 
       <div
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}

@@ -15,18 +15,20 @@ import {
   TooltipProvider
 } from "@/components/ui/tooltip";
 import { getMenuList } from "@/lib/menu-list";
+import { AuthSchema } from "@/lib/schemas";
 
 interface MenuProps {
   isOpen: boolean | undefined;
+  user:AuthSchema
 }
 
-export function Menu({ isOpen }: MenuProps) {
+export function Menu({ isOpen,user }: MenuProps) {
   const pathname = usePathname();
   const menuList = getMenuList(pathname);
 
   return (
       <ScrollArea>
-      <nav className="mt-8 h-full w-full">
+      <nav className="mt-2 h-full w-full">
         <ul className="flex pb-5 flex-col min-h-[calc(100vh-48px-36px-16px-22px)]  lg:min-h-[calc(100vh-32px-40px-22px)] items-start space-y-1 px-2">
           {menuList.map(({ groupLabel, menus }, index) => (
             <li className={cn("w-full", groupLabel ? "pt-5" : "")} key={index}>
@@ -34,7 +36,7 @@ export function Menu({ isOpen }: MenuProps) {
                 <p className="text-sm font-medium text-muted-foreground px-4 pb-2 max-w-[248px] truncate">
                   {groupLabel}
                 </p>
-              ) : !isOpen && isOpen !== undefined && groupLabel ? (
+              ) : !isOpen && isOpen !== undefined && groupLabel  ? (
                 <TooltipProvider>
                   <Tooltip delayDuration={100}>
                     <TooltipTrigger className="w-full">
@@ -51,8 +53,8 @@ export function Menu({ isOpen }: MenuProps) {
                 <p className="pb-2"></p>
               )}
               {menus.map(
-                ({ href, label, icon: Icon, active, submenus }, index) =>
-                  !submenus || submenus.length === 0 ? (
+                ({ href, label, icon: Icon, active,libelle, submenus,visible }, index) =>
+                  (!submenus || submenus.length === 0) && visible?.includes(user?.role||"yes")   ? (
                     <div className="w-full" key={index}>
                       <TooltipProvider disableHoverableContent>
                         <Tooltip delayDuration={100}>
@@ -82,7 +84,7 @@ export function Menu({ isOpen }: MenuProps) {
                                       : "translate-x-0 opacity-100"
                                   )}
                                 >
-                                  {label}
+                                  {user?.lang === "Français"? libelle:label}
                                 </p>
                               </Link>
                             </Button>
@@ -95,11 +97,11 @@ export function Menu({ isOpen }: MenuProps) {
                         </Tooltip>
                       </TooltipProvider>
                     </div>
-                  ) : (
+                  ) :!(!submenus || submenus.length === 0)? (
                     <div className="w-full " key={index}>
                       <CollapseMenuButton
                         icon={Icon}
-                        label={label}
+                        label={user?.lang === "Français"? libelle:label}
                         active={
                           active === undefined
                             ? pathname.startsWith(href)
@@ -109,7 +111,7 @@ export function Menu({ isOpen }: MenuProps) {
                         isOpen={isOpen}
                       />
                     </div>
-                  )
+                  ):null
               )}
             </li>
           ))}
