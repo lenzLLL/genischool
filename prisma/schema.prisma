@@ -85,7 +85,6 @@ model ClassYear {
   class       Class        @relation(fields: [classId], references: [id])
   student       Student        @relation(fields: [studentId], references: [id])
   isSolded Boolean @default(false)
-  fees HistoriqueFees[]
   result Result[]
   // cette table servira pour les historiques, en une année précise on pourra savoir tel élève fréquentait tel année 
 }
@@ -127,13 +126,14 @@ model Class {
   supervisorId  String? @db.Uuid
   supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
   classYears ClassYear[]
-  fees Fees[]
   lessons LessonClass[]
   currentStudents Student[]
   announcements AnnouncementClass[]
   deleted Boolean @default(false)
   schoolId String @db.Uuid
   school       School        @relation(fields: [schoolId], references: [id])
+  feesId String @db.Uuid
+  fees       Fees        @relation(fields: [feesId], references: [id])
   exams Exam[]
 }
 model Subject {
@@ -225,12 +225,19 @@ model Exam {
   sessionId String @db.Uuid
   session     Session      @relation(fields: [sessionId], references: [id])  
 }
-model Fees {
+model Tranche{
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order Int
-  classId String @db.Uuid
-  class     Class      @relation(fields: [classId], references: [id])
   amount BigInt
+  feesId String @db.Uuid
+  fees     Fees      @relation(fields: [feesId], references: [id])
+  historiques HistoriqueFees[]
+
+}
+model Fees {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tranches Tranche[]
+  classes Class[]
   deleted Boolean @default(false)
   studentFees StudentFees[]
 }
@@ -238,11 +245,11 @@ model StudentFees {
    id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
    amount BigInt
    studentId String @db.Uuid
+   student     Student      @relation(fields: [studentId], references: [id])
    schoolYearId String @db.Uuid
+   schoolYear     Schoolyear      @relation(fields: [schoolYearId], references: [id])
    FeesId String @db.Uuid
    fees     Fees      @relation(fields: [FeesId], references: [id])
-   schoolYear     Schoolyear      @relation(fields: [schoolYearId], references: [id])
-   student     Student      @relation(fields: [studentId], references: [id])
    deleted Boolean @default(false)
    historiques HistoriqueFees[]
 }
@@ -250,13 +257,14 @@ model HistoriqueFees {
    id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
    amount BigInt
    createdAt DateTime @default(now())
-   paidAt DateTime 
    FeesId String @db.Uuid
    fees     StudentFees      @relation(fields: [FeesId], references: [id])
-   classYearId String @db.Uuid
-   classYear     ClassYear      @relation(fields: [classYearId], references: [id])
-
+   trancheId String? @db.Uuid
+   tranche     Tranche?      @relation(fields: [trancheId], references: [id])
+   fr String
+   eng String
  }
+
 
 model Result {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

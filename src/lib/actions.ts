@@ -19,6 +19,7 @@ import prisma from "./prisma";
 import { connect } from "http2";
 import { getCurrentUser } from "./functs";
 import { id } from "date-fns/locale";
+import { Prisma } from "@prisma/client";
 type CurrentState = { success: boolean; error: boolean,eng:String,fr:String};
 type FinalCurrentState = { success: boolean; error: boolean;msg:String };
 type CurrentStateUpdate = { success: boolean; error: boolean,newImage:Boolean };
@@ -120,7 +121,8 @@ export const createClass = async (
       data : {
         schoolId:currentUser?.schoolId? currentUser.schoolId:"",
         supervisorId:data.supervisorId,
-        name:data.name
+        name:data.name,
+        feesId:"a65a6cbf-fe75-4c15-b08c-f9178fd0bd55"
       },
     });
    
@@ -428,6 +430,9 @@ export const createStudent = async (
         ...(data.parentId !== "" && { parentId: data.parentId }),
         
       },
+      include:{
+        currentClass:true
+      }
     });
 
     const sy = await prisma.schoolyear.findFirst({
@@ -447,10 +452,64 @@ export const createStudent = async (
             Inscription:sy?.school.inscription? sy?.school?.inscription:0
         }      
     })
+    const cu = await getCurrentUser()
+    const school = await prisma.school.findUnique({
+      where:{
+        id:cu.schoolId
+      }
+    })
+    const studentFeesRecord = await prisma.studentFees.create({
+      data:{
+        amount:school?.inscription||0,
+        student:{
+          connect:{
+            id:user.id
+          }
+        },
+        schoolYear:{
+          connect:{
+            id:cu.currentSchoolYear||""
+          }
+        },
+        fees:{
+          connect:{
+            id:user.currentClass?.feesId
+          }
+        }
+
+      }
+    })
+    if (!studentFeesRecord) {
+      await prisma.classYear.deleteMany({
+        where:{
+          studentId:user.id
+        }
+      })
+      await prisma.student.delete({
+        where:{
+          id:user.id
+        }
+      })
+      return { success: false, error: true, fr: "Erreur lors de la création des frais étudiants.", eng: "Error creating student fees." };
+    }
+    
+    await prisma.historiqueFees.create({
+      data:{
+        amount:school?.inscription||0,
+        fees:{
+          connect:{
+            id:studentFeesRecord.id
+          }
+        },
+        fr:"Paiement de l'inscription",
+        eng:"Payment of the registration"
+      }
+    })
     // fonction inachevé lorsqu'une personne est enregistrée dans la base de données, nous considérons qu'elle est obligatoirement
     //inscripte dans une classe le classYear est alors créer ce qui servira de mémoire dans l'historique et une historique de
     // de paiement devrait ainsi être crée
     // revalidatePath("/list/students");
+
     return { success: true, error: false,fr:"",eng:""};
   } catch (err) {
     console.log(err);
@@ -1398,4 +1457,148 @@ export const addResult = async ({session,classe,student,rating}:{rating:number, 
       
   }
 
+}
+export const getCurrentStudents = async ({classId}:{classId:string}) => {
+  try{
+      const r = await prisma.student.findMany({
+        where:{
+          currentClassId:classId
+        },
+        include:{
+          studentFees:{
+            where:{
+              schoolYear:{
+                current:true
+              }
+          },
+            include:{
+              fees:{
+                include:{
+                  tranches:{
+                    select:{
+                      amount:true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+      return r
+  }
+  catch(error:any){
+
+  }
+}
+export const getClasses = async ({schoolId}:{schoolId:string}) => {
+  try{
+      const r = await prisma.class.findMany({
+        where:{
+          schoolId:schoolId
+        },
+        include:{
+          fees:{
+            include:{
+              tranches:{
+                orderBy:{
+                  order:"asc"
+                }
+              },
+            }
+          },
+          school:true
+        }
+      })
+      return r
+  }
+  catch(error:any){
+
+  }
+}
+export const getCurrentStudentsWithStatus = async ({classId,status,tranche}:{classId:string,status:string,tranche:number}) => {
+  try{
+      const currentUser = await getCurrentUser()
+      const currentSchool = await prisma.school.findUnique({
+        where:{
+          id:currentUser?.schoolId
+        }
+      })
+      const currentClass = await prisma.class.findUnique({
+        where: {
+            id: classId
+        },
+        include: {
+            fees: {
+                include: {
+                    tranches: {
+                        where: {
+                            order: {
+                                lte: tranche // lte signifie "less than or equal"
+                            }
+                        },
+                        select: {
+                            amount: true // ne sélectionne que le champ amount
+                        }
+                    }
+                }
+            }
+        }
+     });
+     if(!currentClass || !currentSchool ){
+      return
+     }
+     let totalamount = parseInt(currentSchool?.inscription.toString()) ||0
+
+     for(let i = 0;i<currentClass.fees.tranches.length;i++){
+         totalamount +=  parseInt(currentClass.fees.tranches[i].amount.toString())
+     }
+      let query:Prisma.StudentWhereInput = {}
+      if(status === "1"){
+          query.studentFees= {
+              some:{
+                amount:{
+                  gte:totalamount
+                }
+              }
+          }
+      }
+      else{
+        query.studentFees= {
+          some:{
+            amount:{
+              lt:totalamount
+            }
+          }
+        }
+      }
+      query.currentClassId = classId
+      const r = await prisma.student.findMany({
+        where:query,
+        include:{
+          studentFees:{
+            where:{
+                schoolYear:{
+                  current:true
+                }
+            },
+            include:{
+              fees:{
+                include:{
+                  tranches:{
+                    select:{
+                      amount:true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+      return r
+  }
+  catch(error:any){
+   
+  }
 }

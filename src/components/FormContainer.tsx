@@ -78,9 +78,8 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
           where:{schoolId:currentUser?.schoolId},
           orderBy:[{name:"asc"}]
         });
-        const parents = await prisma.parent.findMany({where:{students:{some:{schoolId:currentUser?.schoolId}}},
+        const parents = await prisma.parent.findMany({where:{schoolId:currentUser?.schoolId,deleted:false},
           orderBy:[{username:"asc"}]
-        
         })
         relatedData = { classes: studentClasses,parents };
         break;
