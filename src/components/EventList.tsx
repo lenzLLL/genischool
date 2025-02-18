@@ -1,6 +1,9 @@
 import prisma from "@/lib/prisma";
-
-const EventList = async ({ dateParam }: { dateParam: string | undefined }) => {
+import { AuthSchema } from "@/lib/schemas";
+import EventComponent from "./eventComponent";
+import Link from "next/link";
+import { MdArrowForward } from "react-icons/md";
+const EventList = async ({ dateParam,user }: {user:AuthSchema|null, dateParam: string | undefined }) => {
   const date = dateParam ? new Date(dateParam) : new Date();
 
   const data = await prisma.event.findMany({
@@ -11,31 +14,21 @@ const EventList = async ({ dateParam }: { dateParam: string | undefined }) => {
       }
       
     },
+    take:10,
     orderBy:[
       {
         startTime:"desc"
-      }
+      },
+      
     ]
   });
-
-  return data.map((event) => (
-    <div
-      className="p-5 rounded-md border-2 border-gray-100 border-t-4 odd:border-t-lamaSky even:border-t-lamaPurple"
-      key={event.id}
-    >
-      <div className="flex items-center justify-between">
-        <h1 className="font-semibold text-gray-600">{event.title}</h1>
-        <span className="text-gray-300 text-xs">
-          {event.startTime.toLocaleTimeString("en-UK", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          })}
-        </span>
-      </div>
-      <p className="mt-2 text-gray-400 text-sm">{event.description}</p>
-    </div>
-  ));
-};
-
-export default EventList;
+  
+  return(<> {data.map((event) => (
+     <EventComponent event={event}/>
+  ))
+  
+}
+{ data.length > 10 && <Link className="flex items-center gap-1 text-blue-400 font-bold text-lg" href={"/list/events"}>{user?.lang === "Français"? "Voir plus ":"See more "}<MdArrowForward/></Link>
+}</>
+  )}
+export default EventList

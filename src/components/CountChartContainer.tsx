@@ -2,9 +2,12 @@ import Image from "next/image";
 import prisma from "@/lib/prisma";
 import CountChart from "./CountChart";
 
-const CountChartContainer = async () => {
+const CountChartContainer = async ({lang,schooldId}:{lang:string|null,schooldId:string|null}) => {
   const data = await prisma.student.groupBy({
     by: ["sex"],
+    where:{
+      schoolId:schooldId||""
+    },
     _count: true,
   });
 
@@ -15,7 +18,7 @@ const CountChartContainer = async () => {
     <div className="bg-white rounded-xl w-full h-full p-4">
       {/* TITLE */}
       <div className="flex justify-between items-center">
-        <h1 className="text-lg font-semibold">Students</h1>
+        <h1 className="text-lg font-semibold">{lang === "Français"? 'Etudiants':'Students'}</h1>
         <Image src="/moreDark.png" alt="" width={20} height={20} />
       </div>
       {/* CHART */}
@@ -26,14 +29,14 @@ const CountChartContainer = async () => {
           <div className="w-5 h-5 bg-lamaSky rounded-full" />
           <h1 className="font-bold">{boys}</h1>
           <h2 className="text-xs text-gray-300">
-            Boys ({Math.round((boys / (boys + girls)) * 100)}%)
+            {lang === "Français"?"Masculin":"Male"} ({Math.round((boys / (boys + girls)) * 100)}%)
           </h2>
         </div>
         <div className="flex flex-col gap-1">
           <div className="w-5 h-5 bg-lamaYellow rounded-full" />
           <h1 className="font-bold">{girls}</h1>
           <h2 className="text-xs text-gray-300">
-            Girls ({Math.round((girls / (boys + girls)) * 100)}%)
+          {lang === "Français"?"Feminin":"Female"} ({Math.round((girls / (boys + girls)) * 100)}%)
           </h2>
         </div>
       </div>

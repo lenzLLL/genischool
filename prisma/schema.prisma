@@ -263,7 +263,12 @@ model HistoriqueFees {
    tranche     Tranche?      @relation(fields: [trancheId], references: [id])
    fr String
    eng String
+   img String?
+   key String?
+   month String?
  }
+
+
 
 
 model Result {

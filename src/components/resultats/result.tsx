@@ -12,7 +12,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
   const searchParams = useSearchParams();
   const [subjectId,setSubjectId] = useState<string>("")
   const [mesterId,setMesterId] = useState<string>("")
-  const [isLoading,setIsLoading] = useState<boolean>(false)
+  const [lang,setLang] = useState(user?.lang)
   const [sequenceId,setSequenceId] = useState<string>("")
   const [sessions,setSession] = useState<any[]>([])
 

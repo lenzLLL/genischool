@@ -1,12 +1,14 @@
 import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import Link from "next/link";
+import { MdArrowForward } from "react-icons/md";
 
-const Announcements = async ({lang,userId,role}:{lang:string,userId:string,role:string}) => {
-  const currentUser = await getCurrentUser()
+const Announcements = async ({lang,userId,role,schoolId}:{schoolId:string, lang:string,userId:string,role:string}) => {
+
 
   const query: Prisma.AnnouncementWhereInput = {};
-
+  const user=  await getCurrentUser()
   if(role === "Student"){
     query.announcementClass = {
       some: {
@@ -48,12 +50,21 @@ const Announcements = async ({lang,userId,role}:{lang:string,userId:string,role:
         }
       }
     } 
+    else{
+      query.announcementClass = {
+        some:{
+          class:{
+               schoolId:user?.schoolId
+            }
+          }
+        }
+    }
   const data = await prisma.announcement.findMany({
     take: 4,
     where:query,
     orderBy: { date: "desc" },
   });
- 
+  
   return (
     <div className="bg-white p-4 rounded-md">
       <div className="flex items-center justify-between">
@@ -95,6 +106,8 @@ const Announcements = async ({lang,userId,role}:{lang:string,userId:string,role:
           </div>
         )}
       </div>
+      { data.length > 4 && <Link className="flex items-center gap-1 mt-2 text-blue-400 font-bold text-lg" href={"/list/anouncements"}>{user?.lang === "Français"? "Voir plus ":"See more "}<MdArrowForward/></Link>
+}
     </div>
   );
 };

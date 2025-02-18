@@ -41,12 +41,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { createAttendance, createEvent, updateEvent } from '@/lib/actions'
 import {toast} from "react-toastify"
 import { useAttendance } from '@/hooks/attendance/use-attendance'
-export default function AttendanceRight({data1,data2,students}:{students:(Student &  {attendances:Attendance[]} & {totalTime:BigInt|number})[], data1:Lesson[],data2:Exam[]}) {
+import { AuthSchema } from '@/lib/schemas'
+export default function AttendanceRight({data1,data2,students,user}:{user:AuthSchema,students:(Student &  {attendances:Attendance[]} & {totalTime:BigInt|number})[], data1:Lesson[],data2:Exam[]}) {
   const searchParams = useSearchParams();
   const [searchTerm,setSearchTerm] = useState("")
   const [value1,setValue1] = useState(0)
-  const [value2,setValue2] = useState(0)
-  const [value3,setValue3] = useState(0)
+  const [lang,setLang] = useState(user?.lang)
   const [isLoading,setIsLoading] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -100,7 +100,8 @@ export default function AttendanceRight({data1,data2,students}:{students:(Studen
   const {fixAttendace,isSaving,attendances,setAttendances,getAttendances} = useAttendance()
   const addAttendance = (s:Student,isChecked:string,item:string,time:number) => {
     if(!(currentQuery.time&&(currentQuery.exam||currentQuery.lesson))){
-      toast("Veillez choisir une lesson ou un examen avant toute opération!")
+      let msg = lang === "Français"? "Veillez choisir une lesson ou un examen avant toute opération!":"Please choose a lesson or an exam before any operation!"
+      toast(msg)
       return
     }
     if(isChecked === "a"){
@@ -164,11 +165,11 @@ useEffect(
     <Card className='col-span-6 bg-white  p-5 rounded-lg '>
             <Tabs defaultValue='1'>
             <TabsList className="grid w-full grid-cols-5 mb-5">
-              <TabsTrigger value="1">Tout</TabsTrigger>
+              <TabsTrigger value="1">{lang === "Français"?'Tout':'All'}</TabsTrigger>
               <TabsTrigger value="2">0h-5h</TabsTrigger>
               <TabsTrigger value="3">5h-10h</TabsTrigger>
               <TabsTrigger value="4">10h-15h</TabsTrigger>
-              <TabsTrigger value="5">15h et plus</TabsTrigger>
+              <TabsTrigger value="5">{lang === "Français"? '15h et plus':'15h and more'}</TabsTrigger>
             </TabsList>
             <div className='flex items-center gap-3 mb-5'>
           <Input value={searchTerm} onChange = {(e)=>setSearchTerm(e.target.value)} placeholder="veillez entrer le nom d'un étudiant"/>
@@ -176,7 +177,7 @@ useEffect(
             <RefreshCcw/>
           </div>}
           <button onClick={addSearch} className={`bg-blue-400 text-sm text-white flex items-center justify-center p-2 rounded-md`}>
-              Rechercher
+             {lang === "Français"? 'Rechercher':'Search'}
           </button>
 
         </div>
@@ -225,7 +226,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -236,7 +237,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -250,7 +251,7 @@ useEffect(
           
           {
             students.length === 0 && <div className='mt-28 flex justify-center'>
-                <span className='text-4xl font-bold text-[#555] flex flex-col items-center'><LibraryBig size={100}/> Aucun élève</span>
+                <span className='text-4xl font-bold text-[#555] flex flex-col items-center'><LibraryBig size={100}/> { user?.lang === "Français" ? 'Aucun élève':'No student'}</span>
             </div>
           }
     
@@ -308,7 +309,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                    <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -319,7 +320,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -333,7 +334,7 @@ useEffect(
           
           {
             (students.length === 0) && <div className='mt-28 flex justify-center'>
-                <span className='text-4xl font-bold text-[#555] flex flex-col items-center'><LibraryBig size={100}/> Aucun élève</span>
+                <span className='text-4xl font-bold text-[#555] flex flex-col items-center'><LibraryBig size={100}/> {lang === "Français"? 'Aucun élève':'No student'}</span>
             </div>
           }
     
@@ -391,7 +392,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -402,7 +403,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -416,7 +417,7 @@ useEffect(
           
           {
             (students.length === 0) && <div className='mt-28 flex justify-center'>
-                <span className='text-4xl font-bold text-[#555] flex flex-col items-center'><LibraryBig size={100}/> Aucun élève</span>
+                <span className='text-4xl font-bold text-[#555] flex flex-col items-center'><LibraryBig size={100}/> {lang === "Français"?'Aucun élève':'No student'}</span>
             </div>
           }
     
@@ -474,7 +475,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -485,7 +486,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -554,7 +555,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -565,7 +566,7 @@ useEffect(
                              </SelectTrigger>
                              <SelectContent>
                                  <SelectGroup>
-                                     <SelectItem value="p">Présent</SelectItem>
+                                     <SelectItem value="p">{lang === "Français"? 'Présent':'Present'}</SelectItem>
                                      <SelectItem value="a">Absent</SelectItem>
                                  </SelectGroup>
                              </SelectContent>
@@ -579,7 +580,7 @@ useEffect(
           
           {
             (students.length === 0) && <div className='mt-28 flex justify-center'>
-                <span className='text-4xl font-bold text-[#555] flex flex-col items-center'><LibraryBig size={100}/> Aucun élève</span>
+                <span className='text-4xl font-bold text-[#555] flex flex-col items-center'><LibraryBig size={100}/>{lang === "Français"? 'Aucun élève':'No student'}</span>
             </div>
           }
     

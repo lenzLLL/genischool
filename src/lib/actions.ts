@@ -1602,3 +1602,207 @@ export const getCurrentStudentsWithStatus = async ({classId,status,tranche}:{cla
    
   }
 }
+export const getStudentById = async ({id}:{id:string}) =>{
+  try{
+      const user = await prisma.student.findUnique({
+        where:{
+          id
+        },
+        include:{
+          studentFees:{
+            include:{
+              fees:{
+                include:{
+                  tranches:true
+                }
+              }
+            }
+          },
+          currentClass:true,
+          school:true
+
+        }
+      }) 
+      return {status:200,data:user}
+  }
+  catch(error:any){
+    return {status:500,data:null}
+  }
+}
+export const getStudentByMatricule = async ({m}:{m:string}) =>{
+  try{
+      const user = await prisma.student.findFirst({
+        where:{
+          matricule:m
+        },
+        include:{
+          studentFees:{
+            include:{
+              fees:{
+                include:{
+                  tranches:true
+                }
+              }
+            }
+          },
+          currentClass:true,
+          school:true
+        },
+      
+      }) 
+   
+      return {status:200,data:user}
+  }
+  catch(error:any){
+    return {status:500,data:null}
+      
+  }
+}
+export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}) =>{
+  try{
+    const date = new Date();
+    const month = date.getMonth() + 1
+      const currentUser = await getCurrentUser()
+      if(id){
+          const s = await prisma.student.findUnique({
+            where:{
+              id
+            },
+            include:{
+              studentFees:{
+                where:{
+                  schoolYearId:currentUser?.currentSchoolYear||''
+                },
+                take:1,
+                include:{
+                  fees:{
+                    include:{
+                      tranches:true
+                    }
+                  }
+                }
+              },
+              school:true
+            }
+          })
+          let sum = s?.studentFees[0]?.fees.tranches.reduce(
+            (s:number,t:any)=>{
+                return s += parseInt(t.amount.toString())
+            },0
+          )||0
+          sum += parseInt(s?.school.inscription.toString()||"")
+          if(sum===parseInt(s?.studentFees[0]?.amount.toString()||"")+amount){
+            return {status:200,fr:`L'étudiant a réglé la pension en totalité`,eng:`The student has fully paid the tuition`} 
+          }
+          else if(sum<parseInt(s?.studentFees[0]?.amount.toString()||"")+amount){
+              return {status:200,fr:`Vous ne pouvez pas entrer plus de ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`,eng:`You can't enter more than ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`}  
+          }
+          await prisma.studentFees.update({
+            where:{
+              id:s?.studentFees[0]?.id
+            },
+            data:{
+                amount:amount+parseInt(s?.studentFees[0]?.amount.toString()||"")
+            }
+          })
+          let rest = sum- amount+parseInt(s?.studentFees[0]?.amount.toString()||"")
+          await prisma.historiqueFees.create({
+            data:{
+            amount:amount,
+            eng:"Payment of " + amount + " Fcfa, remaining to pay: " + rest + " Fcfa",
+
+            fr:"Paiement de "+amount+" Fcfa, reste à payer: "+rest+' Fcfa',
+             month:month.toString(),
+             fees:{
+              connect:{
+                id:s?.studentFees[0].id
+              }
+             } 
+            }
+          })
+         return {status:200,fr:"  Enregistré",eng:"Saved"}
+
+      }
+      else if(m){
+        const s = await prisma.student.findFirst({
+          where:{
+            matricule:m
+          },
+          include:{
+            studentFees:{
+              where:{
+                schoolYearId:currentUser?.currentSchoolYear||''
+              },
+              take:1,
+              include:{
+                fees:{
+                  include:{
+                    tranches:true
+                  }
+                }
+              }
+            },
+            school:true
+          }
+        })
+        let sum = s?.studentFees[0]?.fees.tranches.reduce(
+          (s:number,t:any)=>{
+              return s += parseInt(t.amount.toString())
+          },0
+        )||0
+        sum += parseInt(s?.school.inscription.toString()||"")
+        if(sum===parseInt(s?.studentFees[0]?.amount.toString()||"")+amount){
+          return {status:200,fr:`L'étudiant a réglé la pension en totalité`,eng:`The student has fully paid the tuition`} 
+        }
+        else if(sum<parseInt(s?.studentFees[0]?.amount.toString()||"")+amount){
+            return {status:200,fr:`Vous ne pouvez pas entrer plus de ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`,eng:`You can't enter more than ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`}  
+        }
+        await prisma.studentFees.update({
+          where:{
+            id:s?.studentFees[0]?.id
+          },
+          data:{
+              amount:amount+parseInt(s?.studentFees[0]?.amount.toString()||"")
+          }
+        })
+        let rest = sum- amount+parseInt(s?.studentFees[0]?.amount.toString()||"")
+        await prisma.historiqueFees.create({
+          data:{
+          amount:amount,
+          eng:"Payment of " + amount + " Fcfa, remaining to pay: " + rest + " Fcfa",
+          month:month.toString(),
+          fr:"Paiement de "+amount+" Fcfa, reste à payer: "+rest+' Fcfa',
+           fees:{
+            connect:{
+              id:s?.studentFees[0].id
+            }
+           } 
+          }
+        })
+       return {status:200,fr:"Enregistré",eng:"Saved"}
+      } 
+      else{
+        return {status:404,fr:"Veillez fournir l'id ou le matricule",eng:"Please provide the ID or the registration number"}
+      }   
+  }
+  catch(error:any){
+    return {status:500,fr:error.message,eng:error.message}
+  }
+}
+export const getFinanceFess = async () => {
+  try{
+    const schoolYearId = (await getCurrentUser()).schoolId; // Remplacez par l'ID de l'année scolaire
+    const r = await prisma.historiqueFees.groupBy({
+      by:["month"],
+      _sum:{
+        amount:true
+      }
+    }    )
+    
+    // Afficher le résultat
+     return r
+  }
+  catch(error:any){
+
+  }
+}

@@ -102,8 +102,8 @@ export default async function page({
   })
   return (
     <div className='grid grid-cols-10 gap-5 p-5'>
-        <AttendanceLeft classes = {classes} data1 = {data1} data2 = {data2}/>
-        <AttendanceRight students={students} data1 = {data1} data2 = {data2}/>
+        <AttendanceLeft user = {currentUser} classes = {classes} data1 = {data1} data2 = {data2}/>
+        <AttendanceRight user = {currentUser} students={students} data1 = {data1} data2 = {data2}/>
     </div>
   )
 }

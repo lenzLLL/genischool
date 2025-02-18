@@ -42,11 +42,11 @@ export function TableResult({sessions, user,classId,sequenceId,mesterId,subjectI
       accessor: s.title,
     })),
    {
-    header:"Note",
+    header: user?.lang === "Français"? "Note":"Rating",
     accessor:"note"
    },
    {
-    header:"Crédit",
+    header: user?.lang === "Français"? "Crédit":"Credit",
     accessor:"credit"
    },
    {

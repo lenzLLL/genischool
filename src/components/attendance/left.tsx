@@ -35,17 +35,18 @@ import { BookOpenCheck, CalendarRange, CalendarSearch, Check, CircleCheck, Circl
 import { Class, Exam, Lesson, Subject, Teacher } from '@prisma/client'
 import { millisecondsToHoursMinutes } from '@/lib/utils'
 import { useSearchParams,useRouter, usePathname } from 'next/navigation'
+import { AuthSchema } from '@/lib/schemas';
 type DateRange = {
   start: Date;
   end: Date;
 };
-export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,data1:(Lesson & {teacher:Teacher}&{subject:Subject})[] ,data2:(Exam & {teacher:Teacher}&{subject:Subject})[]}) {
+export default function AttendanceLeft({data1,data2,classes,user}:{user:AuthSchema, classes:Class[] ,data1:(Lesson & {teacher:Teacher}&{subject:Subject})[] ,data2:(Exam & {teacher:Teacher}&{subject:Subject})[]}) {
   const [showCalendar,setShowCalendar] = useState<boolean>(false)
   const searchParams = useSearchParams();
   const [selectedLesson,setSelectedLesson] = useState("")
   const [selectedExamen,setSelectedExamen] = useState("")
   const [classId, setClassId] = useState('');
-  const [catched,setCatched] = useState('')
+  const [lang,setLang] = useState(user?.lang)
   const [secondClass,setSecondClass] = useState('')
   const [isLoading,setIsLoading] = useState(false)
   const params = new URLSearchParams(searchParams.toString()); 
@@ -180,7 +181,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
     <div className='flex gap-4 items-center'>
     <Select value = {classId} onValueChange={(e)=>onSetClassId(e)} >
     <SelectTrigger className="w-full">
-      <SelectValue placeholder="Selectionnez une classe" />
+      <SelectValue placeholder={lang === "Français"? "Selectionnez une classe":"Select a class"} />
     </SelectTrigger>
     <SelectContent>
       <SelectGroup>
@@ -198,8 +199,8 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
 
     <Tabs defaultValue="account" className="w-[400px]">
       <TabsList className="grid w-full grid-cols-2 mt-5">
-        <TabsTrigger value="account">Leçons</TabsTrigger>
-        <TabsTrigger value="password">Examens</TabsTrigger>
+        <TabsTrigger value="account">{lang === "Français"? 'Leçons':'lessons'}</TabsTrigger>
+        <TabsTrigger value="password">{lang === "Français"? 'Examens':'Exams'}</TabsTrigger>
       </TabsList>
       <TabsContent value="account" >
         <div className='h-[100vh] p-2 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-300'>
@@ -218,7 +219,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
         </Card>))}
         {
         
-        data1.length === 0  && <div className='flex justify-center flex-col items-center mt-32'> <CircleOff size={50} color='#555' /> Aucune donnée</div>       
+        data1.length === 0  && <div className='flex justify-center flex-col items-center mt-32'> <CircleOff size={50} color='#555' />{lang === "Français"? 'Aucune donnée':'No Data'}</div>       
         
         }
         </>:          <div className='flex w-full items-center justify-center mt-24'>
@@ -244,7 +245,7 @@ export default function AttendanceLeft({data1,data2,classes}:{classes:Class[] ,d
    </Card>))}
    {
    
-   data2.length === 0  && <div className='flex justify-center flex-col items-center mt-32'> <CircleOff size={50} color='#555' /> Aucune donnée</div>       
+   data2.length === 0  && <div className='flex justify-center flex-col items-center mt-32'> <CircleOff size={50} color='#555' /> {lang === "Français"? 'Aucune donnée':'No Data'}</div>       
    
    }</>:      <div className='flex w-full items-center justify-center mt-24'>
    < div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />

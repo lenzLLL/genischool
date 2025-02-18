@@ -71,8 +71,8 @@ export default function ResultModal({setRefresh,refresh,sessions,user,setShowMod
       </SelectGroup>
     </SelectContent>
         </Select>
-        <div className='flex items-center w-full justify-between gap-3'><Input placeholder='Entrez une note'  value={v?.toString()} onChange={(e)=>changeRating(parseInt(e.target.value))} /> <Button onClick={fixSave} className='bg-blue-500 w-[200px] hover:bg-blue-700'>{loading?< div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />:"Enregistrer"}</Button></div>
-       <h1 className='my-2 text-[#555] font-bold'>Notes courantes</h1>
+        <div className='flex items-center w-full justify-between gap-3'><Input placeholder='Entrez une note'  value={v?.toString()} onChange={(e)=>changeRating(parseInt(e.target.value))} /> <Button onClick={fixSave} className='bg-blue-500 w-[200px] hover:bg-blue-700'>{loading?< div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />:user?.lang === "Français"? "Enregistrer":"Save"}</Button></div>
+       <h1 className='my-2 text-[#555] font-bold'>{user?.lang === "Français"? "Notes courantes":"Current Rating"}</h1>
        <div className='flex justify-start gap-5 flex-wrap items-center'>
         {
            results.length !== 0 && sessions.map(
