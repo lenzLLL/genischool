@@ -1789,20 +1789,3 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
     return {status:500,fr:error.message,eng:error.message}
   }
 }
-export const getFinanceFess = async () => {
-  try{
-    const schoolYearId = (await getCurrentUser()).schoolId; // Remplacez par l'ID de l'année scolaire
-    const r = await prisma.historiqueFees.groupBy({
-      by:["month"],
-      _sum:{
-        amount:true
-      }
-    }    )
-    
-    // Afficher le résultat
-     return r
-  }
-  catch(error:any){
-
-  }
-}

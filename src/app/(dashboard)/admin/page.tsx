@@ -27,6 +27,42 @@ const AdminPage = async({
       }
     }
   })
+  function getMonthName(monthNumber:number) {
+    const months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+  
+    if (monthNumber < 1 || monthNumber > 12) {
+      return "Mois invalide"; // Gestion des erreurs
+    }
+    return months[monthNumber - 1]; // Retourne le nom du mois
+  }
+
+  const r = await prisma.historiqueFees.groupBy({
+    by:["month"],
+    _sum:{
+      amount:true
+    },
+    
+    where:{
+       fees:{
+        student:{
+          schoolId:school?.id
+        }
+       }  
+    }
+  }    )
+  let fr = []
+  console.log(r)
+  for(let i = 0;i<12;i++){
+    fr.push({
+      name:getMonthName(i+1),
+      income:parseInt(r.find(d=>d.month === (i+1).toString())?._sum.amount?.toString()||"")||0,
+      expense:0
+      })
+  }
+
   return (
     <div className="p-4 flex gap-4 flex-col md:flex-row">
       {/* LEFT */}
@@ -51,7 +87,7 @@ const AdminPage = async({
         </div>
         {/* BOTTOM CHART */}
         <div className="w-full h-[500px]">
-           <FinanceChart /> 
+           <FinanceChart statsF={fr} /> 
         </div>
       </div>
       {/* RIGHT */}
