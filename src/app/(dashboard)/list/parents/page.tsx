@@ -108,6 +108,11 @@ const columns =[
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
+      orderBy:[
+        {
+          username:"asc"
+        }
+      ]
     }),
     prisma.parent.count({ where: query }),
   ]);

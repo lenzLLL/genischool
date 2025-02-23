@@ -105,6 +105,11 @@ const renderRow = (item: ClassList) => (
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
+      orderBy:[
+        {
+          name:"asc"
+        }
+      ]
     }),
     prisma.class.count({ where: query }),
   ]);

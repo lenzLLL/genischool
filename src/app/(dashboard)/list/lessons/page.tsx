@@ -123,7 +123,7 @@ const LessonListPage = async ({
         class: {
           currentStudents: {
             some: {
-              id: currentUser.id
+              id: currentUser.id||""
             }
           }
         }
@@ -150,7 +150,7 @@ const LessonListPage = async ({
            lessons:{
             some:{
               lesson:{
-                teacherId:currentUser?.id
+                teacherId:currentUser?.id||""
               }
             }
            }
@@ -169,6 +169,11 @@ const LessonListPage = async ({
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
+      orderBy:[
+        {
+          startTime:"asc"
+        }
+      ]
     }),
     prisma.lesson.count({ where: query }),
   ]);

@@ -4,10 +4,11 @@ import { Prisma } from "@prisma/client";
 import Link from "next/link";
 import { MdArrowForward } from "react-icons/md";
 
-const Announcements = async ({lang,userId,role,schoolId}:{schoolId:string, lang:string,userId:string,role:string}) => {
+const Announcements = async ({lang,userId,role}:{ lang:string,userId:string,role:string}) => {
 
 
   const query: Prisma.AnnouncementWhereInput = {};
+  const query2: Prisma.AnnouncementWhereInput = {};
   const user=  await getCurrentUser()
   if(role === "Student"){
     query.announcementClass = {
@@ -49,6 +50,13 @@ const Announcements = async ({lang,userId,role,schoolId}:{schoolId:string, lang:
           }
         }
       }
+      query2.announcementClass = {
+        some:{
+          class:{
+            supervisorId:userId
+          }
+        }
+      }
     } 
     else{
       query.announcementClass = {
@@ -61,7 +69,7 @@ const Announcements = async ({lang,userId,role,schoolId}:{schoolId:string, lang:
     }
   const data = await prisma.announcement.findMany({
     take: 4,
-    where:query,
+    where:{OR:[{...query},{...query2}]},
     orderBy: { date: "desc" },
   });
   
