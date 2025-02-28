@@ -130,6 +130,7 @@ const TeacherListPage = async ({
     }
   }
   query.deleted = false
+  query.schoolId = currentUser?.schoolId
   const [data, count] = await prisma.$transaction([
     prisma.teacher.findMany({
       where: query,

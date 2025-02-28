@@ -23,7 +23,7 @@ export const useFees = () => {
     const [tranche,setTranche] = useState<number|null>(null)
     const [currentStudent,setCurrentStudent] = useState<any>(null)
     const [isSettingStudent,setIsSettingStudent] = useState(false)
-    const [matricule,setMatricule] = useState("qsd")
+    const [matricule,setMatricule] = useState("")
     const [settingFees,SetSettingFees] = useState(false)
     const router = useRouter()
     const getStudents = async () => {

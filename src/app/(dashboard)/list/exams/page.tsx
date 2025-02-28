@@ -11,6 +11,8 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Attendance, Class, Exam, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import { Result } from "postcss";
+import { customizedFormatDate } from "../lessons/page";
+import { ExamFilter } from "./components/filter";
 
 type ExamList = Exam & {teacher:Teacher} & {subject:Subject} & {results:Result[]} &{attendances:Attendance[]} & {classes:Class[]}
 const ExamListPage = async ({
@@ -80,10 +82,10 @@ const ExamListPage = async ({
       <td className="hidden md:table-cell">{item.results.length}</td>
       <td className="hidden md:table-cell">{item.attendances.length}</td>
       <td className="hidden md:table-cell">
-      {new Intl.DateTimeFormat("en-US").format(item.startTime)}
+      {customizedFormatDate(item.startTime)}
       </td>
       <td className="hidden md:table-cell">
-      {new Intl.DateTimeFormat("en-US").format(item.endTime)}
+      {customizedFormatDate(item.endTime)}
       </td>
       <td>
         <div className="flex items-center gap-2">
@@ -114,6 +116,15 @@ const ExamListPage = async ({
           case "classId":
             query.classes = {some:{id:value}};
             break;
+            case "subjectId":
+              query.subjectId = value;
+              break;
+            case "date":
+              query.startTime = {
+                gte: new Date(value), // Date début
+                lt: new Date(new Date(value).getTime() + 86400000) // Date fin (le lendemain)
+              }
+              break  
           case "teacherId":
             query.teacherId = value;
             break;
@@ -135,14 +146,15 @@ const ExamListPage = async ({
      case "Admin":
        break;
      case "Teacher":
-        query.teacherId = currentUser?.id;
+        query.teacherId = currentUser?.id||'';
         break;
       case "Student":
-        query.classes = {some:{currentStudents:{some:{id:currentUser?.id}}}};
+        query.classes = {some:{currentStudents:{some:{id:currentUser?.id||''}}}};
         break;
       case "Parent":
         query.classes = {some:{currentStudents:{some:{parentId:currentUser?.id}}}};
         break;
+      
      default:
        break  
   }
@@ -180,6 +192,16 @@ const ExamListPage = async ({
     }),
     prisma.exam.count({ where: query }),
   ]);
+  const subjects = await prisma.subject.findMany({
+    where:{
+      schoolId:currentUser?.schoolId
+    }
+  })
+  const classes = await prisma.class.findMany({
+    where:{
+      schoolId:currentUser?.schoolId
+    }
+  })
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
@@ -188,12 +210,7 @@ const ExamListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch  lang={currentUser?.lang? currentUser?.lang:"Français"}/>
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/filter.png" alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
+             <ExamFilter user={currentUser} classes={classes} subjects={subjects}/>
              {currentUser?.role === "Admin"  && <FormContainer table="exam" type="create" />} 
           </div>
         </div>

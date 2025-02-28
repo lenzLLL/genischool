@@ -100,6 +100,7 @@ const columns =[
       }
     }
   }
+  query.schoolId = currentUser?.schoolId
   const [data, count] = await prisma.$transaction([
     prisma.parent.findMany({
       where: query,

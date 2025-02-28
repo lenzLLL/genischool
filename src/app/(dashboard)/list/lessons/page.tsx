@@ -5,11 +5,12 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { lessonsData, role } from "@/lib/data";
-import { getCurrentUser } from "@/lib/functs";
+import {  getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Attendance, Class, Lesson, LessonClass, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
+import { LessonsFilter } from "./components/filter";
 
 type LessonList = Lesson & { subject: Subject }&{classes:(LessonClass & {class:Class})[]}  & {teacher: Teacher;} & {attendances:Attendance[]};
 
@@ -67,11 +68,11 @@ const LessonListPage = async ({
       </td>
       
       <td className="hidden md:table-cell">
-      {item.startTime && new Intl.DateTimeFormat("en-US").format(item.startTime)}
+      {item.startTime &&  customizedFormatDate(item.startTime)}
 
       </td>
       <td className="hidden md:table-cell">
-      {item.endTime && new Intl.DateTimeFormat("en-US").format(item.endTime)}
+      {item.endTime && customizedFormatDate(item.endTime)}
        
       </td>
       <td>
@@ -102,6 +103,15 @@ const LessonListPage = async ({
           case "classId":
             query.classes = {some:{classId:value}};
             break;
+          case "subjectId":
+            query.subjectId = value;
+            break;
+          case "date":
+            query.startTime = {
+              gte: new Date(value), // Date début
+              lt: new Date(new Date(value).getTime() + 86400000) // Date fin (le lendemain)
+            }
+            break
           case "teacherId":
             query.teacherId = value;
             break;
@@ -158,7 +168,7 @@ const LessonListPage = async ({
         }
       }
     } 
-  
+  query.schoolId = currentUser?.schoolId
   const [data, count] = await prisma.$transaction([
     prisma.lesson.findMany({
       where: query,
@@ -171,13 +181,22 @@ const LessonListPage = async ({
       skip: ITEM_PER_PAGE * (p - 1),
       orderBy:[
         {
-          startTime:"asc"
+          startTime:"desc"
         }
       ]
     }),
     prisma.lesson.count({ where: query }),
   ]);
-
+  const subjects = await prisma.subject.findMany({
+    where:{
+      schoolId:currentUser?.schoolId
+    }
+  })
+  const classes = await prisma.class.findMany({
+    where:{
+      schoolId:currentUser?.schoolId
+    }
+  })
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
@@ -186,12 +205,8 @@ const LessonListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/filter.png" alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
+            <LessonsFilter user = {currentUser} subjects={subjects} classes = {classes} />
+         
              {currentUser?.role === "Admin" && <FormContainer table="lesson" type="create" />} 
           </div>
         </div>
@@ -208,3 +223,13 @@ const LessonListPage = async ({
 };
 
 export default LessonListPage;
+
+export function customizedFormatDate(date:Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Ajoute un zéro si nécessaire
+  const day = String(date.getDate()).padStart(2, '0'); // Ajoute un zéro si nécessaire
+  const hours = String(date.getHours()).padStart(2, '0'); // Ajoute un zéro si nécessaire
+  const minutes = String(date.getMinutes()).padStart(2, '0'); // Ajoute un zéro si nécessaire
+
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+}

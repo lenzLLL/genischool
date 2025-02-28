@@ -95,7 +95,7 @@ const renderRow = (item: ClassList) => (
       }
     }
   }
- 
+ query.schoolId = currentUser?.schoolId
   const [data, count] = await prisma.$transaction([
     prisma.class.findMany({
       where: query,

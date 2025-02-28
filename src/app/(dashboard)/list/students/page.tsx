@@ -135,6 +135,7 @@ const StudentListPage = async ({
     }
   }
   query.deleted = false
+  query.schoolId = currentUser?.schoolId
   const [data, count] = await prisma.$transaction([
     prisma.student.findMany({
       where: query,

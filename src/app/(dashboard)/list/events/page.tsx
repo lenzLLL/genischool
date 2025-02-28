@@ -10,6 +10,7 @@ import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Event, Prisma } from "@prisma/client";
 import Image from "next/image";
+import { customizedFormatDate } from "../lessons/page";
 
 type EventList = Event;
 
@@ -62,11 +63,11 @@ const EventListPage = async ({
       <td className="hidden md:table-cell">{item.description}</td>
      
       <td className="hidden md:table-cell">
-      {item.startTime && new Intl.DateTimeFormat("en-US").format(item.startTime)}
+      {item.startTime && customizedFormatDate(item.startTime)}
 
       </td>
       <td className="hidden md:table-cell">
-      {item.endTime && new Intl.DateTimeFormat("en-US").format(item.endTime)}
+      {item.endTime && customizedFormatDate(item.endTime)}
        
       </td>
       <td>
@@ -103,7 +104,8 @@ const EventListPage = async ({
       }
     }
   }
-
+  query.schoolId = currentUser?.schoolId
+ 
   // ROLE CONDITIONS
 
   const [data, count] = await prisma.$transaction([
@@ -111,6 +113,9 @@ const EventListPage = async ({
       where:query,
       include: {
       
+      },
+      orderBy:{
+        startTime:"desc"
       },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
@@ -126,12 +131,6 @@ const EventListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch lang={currentUser?.lang? currentUser?.lang:""} />
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/filter.png" alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
              {currentUser?.role === "Admin" && <FormContainer table="event" type="create" />} 
           </div>
         </div>

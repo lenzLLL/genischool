@@ -77,7 +77,7 @@ const SubjectListPage = async ({
       }
     }
   }
-
+  query.schoolId = currentUser?.schoolId
   const [data, count] = await prisma.$transaction([
     prisma.subject.findMany({
       where: query,
