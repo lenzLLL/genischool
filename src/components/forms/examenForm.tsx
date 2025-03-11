@@ -68,7 +68,7 @@ const ExamForm = ({
   );
   useEffect(() => {
     if (state.success) {
-      toast(`${user?.lang === "Français"? 'La donnée a été':'Data has been'} ${type === "create" ? user?.lang === "Français"?"Créée":"created" :user?.lang === "Français"?'Modifiée': "updated"}!`);
+      toast.success(`${user?.lang === "Français"? 'La donnée a été':'Data has been'} ${type === "create" ? user?.lang === "Français"?"Créée":"created" :user?.lang === "Français"?'Modifiée': "updated"}!`);
       setOpen(false);
       startTransition(()=>{  
       })
@@ -77,7 +77,7 @@ const ExamForm = ({
     if (state.error) {
       startTransition(()=>{  
       })
-      toast(`${user?.lang === "Français"? state.fr:state.eng}`);
+      toast.error(`${user?.lang === "Français"? state.fr:state.eng}`);
     }
   }, [state, type, setOpen]);
   const [isPending,startTransition] = useTransition()

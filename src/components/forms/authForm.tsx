@@ -26,7 +26,7 @@ export default function AuthForm({school}:{school:School[]}) {
             lang: null
         }}) 
         if(r.error){
-            toast(r.error)    
+            toast.error(r.error)    
         }else if(r.route){
             router.push(r?.route)
         }

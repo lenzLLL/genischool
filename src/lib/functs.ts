@@ -52,15 +52,12 @@ export const toLogin =  async ({data}:{data:AuthSchema}) => {
     //      }
     //  })
 
- }
-
-
- export const getCurrentUser = async () => {
+}
+export const getCurrentUser = async () => {
      const cookieStore = await cookies()
      if(!cookieStore.get("auth") || !cookieStore.get("role")){   
       redirect("/sign-in")
      }
-
      const role = cookieStore.get("role")?.value
      const school = cookieStore.get("school")?.value
      const id = cookieStore.get("auth")?.value
@@ -68,11 +65,12 @@ export const toLogin =  async ({data}:{data:AuthSchema}) => {
      let user = null
      if(role === "Administrateur"){
          user = await prisma.admin.findUnique({where:{id},include:{school:true}})
+         const lang = cookieStore.get("lang")?.value||user?.school.lang
          if(!user){
              redirect("/sign-in")
          }
          const response:AuthSchema = {
-            lang: user.school.lang, email: user.email, role: "Admin", fullname: user.username, id: user.id, schoolId: user.schoolId, password: "", matricule: "",
+            lang: lang||"Français", email: user.email, role: "Admin", fullname: user.username, id: user.id, schoolId: user.schoolId, password: "", matricule: "",
             currentSchoolYear: current? current:""
          }
          return response                 
@@ -83,5 +81,13 @@ export const toLogin =  async ({data}:{data:AuthSchema}) => {
      }
      return response
 
- }
+}
+export const logOut = async ()=>{
+   const cookieStore = await cookies()
+   cookieStore.delete("role")
+   cookieStore.delete("school")
+   cookieStore.delete("auth")
+   cookieStore.delete("current")
+   redirect("/sign-in")
+}
 

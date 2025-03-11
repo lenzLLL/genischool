@@ -46,9 +46,12 @@ model Admin {
   username String
   email String 
   password String
+  createdAt   DateTime?     @default(now())
   schoolId String @db.Uuid
   school      School       @relation(fields: [schoolId], references: [id])
   deleted Boolean @default(false)
+  picture String?
+  key String?
 }
 model Student {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

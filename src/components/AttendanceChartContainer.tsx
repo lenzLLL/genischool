@@ -83,7 +83,6 @@ const AttendanceChartContainer = async ({user}:{user:AuthSchema}) => {
             <div className="flex flex-wrap gap-1 items-center justify-start mt-1">
                 <span style={{color:c1}} className={`bg-white p-1 px-2 text-sm  rounded-full`}>{d.fees.student.username}</span>
                 <span style={{color:c2}} className={`bg-white p-1 px-2 text-sm  rounded-full`}>{d.amount.toString()} fcfa</span>
-                <span style={{color:c1}} className={`bg-white p-1 px-2 text-sm  rounded-full`}>{d.amount.toString()} fcfa</span>
                 <span style={{color:c2}} className={`bg-white p-1 px-2 text-sm  rounded-full`}>{d.fees.student.currentClass?.name}</span>
 
             </div>

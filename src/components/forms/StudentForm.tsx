@@ -84,12 +84,12 @@ const StudentForm = ({
   const router = useRouter();
   useEffect(() => {
     if (state.success) {
-      toast(`${user?.lang === "Français"? 'La donnée a été':'Data has been'} ${type === "create" ? user?.lang === "Français"?"Créée":"created" :user?.lang === "Français"?'Modifiée': "updated"}!`);
+      toast.success(`${user?.lang === "Français"? 'La donnée a été':'Data has been'} ${type === "create" ? user?.lang === "Français"?"Créée":"created" :user?.lang === "Français"?'Modifiée': "updated"}!`);
       setOpen(false);
       router.refresh();
     }
     if (state.error) {
-      toast(`${user?.lang === "Français"? state.fr:state.eng}`);
+      toast.error(`${user?.lang === "Français"? state.fr:state.eng}`);
     }
   }, [state, router, type, setOpen]);
 

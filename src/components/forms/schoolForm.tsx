@@ -51,7 +51,7 @@ const SchoolForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(`School has been ${type === "create" ? "created" : "updated"}!`);
+      toast.success(`School has been ${type === "create" ? "created" : "updated"}!`);
       setOpen(false);
       router.refresh();
     }

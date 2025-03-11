@@ -1,4 +1,5 @@
 "use server";
+import { cookies } from 'next/headers'
 import cloudinary from "cloudinary"
 import { revalidatePath } from "next/cache";
 import {
@@ -20,6 +21,7 @@ import { connect } from "http2";
 import { getCurrentUser } from "./functs";
 import { id } from "date-fns/locale";
 import { Prisma } from "@prisma/client";
+import { string } from "zod";
 type CurrentState = { success: boolean; error: boolean,eng:String,fr:String};
 type FinalCurrentState = { success: boolean; error: boolean;msg:String };
 type CurrentStateUpdate = { success: boolean; error: boolean,newImage:Boolean };
@@ -1692,7 +1694,7 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
           )||0
           sum += parseInt(s?.school.inscription.toString()||"")
           if(sum===parseInt(s?.studentFees[0]?.amount.toString()||"")+amount){
-            return {status:200,fr:`L'étudiant a réglé la pension en totalité`,eng:`The student has fully paid the tuition`} 
+            return {status:200,fr:`L'étudiant a réglé la pension en totalité`,eng:`The student has fully paid the school fees`} 
           }
           else if(sum<parseInt(s?.studentFees[0]?.amount.toString()||"")+amount){
               return {status:200,fr:`Vous ne pouvez pas entrer plus de ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`,eng:`You can't enter more than ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`}  
@@ -1788,4 +1790,91 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
   catch(error:any){
     return {status:500,fr:error.message,eng:error.message}
   }
+}
+export const getCurrentUserInfos = async () =>{
+  try{
+      const user = await getCurrentUser()
+      let f = null
+      if(user.role === "Admin"){
+          f = await prisma.admin.findUnique({
+            where:{
+              id:user?.id||""
+            }
+          })
+          return f 
+      }
+      return f   
+  }
+  catch(error:any){
+    console.log(error)
+  }
+}
+export const deletePictureUser = async () => {
+  try{
+      const user = await getCurrentUser()
+      if(!user){return null}
+      if(user?.role === "Admin"){
+          const userInfos = await prisma.admin.findFirst({
+            where:{id:user?.id||""}
+          })    
+          if(!userInfos){return null}
+          if(userInfos.key){
+              await cloudinary.v2.uploader.destroy(userInfos.key)
+              await prisma.admin.updateMany({
+                data:{
+                  key:"",
+                  picture:""
+                }
+              })
+          }
+      }
+      
+  }
+  catch(error){
+    return null
+  }
+}
+export const uploadProfilPicture = async ({url,key}:{url:string,key:string}) => {
+    try{
+        const user = await getCurrentUser()
+        await deletePictureUser()
+        if(user?.role === "Admin"){
+          await prisma.admin.update({
+            where:{
+              id:user?.id||""
+            },
+            data:{
+              key,
+              picture:url
+            }
+          })
+        }
+    } 
+    catch(error:any){
+        return null 
+    } 
+}
+export const updateProfilUser = async ({password,email,lang,username}:{password:string,email:string,lang:string,username:string}) => {
+    try{
+        const user = await getCurrentUser()
+        const cookieStore = await cookies()
+        let l = lang === "f"? "Français":"Anglais"
+        cookieStore.set("lang",l,{expires:new Date(new Date().getTime() + 1000 * 60 * 60 * 24)})
+        if(user?.role === "Admin"){
+            await prisma.admin.update({
+              where:{
+                id:user?.id??""
+              },
+              data:{
+                password,
+                email,
+                username
+              }
+            })
+        }
+        return 
+    } 
+    catch(error:any){
+        return
+    } 
 }

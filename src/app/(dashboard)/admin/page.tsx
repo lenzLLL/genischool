@@ -93,7 +93,7 @@ const AdminPage = async({
       {/* RIGHT */}
       <div className="w-full lg:w-1/3 flex flex-col gap-8">
         <EventCalendarContainer user = {currentUser} searchParams={searchParams} /> 
-        <Announcements userId={currentUser?.id||""} role = {currentUser?.role||""} lang = {currentUser?.lang||""} schoolId={currentUser?.schoolId||""} />
+        <Announcements userId={currentUser?.id||""} role = {currentUser?.role||""} lang = {currentUser?.lang||""}  />
       </div>
     </div>
   );

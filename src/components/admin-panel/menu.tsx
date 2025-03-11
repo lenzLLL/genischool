@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/tooltip";
 import { getMenuList } from "@/lib/menu-list";
 import { AuthSchema } from "@/lib/schemas";
-
+import { logOut } from "@/lib/functs";
+import { toast } from "react-toastify";
 interface MenuProps {
   isOpen: boolean | undefined;
   user:AuthSchema
@@ -25,7 +26,15 @@ interface MenuProps {
 export function Menu({ isOpen,user }: MenuProps) {
   const pathname = usePathname();
   const menuList = getMenuList(pathname);
-
+  const signout = async () =>{
+    let msg = user?.lang === "Français" ? "Déconnexion réussie":"Logout successful"
+    await logOut().then(
+        ()=>{
+            toast.success(msg)
+            
+        }
+      )  
+  }
   return (
       <ScrollArea>
       <nav className="mt-2 h-full w-full">
@@ -123,7 +132,7 @@ export function Menu({ isOpen,user }: MenuProps) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() => {}}
+                    onClick={signout}
                     variant="outline"
                     className="w-full bg-blue-400 text-white hover:bg-blue-700 hover:shadow-md hover:text-white justify-center h-10"
                   >
@@ -136,7 +145,7 @@ export function Menu({ isOpen,user }: MenuProps) {
                         isOpen === false ? "opacity-0 hidden" : "opacity-100"
                       )}
                     >
-                      Sign out
+                      {user?.lang !== "Français"? 'Sign out':'Déconnecter'}
                     </p>
                   </Button>
                 </TooltipTrigger>
