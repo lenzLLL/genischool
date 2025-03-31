@@ -24,11 +24,11 @@ export default async function DashboardLayout({
           <Image src="/logo.png" alt="logo" width={32} height={32} />
           <span className="hidden lg:block font-bold">SchooLama</span>
         </Link> */}
-        <Sidebar user = {user}  />
+        <Sidebar user = {user||null}  />
       {/* </div> */}
       {/* RIGHT */}
       <div className={` lg:flex-1 w-[100%] z-[0] pt-20 lg:pt-0 bg-[#F7F8FA] overflow-scroll flex flex-col`}>
-        <Navbar currentUser={user} />
+        <Navbar currentUser={user||null} />
         {children}
       </div>
     </div>

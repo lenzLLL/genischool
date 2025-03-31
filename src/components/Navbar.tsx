@@ -7,7 +7,7 @@ import React,{useState} from "react"
 import { AuthSchema } from "@/lib/schemas"
 import { useUser } from "@/hooks/user/use-user"
 import NavComponent from "./NavComponent"
-const Navbar = async ({currentUser}:{currentUser:AuthSchema}) => {
+const Navbar = async ({currentUser}:{currentUser:AuthSchema|null}) => {
   
   return (
     <NavComponent currentUser = {currentUser}/>

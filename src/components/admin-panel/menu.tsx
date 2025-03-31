@@ -20,7 +20,7 @@ import { logOut } from "@/lib/functs";
 import { toast } from "react-toastify";
 interface MenuProps {
   isOpen: boolean | undefined;
-  user:AuthSchema
+  user:AuthSchema|null
 }
 
 export function Menu({ isOpen,user }: MenuProps) {

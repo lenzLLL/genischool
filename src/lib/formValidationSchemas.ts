@@ -149,5 +149,12 @@ export const attendanceSchema = z.object({
    //teacher ids
 });
 export type AttendanceSchema = z.infer<typeof attendanceSchema>
-
+export const accountingSchema = z.object({
+  id: z.coerce.string().optional(),
+  title: z.coerce.string(),
+  amount:z.string(),
+  paymentDate:z.coerce.date(),
+  description:z.string()
+});
+export type AccountingSchema = z.infer<typeof accountingSchema>
 

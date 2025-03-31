@@ -49,7 +49,7 @@ export const useFees = () => {
         const c = await getClasses({schoolId: r?.schoolId||""}) ||[]
      
         setClasses(c||[])
-        setCurrentUser(r)
+        setCurrentUser(r||null)
     }
     const getUserByName = () =>{
         if(name){
@@ -96,7 +96,7 @@ export const useFees = () => {
         const currentUser = await getCurrentUser()
         SetSettingFees(true)
         if(amount === 0){
-            if(currentUser.lang === "Français"){
+            if(currentUser?.lang === "Français"){
                 toast("Le champs nouveau montant est vide!")
             }
             else{
@@ -104,7 +104,7 @@ export const useFees = () => {
             }  
         }
         let r = await addFees({amount,id:selectedUser,m:matricule})
-        if(currentUser.lang === "Français"){
+        if(currentUser?.lang === "Français"){
             toast(r.fr)
         }
         else{
@@ -120,6 +120,7 @@ export const useFees = () => {
           studentById()
         }
     }
+
     useEffect(
         ()=>{
             getStudents()

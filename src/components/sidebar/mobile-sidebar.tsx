@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { PanelsTopLeft, X } from "lucide-react";
 import Link from "next/link";
 
-export function MobileSidebar({user,onClose}:{user:AuthSchema,onClose:(v:boolean)=>void}) {
+export function MobileSidebar({user,onClose}:{user:AuthSchema|null,onClose:(v:boolean)=>void}) {
   const sidebar = useStore(useSidebar, (x:any) => x);
   if (!sidebar) return null;
   const { isOpen, toggleOpen, getOpenState, setIsHover, settings } = sidebar;

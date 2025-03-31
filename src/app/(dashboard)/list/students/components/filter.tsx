@@ -65,7 +65,7 @@ const data = [
   },
 ]
 
-export function StudentFilter({user,classes}:{user:AuthSchema,classes:any[]}) {
+export function StudentFilter({user,classes}:{user:AuthSchema|null,classes:any[]}) {
  
   const router = useRouter()
   const searchParams = useSearchParams();

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  deleteAccounting,
   deleteAnnouncement,
   deleteClass,
   deleteEvent,
@@ -25,6 +26,7 @@ import { getCurrentUser } from "@/lib/functs";
 import { AuthSchema } from "@/lib/schemas";
 import { School, User } from "lucide-react";
 import { string } from "zod";
+import AccountForm from "./forms/AccountingForm";
 
 const deleteActionMap = {
 //   subject: deleteSubject,
@@ -54,6 +56,7 @@ const deleteActionMap = {
   subject:deleteSubject,
   event: deleteEvent,
   announcement: deleteAnnouncement,
+  accounting:deleteAccounting
 };
 
 // USE LAZY LOADING
@@ -86,6 +89,13 @@ const AnnouncementForm = dynamic(() => import("./forms/AnnouncementForm"), {
 const LessonForm = dynamic(() => import("./forms/lessonForm"), {
   loading: () => <h1>Loading...</h1>,
 }
+
+);
+
+const AccountingForm = dynamic(() => import("./forms/AccountingForm"), {
+  loading: () => <h1>Loading...</h1>,
+}
+
 );
 
 const ExamForm = dynamic(() => import("./forms/examenForm"), {
@@ -147,7 +157,6 @@ const forms: {
     <SchoolForm
       type={type}
       data={data}
-      user={user}
       setOpen={setOpen}
       relatedData={relatedData}
     />
@@ -156,7 +165,6 @@ const forms: {
     <SchoolYearForm
       type={type}
       data={data}
-      user={user}
       setOpen={setOpen}
       relatedData={relatedData}
     />
@@ -206,6 +214,14 @@ const forms: {
       user={user}
       setOpen={setOpen}
       relatedData={relatedData}
+    />
+  ),
+  accounting:(setOpen, type, data, relatedData,user) => (
+    <AccountingForm
+      type={type}
+      data={data}
+      user={user}
+      setOpen={setOpen}
     />
   )
   // exam: (setOpen, type, data, relatedData) => (

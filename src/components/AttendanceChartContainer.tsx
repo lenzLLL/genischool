@@ -5,7 +5,7 @@ import { AuthSchema } from "@/lib/schemas";
 import { NavigationOff } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const AttendanceChartContainer = async ({user}:{user:AuthSchema}) => {
+const AttendanceChartContainer = async ({user}:{user:AuthSchema|null}) => {
  
 
   // const resData = await prisma.attendance.findMany({
@@ -57,7 +57,7 @@ const AttendanceChartContainer = async ({user}:{user:AuthSchema}) => {
         <h1 className="text-lg font-semibold">{user?.lang === "Français"? "Dernières transactions":"Last transactions"}</h1>
         <span className="text-xs text-gray-400">{user?.lang === "Français"? "Voir tout":"View all"}</span>
       </div>
-      <ScrollArea>
+      <ScrollArea className="h-[calc(100%-50px)]  rounded-md border">
        {
         data.length >0 && data.map(
           (d,i)=>{

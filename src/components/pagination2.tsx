@@ -1,3 +1,4 @@
+"use client"
 import { useSearchParams ,useRouter, usePathname} from 'next/navigation';
 import React from 'react'
 import ReactPaginate from 'react-paginate';

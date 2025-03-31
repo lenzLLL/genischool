@@ -10,6 +10,7 @@ import { School } from '@prisma/client'
 import { toLogin } from '@/lib/functs';
 export default function AuthForm({school}:{school:School[]}) {
     const [email,setEmail] = useState("")
+    const [isLoading,setIsLoading] = useState(false)
     const [password,setPassword] = useState("")
     const [contact,setContact] = useState("")
     const [matricule,setMatricule] = useState("")
@@ -17,18 +18,24 @@ export default function AuthForm({school}:{school:School[]}) {
     const [institut,setInstitut] = useState("Choisir un établissement")
     const [role,setRole] = useState("Rôle")
     const router = useRouter()
- 
     const submit  = async () =>{
+        setIsLoading(true)
         const r = await toLogin({data:{
             email, password, matricule, role, schoolId: institut, fullname: null,
             currentSchoolYear: null,
             id: null,
             lang: null
-        }}) 
+        }})
         if(r.error){
-            toast.error(r.error)    
+            toast.error(r.error)  
+            setIsLoading(false)
         }else if(r.route){
             router.push(r?.route)
+        }
+    }
+    const gotToForget = async () => {
+        if(role === "Administrateur"){
+            router.push("/forget/admin")
         }
     }
     return (
@@ -75,7 +82,8 @@ export default function AuthForm({school}:{school:School[]}) {
                 <Input value={password} onChange={e=>setPassword(e.target.value)}  placeholder='Mot de passe' className='h-14 w-full outline-sky-500 rounded-md'/>
                 </>
             }
-            <Button onClick={()=>submit()} className='bg-sky-500  hover:bg-sky-700 w-[100%] '>Connexion</Button>
+            {role !== "Rôle" && <h1 onClick={gotToForget} className='text-center text-white cursor-pointer'>Informations d'authentification oubliées ? <span className='text-sky-700 ml-1'>Cliquez ici.</span></h1>}
+            <Button onClick={()=>submit()} className='bg-sky-500  hover:bg-sky-700 w-[100%] '>{isLoading? < div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />:"Connexion" }</Button>
             {/* <h2 className='text-white text-center'>Forget Password? <span className='text-sky-500 cursor-pointer'>click here</span></h2> */}
         </div>
     </div>

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { PanelsTopLeft } from "lucide-react";
 import Link from "next/link";
 
-export function Sidebar({user}:{user:AuthSchema}) {
+export function Sidebar({user}:{user:AuthSchema|null}) {
   const sidebar = useStore(useSidebar, (x:any) => x);
   if (!sidebar) return null;
   const { isOpen, toggleOpen, getOpenState, setIsHover, settings } = sidebar;

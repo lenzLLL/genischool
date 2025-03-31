@@ -1,11 +1,12 @@
 "use client"
-import { deletePictureUser, getCurrentUserInfos, updateProfilUser, uploadProfilPicture } from "@/lib/actions"
+import { deletePictureUser, getAdminByContact, getCurrentSchool, getCurrentUserInfos, getNotificationForUser, sendWhatsAppMessage, updateProfilUser, uploadProfilPicture } from "@/lib/actions"
 import { getCurrentUser } from "@/lib/functs"
 import { AuthSchema } from "@/lib/schemas"
 import React,{useEffect,useState} from "react"
 import { toast } from "react-toastify";
 import {useRouter} from "next/navigation"
 import { string } from "zod"
+import { Parent, Student } from "@prisma/client"
 export const useUser = () =>{
     const [close,setClose] = useState(true)
     const router = useRouter()
@@ -33,7 +34,7 @@ export const useUser = () =>{
     const getUser = async () => {
         setIsLoading(true)
         const r = await getCurrentUser()
-        setUser(r)
+        setUser(r||null)
         const f = await getCurrentUserInfos()
         setUserInfos(f)
         setIsLoading(false)
@@ -68,11 +69,51 @@ export const useUser = () =>{
             await getUser()
          }
     }
+    const getNotifications = async () => {
+        setIsLoading(true)
+        const r = await getNotificationForUser()
+        setIsLoading(false)
+        return r
+    }
+    const forgetadmininfos = async ({tel}:{tel:string}) => {
+        try{
+            setIsLoading(true)
+            const admin = await getAdminByContact({contact:tel})
+            let msg = user?.lang === "Français"?admin.fr:admin.eng
+            let whatsappMsg = user?.lang === "Français"? 
+            `${admin.data?.school?.name} Informations d'authentification Email: ${admin.data?.admin.email}, Mot de passe:${admin.data?.admin.password}`:
+            `${admin.data?.school?.name} Authentification Information Email: ${admin.data?.admin.email} password:${admin.data?.admin.password}`
+            if(admin.status === 200){
+                toast.success(msg)
+                await sendWhatsAppMessage({to:tel,body:whatsappMsg})
+                router.push("/sign-in")
+            }
+            else{
+                toast.error(msg)
+            }
+        }
+        catch(error){
+            console.log(error)
+        }
+        finally{
+            setIsLoading(false)
+        }
+    }
+    const sendwhatsapp = async ({s,msg}:{s:{s:string,p:string|null},msg:string}) => {
+        const school = await getCurrentSchool()
+        let m = user?.lang === "Français"? `Cordialement ${school?.name}`:`Cordialy ${school?.name}`
+        await sendWhatsAppMessage({to:s.s||"",body:msg})
+        await sendWhatsAppMessage({to:s.s||"",body:m})
+        if(s.p){
+            await sendWhatsAppMessage({to:s.p,body:msg})
+            await sendWhatsAppMessage({to:s.p,body:m})
+        }
+    }
     useEffect(
         ()=>{
             getUser()
         },[]
     )
    
-   return {isSaving,close,setClose,deletePicture,user,userInfos,uploadProfil,isLoading,setProfil,setUserInfos}
+   return {sendwhatsapp, forgetadmininfos,getNotifications,isSaving,close,setClose,deletePicture,user,userInfos,uploadProfil,isLoading,setProfil,setUserInfos}
 }

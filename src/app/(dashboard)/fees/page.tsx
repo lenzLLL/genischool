@@ -10,7 +10,7 @@ import {
     SelectValue,
   } from "@/components/ui/select"
 import { Input } from '@/components/ui/input'
-import { File, JoystickIcon, Mail, Paperclip, SaveAll, UserRoundSearch } from 'lucide-react'
+import { File, JoystickIcon, Languages, Mail, Paperclip, SaveAll, UserRoundSearch } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import EmptyComponent from '@/components/emptyComponent'
 import { useFees } from '@/hooks/fees/use-fees'
@@ -29,6 +29,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import Secondpagination from '@/components/pagination2'
 import { ProgressBar } from '@/components/progress-bar'
+import { MdWhatsapp } from 'react-icons/md'
+import { FeesFilter } from './components/filter'
+import { toast } from 'react-toastify'
 export default function page() {
   type StudentList = Student
   const [currentTranche,setCurrentTranche] = useState("")
@@ -133,7 +136,9 @@ const FixNewAmount = () =>{
                 <Button onClick={()=>getUserByName()} className='bg-blue-500 hover:bg-blue-600'>{currentUser?.lang === "Français"? 'Rechercher':'Search'}</Button>
                 </div>
                 <div>
-                    <Button><Mail className='text-white '/></Button>
+                    {students.length !== 0 && <FeesFilter user = {currentUser} students={students||[]}/>    }
+                    {students.length === 0 && <Button onClick={()=>toast.error(currentUser?.lang === "Français"?"Veillez selectionner des étudiants":"You have to select students")} style={{background:"linear-gradient(to top, #25C371, #25D366)"}}><MdWhatsapp  size={30}/></Button>}
+
                 </div>
             </div> 
             <div>
@@ -190,10 +195,12 @@ const FixNewAmount = () =>{
             <div className='flex mt-3 justify-between items-center'>
                 <div className='flex items-center justify-start gap-2'>
                 <Input value = {matricule} placeholder={currentUser?.lang === "Français"?'Matricule':'Registration Number' } onChange={(e)=>setMatricule(e.target.value)}/>
-                <Button onClick={studentBymatricule}>{ currentUser?.lang === "Français"? 'Rechercher':'Search'}</Button>
-                </div>
+                <Button onClick={()=>getUserByName()} className='bg-blue-500 hover:bg-blue-600'>{currentUser?.lang === "Français"? 'Rechercher':'Search'}</Button>
+            </div>
                 <div>
-                    <Button><Mail className='text-white '/></Button>
+                    {currentStudent && <FeesFilter user = {currentUser} students={[currentStudent]}/>}
+                    {!currentStudent && <Button onClick={()=>toast.error(currentUser?.lang === "Français"?"Veillez selectionner un étudiant":"You have to select any student")} style={{background:"linear-gradient(to top, #25C371, #25D366)"}}><MdWhatsapp  size={30}/></Button>}
+                    
                 </div>
             </div>
 

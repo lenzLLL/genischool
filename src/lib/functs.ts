@@ -56,7 +56,7 @@ export const toLogin =  async ({data}:{data:AuthSchema}) => {
 export const getCurrentUser = async () => {
      const cookieStore = await cookies()
      if(!cookieStore.get("auth") || !cookieStore.get("role")){   
-      redirect("/sign-in")
+         return 
      }
      const role = cookieStore.get("role")?.value
      const school = cookieStore.get("school")?.value

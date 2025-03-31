@@ -9,7 +9,8 @@ import {
   Notebook,
   User,
   Volume2,
-  Wallet
+  Wallet,
+  Bell
 } from "lucide-react";
 
 type Submenu = {
@@ -293,7 +294,7 @@ export function getMenuList(pathname: string): Group[] {
             {
               label: "Accounting",
               libelle:"Comptabilité",
-              href: "/accounting",
+              href: "/list/accounting",
               visible: ["Admin", "Accounter"],
             },
           ]
@@ -312,12 +313,11 @@ export function getMenuList(pathname: string): Group[] {
 
         },
         {
-          href: "/account",
-          label: "Setting",
-          libelle:"Paramètres",
-          icon: Settings,
-          visible: ["Admin"]
-
+          href: "/notifications",
+          label: "Notificatons",
+          libelle:"Notifications",
+          icon: Bell,
+          visible: ["Admin", "Teacher", "Student", "Parent"]
         }
       ]
     }

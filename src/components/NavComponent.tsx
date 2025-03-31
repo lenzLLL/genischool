@@ -6,7 +6,7 @@ import { MobileSidebar } from "./sidebar/mobile-sidebar"
 import React,{useEffect, useState} from "react"
 import { AuthSchema } from "@/lib/schemas"
 import { useUser } from "@/hooks/user/use-user"
-export default function NavComponent({currentUser}:{currentUser:AuthSchema}) {
+export default function NavComponent({currentUser}:{currentUser:AuthSchema|null}) {
     const [close,setClose] = useState(true)
     useEffect(
         ()=>{

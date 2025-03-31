@@ -16,17 +16,6 @@ import {
 
 
 const FinanceChart = ({statsF}:{statsF:any[]}) => {
-  const [data,setData] = useState<any[]>([])
-  const fixData = ()=>{
-    for(let i = 0;i<12;i++){
-      setData(statsF)
- }
-  }
-  React.useEffect(
-    ()=>{
-        // fixData()
-    }
-  )
   return (
     <div className="bg-white rounded-xl w-full h-full p-4">
       <div className="flex justify-between items-center">

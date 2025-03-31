@@ -27,6 +27,8 @@ model School {
   parents Parent[]
   lessons Lesson[]
   deefaultSessions DefaultSession[]
+  notifications Notifications[]
+  accountings Accounting[]
 }
 model Schoolyear {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -40,11 +42,13 @@ model Schoolyear {
   activate Boolean? @default(false)
   current Boolean  @default(false)
   title String?
+  accounting Accounting[]
 }
 model Admin {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username String
-  email String 
+  email String
+  contact String? 
   password String
   createdAt   DateTime?     @default(now())
   schoolId String @db.Uuid
@@ -76,6 +80,7 @@ model Student {
   deleted Boolean @default(false)
   schoolId String @db.Uuid
   school      School       @relation(fields: [schoolId], references: [id])
+  notifications Notifications[]
 }
 model ClassYear {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -108,6 +113,8 @@ model Teacher {
   lessons   Lesson[]
   classes   Class[]
   exams Exam[]
+  notifications Notifications[]
+
 }
 model Parent {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -138,6 +145,7 @@ model Class {
   feesId String @db.Uuid
   fees       Fees        @relation(fields: [feesId], references: [id])
   exams Exam[]
+  
 }
 model Subject {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -235,7 +243,6 @@ model Tranche{
   feesId String @db.Uuid
   fees     Fees      @relation(fields: [feesId], references: [id])
   historiques HistoriqueFees[]
-
 }
 model Fees {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -331,4 +338,38 @@ enum Day {
   WEDNESDAY
   THURSDAY
   FRIDAY
+}
+model Notifications{
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type TypeCat
+  cat CatNot
+  msg String
+  schoolId String @db.Uuid
+  teachers Teacher[]
+  students Student[]
+  school School? @relation(fields: [schoolId],references:[id])
+
+}
+enum CatNot {
+  TEACHER
+  STUDENT
+  ADMIN
+}
+enum TypeCat {
+  info
+  warning
+  success
+}
+model Accounting{
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title String
+  amount BigInt
+  createdAt   DateTime     @default(now())
+  paymentDate   DateTime     @default(now())
+  description String?
+  month Int
+  schoolId String @db.Uuid
+  school School @relation(fields: [schoolId],references:[id])
+  schoolYearId String @db.Uuid
+  schoolYear Schoolyear @relation(fields: [schoolYearId],references:[id])
 }

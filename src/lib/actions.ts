@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import cloudinary from "cloudinary"
 import { revalidatePath } from "next/cache";
 import {
+  AccountingSchema,
   AnnouncementSchema,
   AttendanceSchema,
   ClassSchema,
@@ -457,7 +458,7 @@ export const createStudent = async (
     const cu = await getCurrentUser()
     const school = await prisma.school.findUnique({
       where:{
-        id:cu.schoolId
+        id:cu?.schoolId
       }
     })
     const studentFeesRecord = await prisma.studentFees.create({
@@ -470,7 +471,7 @@ export const createStudent = async (
         },
         schoolYear:{
           connect:{
-            id:cu.currentSchoolYear||""
+            id:cu?.currentSchoolYear||""
           }
         },
         fees:{
@@ -511,7 +512,11 @@ export const createStudent = async (
     //inscripte dans une classe le classYear est alors créer ce qui servira de mémoire dans l'historique et une historique de
     // de paiement devrait ainsi être crée
     // revalidatePath("/list/students");
-
+    let fr = `Bienvenue sur GeniSchool! Nous avons le plaisir de vous informer que votre inscription à ${school?.name} est un succès. Votre matricule pour l'authentification est ${data.matricule} et votre mot de passe est ${data.password}.\nSi vous avez des questions ou avez besoin d'aide, n'hésitez pas à nous contacter. Cordialement, L'équipe GeniSchool`
+    let eng = `Welcome to GeniSchool! We are pleased to inform you that your registration has been successful at ${school?.name}. Your student ID is ${data.matricule} and your password is ${data.password} for authentification.If you have any questions or need assistance, feel free to reach out. Best regards, Genischool Team`
+    const msg = currentUser?.lang === "Français"?fr:eng
+    let p = data.phone||""
+    sendWhatsAppMessage({to:p,body:msg})
     return { success: true, error: false,fr:"",eng:""};
   } catch (err) {
     console.log(err);
@@ -826,14 +831,45 @@ export const createAnnouncement = async (
       }
     })
     if(!a){return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }}
+    let Ids = []
     for(let i = 0;i<data?.classes?.length;i++){
         await prisma.announcementClass.create({
           data:{
             announcementId:a.id,
             classId:data.classes[i].id
           }
-        })  
+        })
+        Ids.push(data.classes[i].id)  
     }
+    const students = await prisma.student.findMany({
+      where:{
+        currentClassId:{
+          in:Ids
+        }
+      },
+      include:{
+        parent:true
+      }
+    })
+    let currentUser = await getCurrentUser()
+    const school = await prisma.school.findUnique({
+      where:{
+        id:currentUser?.schoolId
+      }
+    })
+    let endMsg = currentUser?.lang === "Français"? `Cordialement ${school?.name}`:`Cordialy ${school?.name}`
+    for(let i = 0;i<students.length;i++){
+      if(students[i].phone){
+          await sendWhatsAppMessage({to:students[i].phone||'',body:data.title})
+          await sendWhatsAppMessage({to:students[i].phone||'',body:data.description})
+          await sendWhatsAppMessage({to:students[i].phone||'',body:endMsg})
+      }
+      if(students[i].parent?.phone){
+          await sendWhatsAppMessage({to:students[i].parent?.phone||'',body:data.title})
+          await sendWhatsAppMessage({to:students[i].parent?.phone||'',body:data.description})
+          await sendWhatsAppMessage({to:students[i].parent?.phone||'',body:endMsg})
+      }
+    } 
     return { success: true, error: false,fr:"",eng:"" };
      
   }
@@ -928,7 +964,32 @@ export const createEvent = async (
           }
       }
     })
-
+    const students = await prisma.student.findMany({
+      where:{
+        schoolId:currentUser?.schoolId
+      },
+      include:{
+        parent:true
+      }
+    })
+    const school = await prisma.school.findUnique({
+      where:{
+        id:currentUser?.schoolId
+      }
+    })
+    let endMsg = currentUser?.lang === "Français"? `Cordialement ${school?.name}`:`Cordialy ${school?.name}`
+    for(let i = 0;i<students.length;i++){
+      if(students[i].phone){
+          await sendWhatsAppMessage({to:students[i].phone||'',body:data.title})
+          await sendWhatsAppMessage({to:students[i].phone||'',body:data.description})
+          await sendWhatsAppMessage({to:students[i].phone||'',body:endMsg})
+      }
+      if(students[i].parent?.phone){
+        await sendWhatsAppMessage({to:students[i].parent?.phone||'',body:data.title})
+        await sendWhatsAppMessage({to:students[i].parent?.phone||'',body:data.description})
+        await sendWhatsAppMessage({to:students[i].parent?.phone||'',body:endMsg})
+      }
+    }
     return { success: true, error: false, eng:"",fr:"" };
      
   }
@@ -997,7 +1058,7 @@ export const createLessons = async (
           teacherId:data.teacherId? data.teacherId:"",
           subjectId:data.subjectId? data.subjectId:"",
           startTime:data.startTime,
-          schoolId:currentUser?.schoolId,
+          schoolId:currentUser?.schoolId||"",
           endTime:data.endTime
       }
     })
@@ -1184,7 +1245,7 @@ export const createParent = async (
       data:{
           username:data.username,
           email:data.email,
-          phone:data.phone,
+          phone:data.phone||"",
           password:data.password,
           address:data.address,
           school:{
@@ -1317,7 +1378,7 @@ export const getAllAttendances = async () => {
       const attendances = await prisma.attendance.findMany({
           where:{
             student:{
-              schoolId: user.schoolId
+              schoolId: user?.schoolId
             }
           }
       })
@@ -1481,10 +1542,12 @@ export const getCurrentStudents = async ({classId}:{classId:string}) => {
                       amount:true
                     }
                   }
-                }
-              }
+                },
+                
+              },
             }
-          }
+          },
+          parent:true
         }
       })
       return r
@@ -1621,8 +1684,8 @@ export const getStudentById = async ({id}:{id:string}) =>{
             }
           },
           currentClass:true,
-          school:true
-
+          school:true,
+          parent:true
         }
       }) 
       return {status:200,data:user}
@@ -1684,7 +1747,8 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
                   }
                 }
               },
-              school:true
+              school:true,
+              parent:true
             }
           })
           let sum = s?.studentFees[0]?.fees.tranches.reduce(
@@ -1699,7 +1763,7 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
           else if(sum<parseInt(s?.studentFees[0]?.amount.toString()||"")+amount){
               return {status:200,fr:`Vous ne pouvez pas entrer plus de ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`,eng:`You can't enter more than ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`}  
           }
-          await prisma.studentFees.update({
+          let sf  = await prisma.studentFees.update({
             where:{
               id:s?.studentFees[0]?.id
             },
@@ -1707,7 +1771,7 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
                 amount:amount+parseInt(s?.studentFees[0]?.amount.toString()||"")
             }
           })
-          let rest = sum- amount+parseInt(s?.studentFees[0]?.amount.toString()||"")
+          let rest = sum- parseInt(sf.amount.toString())
           await prisma.historiqueFees.create({
             data:{
             amount:amount,
@@ -1722,6 +1786,16 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
              } 
             }
           })
+          let fr = `Dear ${s?.username}, We are pleased to inform you that your payment for the tuition fee has been successfully recorded in our system. Payment of ${amount}Fcfa, remaining to pay: ${rest}Fcfa. If you notice any discrepancies in the amount, please click the next link  to report the issue: https://genischool.org/fess-request/${sf.id}`
+          let eng = `Cher(e) ${s?.username}, nous avons le plaisir de vous informer que votre paiement pour la pension a été enregistré avec succès dans notre système. Montant du paiement : ${amount} Fcfa, reste à payer : ${rest} Fcfa. Si vous constatez des erreurs dans le montant, veuillez cliquer sur le lien suivant pour signaler le problème : https://genischool.org/fess-request/${sf.id}`
+          let msg = currentUser?.lang === "Français"?fr:eng
+          sendWhatsAppMessage({to:s?.phone||"",body:msg})
+          if(s?.parent?.phone){
+            let eng = `Dear Parent of ${s?.username}, We are pleased to inform you that the payment for the tuition fee has been successfully recorded in our system. Payment of ${amount} Fcfa, remaining to pay: ${rest} Fcfa. If you notice any discrepancies in the amount, please click the next link to report the issue: https://genischool.org/fess-request/${sf.id}`
+            let fr = `Chère/Chère Parent de ${s?.username}, nous avons le plaisir de vous informer que le paiement pour la pension a été enregistré avec succès dans notre système. Montant du paiement : ${amount} Fcfa, reste à payer : ${rest} Fcfa. Si vous constatez des erreurs dans le montant, veuillez cliquer sur le lien suivant pour signaler le problème : https://genischool.org/fess-request/${sf.id}`
+            let msg = currentUser?.lang === "Français"?fr:eng
+            sendWhatsAppMessage({to:s?.parent?.phone||"",body:msg})
+          }
          return {status:200,fr:"  Enregistré",eng:"Saved"}
 
       }
@@ -1744,7 +1818,8 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
                 }
               }
             },
-            school:true
+            school:true,
+            parent:true
           }
         })
         let sum = s?.studentFees[0]?.fees.tranches.reduce(
@@ -1759,7 +1834,7 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
         else if(sum<parseInt(s?.studentFees[0]?.amount.toString()||"")+amount){
             return {status:200,fr:`Vous ne pouvez pas entrer plus de ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`,eng:`You can't enter more than ${sum-parseInt(s?.studentFees[0]?.amount.toString()||"")} fcfa`}  
         }
-        await prisma.studentFees.update({
+        const sf = await prisma.studentFees.update({
           where:{
             id:s?.studentFees[0]?.id
           },
@@ -1767,7 +1842,7 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
               amount:amount+parseInt(s?.studentFees[0]?.amount.toString()||"")
           }
         })
-        let rest = sum- amount+parseInt(s?.studentFees[0]?.amount.toString()||"")
+        let rest = sum- parseInt(sf.amount.toString())
         await prisma.historiqueFees.create({
           data:{
           amount:amount,
@@ -1781,6 +1856,16 @@ export const addFees = async ({m,id,amount}:{m?:string,id?:string,amount:number}
            } 
           }
         })
+        let fr = `Dear ${s?.username}, We are pleased to inform you that your payment for the tuition fee has been successfully recorded in our system. Payment of ${amount}Fcfa, remaining to pay: ${rest}Fcfa. If you notice any discrepancies in the amount, please click the next link  to report the issue: https://genischool.org/fess-request/${sf.id}`
+        let eng = `Cher(e) ${s?.username}, nous avons le plaisir de vous informer que votre paiement pour la pension a été enregistré avec succès dans notre système. Montant du paiement : ${amount} Fcfa, reste à payer : ${rest} Fcfa. Si vous constatez des erreurs dans le montant, veuillez cliquer sur le lien suivant pour signaler le problème : https://genischool.org/fess-request/${sf.id}`
+        let msg = currentUser?.lang === "Français"?fr:eng
+        sendWhatsAppMessage({to:s?.phone||"",body:msg})
+        if(s?.parent?.phone){
+          let eng = `Dear Parent of ${s?.username}, We are pleased to inform you that the payment for the tuition fee has been successfully recorded in our system. Payment of ${amount} Fcfa, remaining to pay: ${rest} Fcfa. If you notice any discrepancies in the amount, please click the next link to report the issue: https://genischool.org/fess-request/${sf.id}`
+          let fr = `Chère/Chère Parent de ${s?.username}, nous avons le plaisir de vous informer que le paiement pour la pension a été enregistré avec succès dans notre système. Montant du paiement : ${amount} Fcfa, reste à payer : ${rest} Fcfa. Si vous constatez des erreurs dans le montant, veuillez cliquer sur le lien suivant pour signaler le problème : https://genischool.org/fess-request/${sf.id}`
+          let msg = currentUser?.lang === "Français"?fr:eng
+          sendWhatsAppMessage({to:s?.parent?.phone||"",body:msg})
+        }
        return {status:200,fr:"Enregistré",eng:"Saved"}
       } 
       else{
@@ -1795,7 +1880,7 @@ export const getCurrentUserInfos = async () =>{
   try{
       const user = await getCurrentUser()
       let f = null
-      if(user.role === "Admin"){
+      if(user?.role === "Admin"){
           f = await prisma.admin.findUnique({
             where:{
               id:user?.id||""
@@ -1877,4 +1962,161 @@ export const updateProfilUser = async ({password,email,lang,username}:{password:
     catch(error:any){
         return
     } 
+}
+export const getNotificationForUser = async () => {
+  try{
+      const currentUser = await getCurrentUser()
+      let result = null
+      if(currentUser?.role === "Admin"){
+          result = await prisma.notifications.findMany({
+            where:{
+              schoolId:currentUser?.schoolId,
+              cat:"ADMIN"
+            }
+          })
+      }
+      return result
+  }
+  catch(error){
+
+  }
+}
+export const createAccounting = async ( 
+  currentState: CurrentState,
+  data: AccountingSchema,
+  ) => {
+  try{
+
+    const currentUser = await getCurrentUser()
+    const date = new Date();
+    const month = date.getMonth() + 1
+    const a = await prisma.accounting.create({
+      data:{
+          title:data.title,
+          description:data.description,
+          amount:parseInt(data.amount),
+          paymentDate:data.paymentDate,
+          month,
+          school:{
+            connect:{
+              id:currentUser?.schoolId
+            }
+          },
+          schoolYear:{
+            connect:{
+              id:currentUser?.currentSchoolYear||""
+            }
+          }
+      }
+    })
+
+    return { success: true, error: false, eng:"",fr:"" };
+     
+  }
+  catch(error:any){
+    console.log(error)
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
+  }
+}
+export const deleteAccounting = async (  currentState: CurrentState,
+  data: FormData,) => {
+  const id = data.get("id") as string;
+  try{
+
+      await prisma.accounting.delete({
+        where:{
+          id
+        }
+      })
+    return { success: true, error: false,fr:"",eng:"" };
+
+  }
+  catch(error:any){
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
+    
+  }
+}
+export const updateAccounting = async (
+  currentState: CurrentState,
+  data: AccountingSchema
+) => {
+  if (!data.id) {
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
+  }
+  try {
+    await prisma.accounting.update({
+      where:{
+        id:data.id
+      },
+      data:{
+        title:data.title,
+        description:data.description,
+        paymentDate:data.paymentDate,
+        amount:parseInt(data.amount)
+      }
+      
+    })
+    // revalidatePath("/list/students");
+    return { success: true, error: false,fr:"",eng:"" };
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }
+    
+  }
+};
+export const getAdminByContact = async ({contact}:{contact:string}) => {
+  try{
+      const r = await prisma.admin.findFirst({
+        where:{
+          contact
+        }
+      })
+      if(r)
+      {
+        const school = await prisma.school.findUnique({
+          where:{
+            id:r.schoolId
+          }
+        })
+       return {status:200,data:{admin:r,school},eng:'Please go to your WhatsApp account to retrieve your authentication information.',fr:'Veuillez vous rendre dans votre compte WhatsApp pour récupérer vos informations d\'authentification'}
+      }
+      else{
+        return {status:404,data:null,eng:'User with contact '+contact+" doesn't exist",fr:'L\'utilisateur de contact '+contact+' n\'existe pas'}
+      }
+  }
+  catch(error:any){
+    return {status:500,data:null,eng:'Something went wrong, please try again!',fr:'Une erreur s\'est produite s\'il vous pmaît veillez recommencer!'}
+  }
+}
+export const sendWhatsAppMessage = async ({to,body}:{to:string,body:string}) => {
+  const myHeaders = new Headers({
+      "Content-Type": "application/x-www-form-urlencoded",
+  });
+  const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+  };
+  const token = 'a5po38dc74cn5aai'
+  try {
+      const response = await fetch(`https://api.ultramsg.com/instance111664/messages/chat?token=${encodeURIComponent(token)}&&to=${to}&&body=${body}`, requestOptions);
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.text();
+      console.log(result);
+  } catch (error) {
+      console.error('Error sending message:', error);
+  }
+  };
+export const getCurrentSchool = async () => {
+  const currentUser = await getCurrentUser()
+  if(!currentUser){
+    return
+  }
+  const school = await prisma.school.findUnique({
+    where:{
+      id:currentUser?.schoolId
+    }
+  })
+  return school
 }

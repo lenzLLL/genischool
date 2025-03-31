@@ -53,7 +53,7 @@ export default function AdminPorfil() {
     <div className='flex justify-between items-ends mb-16'>
         <div className='flex flex-col'>
             <h1 className='font-bold text-md lg:text-lg'>{user?.lang === "Français"? 'Votre Profil':'Your Profil'}</h1>
-            <p className='text-sm lg:text-md'><span className='text-gray-400 font-extralight'>{user?.lang === "Français"?"Ajouté le ":"Crated at "}</span> {userInfos?.createAt? formatDate(userInfos.createdAt):"28-01-2024"}</p>
+            <p className='text-sm lg:text-md'><span className='text-gray-400 font-extralight'>{user?.lang === "Français"?"Ajouté le ":"Created at "}</span> {userInfos?.createAt? formatDate(userInfos.createdAt):"28-01-2024"}</p>
         </div>
         <div className='flex items-center gap-5'>
             <Button disabled = {isLoading || isSaving} onClick={toCancel} className='bg-transparent border transation-all ease-in duration-200  hover:shadow-indigo-400 hover:bg-blue-500 hover:text-white border-blue-500 text-blue-500'> {user?.lang === "Français"? 'Annuler':'Cancel'} </Button> 

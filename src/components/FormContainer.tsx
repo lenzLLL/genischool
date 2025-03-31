@@ -19,6 +19,7 @@ export type FormContainerProps = {
     | "announcement"
     |"schoolyear"
     |"session"
+    |"accounting"
     ;
   type: "create" | "update" | "delete";
   data?: any;

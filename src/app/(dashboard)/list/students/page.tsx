@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { StudentFilter } from "./components/filter";
 import { groupBy, orderBy } from "lodash";
+import Secondpagination from "@/components/pagination2";
 type StudentList = Student & { currentClass: Class,studentFees:StudentFees[] };
 
 
@@ -96,7 +97,7 @@ const StudentListPage = async ({
     </tr>
   );
    
-  const { page, ...queryParams } = searchParams;
+  const { page,itemOffset,endOffset, ...queryParams } = searchParams;
 
   const p = page ? parseInt(page) : 1;
 
@@ -180,7 +181,7 @@ const StudentListPage = async ({
   const feeA = {amount:parseInt(a?.studentFees[0]?.amount.toString())};
   const feeB = {amount:parseInt(b?.studentFees[0]?.amount.toString())};
   return queryParams.tri === "price-asc" ? feeA.amount - feeB.amount : feeB.amount - feeA.amount;
-}):null
+}):[]
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
@@ -189,7 +190,7 @@ const StudentListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch lang={currentUser?.lang||"Français"}/>
           <div className="flex items-center gap-4 self-end">
-              <StudentFilter  user = {currentUser} classes = {classes} />
+              <StudentFilter  user = {currentUser||null} classes = {classes} />
           
              {currentUser?.role === "Admin" && (
               // <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
@@ -201,9 +202,9 @@ const StudentListPage = async ({
         </div>
       </div>
       {/* LIST */}
-      {data.length !== 0 && <><Table columns={columns} renderRow={renderRow} data={sortedData??data} /> 
+      {data.length !== 0 && <><Table columns={columns} renderRow={renderRow}  data={sortedData.length !== 0? sortedData.slice(parseInt(itemOffset||""),parseInt(endOffset||"")):data.slice(parseInt(itemOffset||""),parseInt(endOffset||""))} /> 
       {/* PAGINATION */}
-       <Pagination page={p} count={count} /> </>}
+        <Secondpagination itemsCount={sortedData.length !== 0? sortedData.length:data.length} itemsPerPage={10} /> </>}
        {
         data.length === 0 &&  
             <EmptyComponent msg = {currentUser?.lang === "Français"?'Aucunes données':'No Data'} />

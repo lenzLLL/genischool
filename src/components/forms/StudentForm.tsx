@@ -176,6 +176,7 @@ const StudentForm = ({
         <InputField
           label={user?.lang === "Français"?"Contact":"Phone"}
           name="phone"
+          placeholder={"Ex: +237671434007"}
           defaultValue={data?.phone}
           register={register}
           error={errors.phone}

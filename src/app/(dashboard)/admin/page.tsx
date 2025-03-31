@@ -7,6 +7,7 @@ import FinanceChart from "@/components/FinanceChart";
 import UserCard from "@/components/UserCard";
 import { getCurrentUser } from "@/lib/functs";
 import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 const AdminPage = async({
   searchParams,
@@ -14,9 +15,12 @@ const AdminPage = async({
   searchParams: { [keys: string]: string | undefined };
 }) => {
   const currentUser = await getCurrentUser()
+  if(!currentUser){
+      redirect("sign-in")  
+  }
   const school = await prisma.school.findUnique({
     where:{
-      id:currentUser.schoolId
+      id:currentUser?.schoolId||""
     },
     include:{
       schoolyears:{
@@ -48,9 +52,21 @@ const AdminPage = async({
     where:{
        fees:{
         student:{
-          schoolId:school?.id
-        }
-       }  
+          schoolId:school?.id,
+        },
+        schoolYearId:currentUser?.currentSchoolYear||""
+       },
+         
+    }
+  }    )
+  const e = await prisma.accounting.groupBy({
+    by:["month"],
+    _sum:{
+      amount:true
+    },
+    where:{
+        schoolId:currentUser?.schoolId||"",
+        schoolYearId:currentUser?.currentSchoolYear||"" 
     }
   }    )
   let fr = []
@@ -59,7 +75,7 @@ const AdminPage = async({
     fr.push({
       name:getMonthName(i+1),
       income:parseInt(r.find(d=>d.month === (i+1).toString())?._sum.amount?.toString()||"")||0,
-      expense:0
+      expense:parseInt(e.find(d=>d.month === (i+1))?._sum.amount?.toString()||"")||0
       })
   }
 
@@ -69,20 +85,20 @@ const AdminPage = async({
       <div className="w-full  flex flex-col gap-8">
         {/* USER CARDS */}
         <div className="flex gap-4 justify-between flex-wrap">
-           <UserCard year = {school?.schoolyears[0].title||""} user = {currentUser} type="Admin" /> 
-           <UserCard year = {school?.schoolyears[0].title||""} user = {currentUser} type="Teacher" /> 
-           <UserCard year = {school?.schoolyears[0].title||""} user = {currentUser} type="Parent" /> 
-           <UserCard year = {school?.schoolyears[0].title||""} user = {currentUser} type="Student" /> 
+           <UserCard year = {school?.schoolyears[0].title||""} user = {currentUser||null} type="Admin" /> 
+           <UserCard year = {school?.schoolyears[0].title||""} user = {currentUser||null} type="Teacher" /> 
+           <UserCard year = {school?.schoolyears[0].title||""} user = {currentUser||null} type="Parent" /> 
+           <UserCard year = {school?.schoolyears[0].title||""} user = {currentUser||null} type="Student" /> 
         </div>
         {/* MIDDLE CHARTS */}
         <div className="flex gap-4 flex-col lg:flex-row">
           {/* COUNT CHART */}
           <div className="w-full  h-[450px]">
-             <CountChartContainer schooldId={school?.id||''} lang = {currentUser?.lang} /> 
+             <CountChartContainer schooldId={school?.id||''} lang = {currentUser?.lang||''} /> 
           </div>
           {/* ATTENDANCE CHART */}
           <div className="w-full lg:w-2/3 h-[450px]">
-             <AttendanceChartContainer user = {currentUser}/> 
+             <AttendanceChartContainer user = {currentUser||null}/> 
           </div>
         </div>
         {/* BOTTOM CHART */}
@@ -92,7 +108,7 @@ const AdminPage = async({
       </div>
       {/* RIGHT */}
       <div className="w-full lg:w-1/3 flex flex-col gap-8">
-        <EventCalendarContainer user = {currentUser} searchParams={searchParams} /> 
+        <EventCalendarContainer user = {currentUser||null} searchParams={searchParams} /> 
         <Announcements userId={currentUser?.id||""} role = {currentUser?.role||""} lang = {currentUser?.lang||""}  />
       </div>
     </div>

@@ -10,6 +10,7 @@ type InputFieldProps = {
   defaultValue?: string;
   error?: FieldError;
   hidden?: boolean;
+  placeholder?:String;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 };
 
@@ -22,6 +23,7 @@ const InputField = ({
   error,
   hidden,
   inputProps,
+  placeholder
 }: InputFieldProps) => {
   if(type === "textarea"){
     return    <div className={hidden ? "hidden" : "flex flex-col gap-2 w-full md:w-full"}>
@@ -43,6 +45,7 @@ const InputField = ({
       <label className="text-xs text-gray-500">{label}</label>
       <input
         type={type}
+        placeholder={placeholder||""}
         {...register(name)}
         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
         {...inputProps}
