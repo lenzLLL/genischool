@@ -8,12 +8,12 @@ import { useRouter } from 'next/navigation'
 import { getClassName } from './result-table'
 import { useResult } from '@/hooks/result/use-result'
 
-export default function ResultModal({setRefresh,refresh,sessions,user,setShowModal,students,currentUser,subjectId,sequenceId,classe}:{refresh:boolean, setRefresh:(v:boolean)=>void,classe:string, subjectId:string,sequenceId:string, currentUser:string,students:any[], setShowModal:(v:boolean)=>void,sessions:any[],user:AuthSchema}) {
+export default function ResultModal({setRefresh,refresh,sessions,user,setShowModal,students,currentUser,subjectId,sequenceId,classe}:{refresh:boolean, setRefresh:(v:boolean)=>void,classe:string, subjectId:string,sequenceId:string, currentUser:string,students:any[], setShowModal:(v:boolean)=>void,sessions:any[],user:AuthSchema|null}) {
   const [session,setSession] = useState("")
   const [studentId,setStudentId] = useState(currentUser)
   const [v,setV] = useState<number|null>(null)
 
-  const {saveResult,loading,results} = useResult({subject:subjectId,sequence:sequenceId,session:session,classe,student:studentId,rating:v??0,lang:user.lang??""})
+  const {saveResult,loading,results} = useResult({subject:subjectId,sequence:sequenceId,session:session,classe,student:studentId,rating:v??0,lang:user?.lang??""})
 
   const router = useRouter()
 

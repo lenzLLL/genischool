@@ -13,7 +13,7 @@ export default async function page({
 })  {
   const currentUser = await getCurrentUser()
   const query3: Prisma.ClassWhereInput = {};
-  query3.schoolId =currentUser.schoolId
+  query3.schoolId =currentUser?.schoolId
   const classes = await prisma.class.findMany({
     where:query3,
     orderBy:{
@@ -22,7 +22,7 @@ export default async function page({
   })
   const subjects = await prisma.subject.findMany({
     where:{
-      schoolId:currentUser.schoolId,
+      schoolId:currentUser?.schoolId||"",
     }
   })
   const currentYear = await prisma.schoolyear.findUnique({
@@ -37,7 +37,7 @@ export default async function page({
           }
         }  
     },
-    where:{id:currentUser.currentSchoolYear? currentUser.currentSchoolYear:""}})
+    where:{id:currentUser?.currentSchoolYear? currentUser.currentSchoolYear:""}})
   const school = await prisma.school.findUnique({
     where:{ 
         id:currentUser?.schoolId
@@ -48,7 +48,7 @@ export default async function page({
   })
   return (
     <div className='gap-5 p-5'>
-        <ResultComponent current = {currentYear} school = {school} user = {currentUser} subjects = {subjects} classes={classes}/>
+        <ResultComponent current = {currentYear} school = {school} user = {currentUser||null} subjects = {subjects} classes={classes}/>
     </div>
   )
 }

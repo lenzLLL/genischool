@@ -11,6 +11,7 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Attendance, Class, Lesson, LessonClass, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import { LessonsFilter } from "./components/filter";
+import Secondpagination from "@/components/pagination2";
 
 type LessonList = Lesson & { subject: Subject }&{classes:(LessonClass & {class:Class})[]}  & {teacher: Teacher;} & {attendances:Attendance[]};
 
@@ -88,7 +89,7 @@ const LessonListPage = async ({
     </tr>
   );
   
-  const { page, ...queryParams } = searchParams;
+  const { page,itemOffset,endOffset, ...queryParams } = searchParams;
 
   const p = page ? parseInt(page) : 1;
 
@@ -205,7 +206,7 @@ const LessonListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <LessonsFilter user = {currentUser} subjects={subjects} classes = {classes} />
+            <LessonsFilter user = {currentUser||null} subjects={subjects} classes = {classes} />
          
              {currentUser?.role === "Admin" && <FormContainer table="lesson" type="create" />} 
           </div>
@@ -213,7 +214,7 @@ const LessonListPage = async ({
       </div>
       {data.length !== 0 && <><Table columns={columns} renderRow={renderRow} data={data} /> 
       {/* PAGINATION */}
-       <Pagination page={p} count={count} /> </>}
+        <Secondpagination itemsCount={count} itemsPerPage={10} /> </>}
        {
         data.length === 0 &&  
             <EmptyComponent msg = {currentUser?.lang === "Français"?'Aucunes données':'No Data'} />

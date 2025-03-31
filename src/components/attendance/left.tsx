@@ -40,7 +40,7 @@ type DateRange = {
   start: Date;
   end: Date;
 };
-export default function AttendanceLeft({data1,data2,classes,user}:{user:AuthSchema, classes:Class[] ,data1:(Lesson & {teacher:Teacher}&{subject:Subject})[] ,data2:(Exam & {teacher:Teacher}&{subject:Subject})[]}) {
+export default function AttendanceLeft({data1,data2,classes,user}:{user:AuthSchema|null, classes:Class[] ,data1:(Lesson & {teacher:Teacher}&{subject:Subject})[] ,data2:(Exam & {teacher:Teacher}&{subject:Subject})[]}) {
   const [showCalendar,setShowCalendar] = useState<boolean>(false)
   const searchParams = useSearchParams();
   const [selectedLesson,setSelectedLesson] = useState("")

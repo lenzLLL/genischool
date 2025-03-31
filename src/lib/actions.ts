@@ -23,6 +23,7 @@ import { getCurrentUser } from "./functs";
 import { id } from "date-fns/locale";
 import { Prisma } from "@prisma/client";
 import { string } from "zod";
+import { format } from 'date-fns'
 type CurrentState = { success: boolean; error: boolean,eng:String,fr:String};
 type FinalCurrentState = { success: boolean; error: boolean;msg:String };
 type CurrentStateUpdate = { success: boolean; error: boolean,newImage:Boolean };
@@ -31,6 +32,7 @@ cloudinary.v2.config({
   api_key:process.env.CLOUDINARY_API_KEY,
   api_secret:process.env.CLOUDINARY_API_SECRET
 })
+
 export const createSubject = async (
   currentState: CurrentState,
   data: SubjectSchema
@@ -240,6 +242,17 @@ export const createTeacher = async (
       },
     });
     // revalidatePath("/list/teachers");
+    const school = await prisma.school.findUnique({
+      where:{
+        id:currentUser?.schoolId||""
+      }
+    })
+    let fr = `Bienvenue sur GeniSchool! Nous avons le plaisir de vous informer que votre insertion dans le système de  ${school?.name} est un succès. Vos informations pour l'authentification sont: Contact: ${data.phone}, mot de passe: ${data.password}.\nSi vous avez des questions ou avez besoin d'aide, n'hésitez pas à nous contacter. Cordialement, L'équipe GeniSchool`
+    let eng = `Welcome to GeniSchool! We are pleased to inform you that your registration in the system of ${school?.name} has been successful. Your authentication details are: Contact: ${data.phone}, password: ${data.password}. 
+If you have any questions or need assistance, please do not hesitate to contact us. Sincerely, The GeniSchool Team.`
+    const msg = currentUser?.lang === "Français"?fr:eng
+    let p = data.phone||""
+    sendWhatsAppMessage({to:p,body:msg})
     return { success: true, error: false,fr:"",eng:"" };
   } catch (err) {
     console.log(err);
@@ -1049,10 +1062,16 @@ export const createLessons = async (
   data: LessonSchema,
   ) => {
   try{
+
     if(data.classes?.length === 0 || !data.classes){
     return { success: false, error: true,fr:"Veillez selectionner au moins une classe!",eng:"Please select at least one class!" }  
     }
-    const currentUser = await getCurrentUser()
+    let currentUser = await getCurrentUser()
+    const school = await prisma.school.findUnique({
+      where:{
+        id:currentUser?.schoolId
+      }
+    })
     const a = await prisma.lesson.create({
       data:{
           teacherId:data.teacherId? data.teacherId:"",
@@ -1060,8 +1079,12 @@ export const createLessons = async (
           startTime:data.startTime,
           schoolId:currentUser?.schoolId||"",
           endTime:data.endTime
+      },
+      include:{
+        subject:true
       }
     })
+     let Ids = []
     for(let i = 0;i<data?.classes.length;i++){
         await prisma.lessonClass.create({
           data:{
@@ -1069,6 +1092,27 @@ export const createLessons = async (
             lessonId:a.id
           }
         })  
+        Ids.push(data.classes[i].id)
+    }
+    const students = await prisma.student.findMany({
+      where:{
+        id:{
+          in:Ids
+        }
+      },
+      include:{
+        parent:true
+      }
+    })
+    let fr = `Hey, nous souhaitons vous informer qu'une leçon de ${a.subject.name}, a été programmé pour le ${format(new Date(a.startTime), 'dd/MM/yyyy')} de ${format(new Date(a.startTime), 'HH:mm:ss')} à ${format(new Date(a.endTime), 'HH:mm:ss')}.`
+    let fr2 = `Cordialement ${school?.name}`
+    let eng = `Hey, we would like to inform you that a lesson on ${a.subject.name} has been scheduled for ${format(new Date(a.startTime), 'dd/MM/yyyy')} from ${format(new Date(a.startTime), 'HH:mm:ss')} to ${format(new Date(a.endTime), 'HH:mm:ss')}.`;
+    let eng2 = `Sincerely, ${school?.name}`;
+    const msg = currentUser?.lang === "Français"?fr:eng
+    const msg2 = currentUser?.lang === "Français"?fr2:eng2
+    for(let i =0;i<students.length;i++){
+        await sendWhatsAppMessage({to:students[i].phone||"",body:msg})
+        await sendWhatsAppMessage({to:students[i].phone||"",body:msg2})
     }
     return { success: true, error: false,fr:"",eng:"" };
   }
@@ -1256,8 +1300,17 @@ export const createParent = async (
           
       }
     })
-
-    
+    const school = await prisma.school.findUnique({
+      where:{
+        id:currentUser?.schoolId||""
+      }
+    })
+    let fr = `Bienvenue sur GeniSchool! Nous avons le plaisir de vous informer que votre insertion dans le système de  ${school?.name} est un succès. Vos informations pour l'authentification sont: Contact: ${data.phone}, mot de passe: ${data.password}.\nSi vous avez des questions ou avez besoin d'aide, n'hésitez pas à nous contacter. Cordialement, L'équipe GeniSchool`
+    let eng = `Welcome to GeniSchool! We are pleased to inform you that your registration in the system of ${school?.name} has been successful. Your authentication details are: Contact: ${data.phone}, password: ${data.password}. 
+If you have any questions or need assistance, please do not hesitate to contact us. Sincerely, The GeniSchool Team.`
+    const msg = currentUser?.lang === "Français"?fr:eng
+    let p = data.phone||""
+    sendWhatsAppMessage({to:p,body:msg})
     return { success: true, error: false,fr:"",eng:"" };
      
   }
@@ -1315,6 +1368,12 @@ export const createAttendance =  async (
   data: AttendanceSchema
 ) => {
     try{
+        let currentUser = await getCurrentUser()
+        const school = await prisma.school.findUnique({
+          where:{
+            id:currentUser?.schoolId
+          }
+        })
         if(data.type){
             if(data.examenId){
                 const verify = await prisma.attendance.findFirst({
@@ -1331,7 +1390,41 @@ export const createAttendance =  async (
                     examenId:data.examenId
                   }
                 })
-            }
+                const student = await prisma.student.findUnique({
+                  where:{
+                    id:data.studentId
+                  },
+                  include:{
+                    parent:true
+                  }
+                })
+                const exam = await prisma.exam.findUnique({
+                  where:{
+                    id:data.examenId
+                  },
+                  include:{
+                    subject:true
+                  }
+                })
+                let fr = `Nous vous écrivons pour vous informer que l'étudiant ${student?.username} était absent(e) en examen de ${exam?.subject.name} le ${format(new Date(exam?.startTime||0), 'dd/MM/yyyy HH:mm:ss')}. Afin de justifier cette absence, pourriez-vous s'il vous plaît fournir une pièce justificative après de l'administration`
+                let fr2 = `Cordialement ${school?.name}`
+                let eng = `We are writing to inform you that the student ${student?.username} was absent from the ${exam?.subject.name} exam on ${format(new Date(exam?.startTime || 0), 'dd/MM/yyyy HH:mm:ss')}. To justify this absence, could you please provide a supporting document to the administration?`;
+                let eng2 = `Sincerely, ${school?.name}`;
+                const msg = currentUser?.lang === "Français"?fr:eng
+                const msg2 = currentUser?.lang === "Français"?fr2:eng2
+                let p = student?.phone||""
+                let p2 = student?.parent?.phone||""
+                if(p)
+                {
+                    await sendWhatsAppMessage({to:p,body:msg})
+                    await sendWhatsAppMessage({to:p,body:msg2})
+                }
+                if(p2)
+                {
+                    await sendWhatsAppMessage({to:p2,body:msg})
+                    await sendWhatsAppMessage({to:p2,body:msg2})
+                }
+              }
             else{
               const verify = await prisma.attendance.findFirst({
                 where:{
@@ -1347,6 +1440,41 @@ export const createAttendance =  async (
                   lessonId:data.lessonId
                 }
               })
+              const student = await prisma.student.findUnique({
+                where:{
+                  id:data.studentId
+                },
+                include:{
+                  parent:true
+                }
+              })
+              const lesson = await prisma.exam.findUnique({
+                where:{
+                  id:data.lessonId
+                },
+                include:{
+                  subject:true
+                }
+              })
+              
+              let fr = `Nous vous écrivons pour vous informer que l'étudiant ${student?.username} était absent(e) en cours de ${lesson?.subject.name} le ${format(new Date(lesson?.startTime||0), 'dd MM yyyy HH:mm:ss')}. Afin de justifier cette absence, pourriez-vous s'il vous plaît fournir une pièce justificative après de l'administration`
+              let fr2 = `Cordialement ${school?.name}`
+              let eng = `We are writing to inform you that the student ${student?.username} was absent from the ${lesson?.subject.name} class on ${format(new Date(lesson?.startTime || 0), 'dd MM yyyy HH:mm:ss')}. To justify this absence, could you please provide a supporting document to the administration?`;
+              let eng2 = `Sincerely, ${school?.name}`;
+              const msg = currentUser?.lang === "Français"?fr:eng
+              const msg2 = currentUser?.lang === "Français"?fr2:eng2
+              let p = student?.phone||""
+              let p2 = student?.parent?.phone||""
+              if(p)
+              {
+                  await sendWhatsAppMessage({to:p,body:msg})
+                  await sendWhatsAppMessage({to:p,body:msg2})
+              }
+              if(p2)
+                {
+                    await sendWhatsAppMessage({to:p2,body:msg})
+                    await sendWhatsAppMessage({to:p2,body:msg2})
+                }
             }
         }
         else{
@@ -1366,6 +1494,8 @@ export const createAttendance =  async (
               }
             })
           }
+          
+        
         }
     }
     catch(error:any){

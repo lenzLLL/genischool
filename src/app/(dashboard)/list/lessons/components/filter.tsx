@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils"
 
 
 
-export function LessonsFilter({user,subjects,classes}:{user:AuthSchema,subjects:any[],classes:any[]}) {
+export function LessonsFilter({user,subjects,classes}:{user:AuthSchema|null,subjects:any[],classes:any[]}) {
  
   const router = useRouter()
   const searchParams = useSearchParams();

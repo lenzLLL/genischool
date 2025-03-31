@@ -2,6 +2,7 @@ import EmptyComponent from "@/components/emptyComponent";
 import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
+import Secondpagination from "@/components/pagination2";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { role, subjectsData } from "@/lib/data";
@@ -56,7 +57,7 @@ const SubjectListPage = async ({
       </td>
     </tr>
   );
-  const { page, ...queryParams } = searchParams;
+  const { page,itemOffset,endOffset, ...queryParams } = searchParams;
 
   const p = page ? parseInt(page) : 1;
 
@@ -103,19 +104,14 @@ const SubjectListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch lang = {currentUser?.lang? currentUser?.lang:""} />
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/filter.png" alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
-           {currentUser.role === "Admin" && <FormContainer table="subject" type="create" />} 
+            
+           {currentUser?.role === "Admin" && <FormContainer table="subject" type="create" />} 
           </div>
         </div>
       </div>
       {data.length !== 0 && <><Table columns={columns} renderRow={renderRow} data={data} /> 
       {/* PAGINATION */}
-       <Pagination page={p} count={count} /> </>}
+      <Secondpagination itemsCount={data.length} itemsPerPage={10} /> </>}
        {
         data.length === 0 &&  
             <EmptyComponent msg = {currentUser?.lang === "Français"?'Aucunes données':'No Data'} />

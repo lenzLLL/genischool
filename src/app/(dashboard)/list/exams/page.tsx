@@ -13,6 +13,7 @@ import Image from "next/image";
 import { Result } from "postcss";
 import { customizedFormatDate } from "../lessons/page";
 import { ExamFilter } from "./components/filter";
+import Secondpagination from "@/components/pagination2";
 
 type ExamList = Exam & {teacher:Teacher} & {subject:Subject} & {results:Result[]} &{attendances:Attendance[]} & {classes:Class[]}
 const ExamListPage = async ({
@@ -100,7 +101,7 @@ const ExamListPage = async ({
     </tr>
   );
   
-  const { page, ...queryParams } = searchParams;
+  const { page,itemOffset,endOffset, ...queryParams } = searchParams;
 
   const p = page ? parseInt(page) : 1;
 
@@ -210,7 +211,7 @@ const ExamListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch  lang={currentUser?.lang? currentUser?.lang:"Français"}/>
           <div className="flex items-center gap-4 self-end">
-             <ExamFilter user={currentUser} classes={classes} subjects={subjects}/>
+             <ExamFilter user={currentUser||null} classes={classes} subjects={subjects}/>
              {currentUser?.role === "Admin"  && <FormContainer table="exam" type="create" />} 
           </div>
         </div>
@@ -218,7 +219,7 @@ const ExamListPage = async ({
       {/* LIST */}
       {data.length !== 0 && <><Table columns={columns} renderRow={renderRow} data={data} /> 
       {/* PAGINATION */}
-       <Pagination page={p} count={count} /> </>}
+        <Secondpagination itemsCount={data.length} itemsPerPage={10} /> </>}
        {
         data.length === 0 &&  
             <EmptyComponent msg = {currentUser?.lang === "Français"?'Aucunes données':'No Data'} />

@@ -42,7 +42,7 @@ import { createAttendance, createEvent, updateEvent } from '@/lib/actions'
 import {toast} from "react-toastify"
 import { useAttendance } from '@/hooks/attendance/use-attendance'
 import { AuthSchema } from '@/lib/schemas'
-export default function AttendanceRight({data1,data2,students,user}:{user:AuthSchema,students:(Student &  {attendances:Attendance[]} & {totalTime:BigInt|number})[], data1:Lesson[],data2:Exam[]}) {
+export default function AttendanceRight({data1,data2,students,user}:{user:AuthSchema|null,students:(Student &  {attendances:Attendance[]} & {totalTime:BigInt|number})[], data1:Lesson[],data2:Exam[]}) {
   const searchParams = useSearchParams();
   const [searchTerm,setSearchTerm] = useState("")
   const [value1,setValue1] = useState(0)
@@ -172,7 +172,7 @@ useEffect(
               <TabsTrigger value="5">{lang === "Français"? '15h et plus':'15h and more'}</TabsTrigger>
             </TabsList>
             <div className='flex items-center gap-3 mb-5'>
-          <Input value={searchTerm} onChange = {(e)=>setSearchTerm(e.target.value)} placeholder="veillez entrer le nom d'un étudiant"/>
+          <Input value={searchTerm} onChange = {(e)=>setSearchTerm(e.target.value)} placeholder={lang === "Français"? "veillez entrer le nom d'un étudiant":"Type a student name"}/>
            {    currentQuery.search &&      <div onClick={deleteSearch} className='w-10 h-9 cursor-pointer flex items-center justify-center px-2 rounded-md bg-gray-100'>
             <RefreshCcw/>
           </div>}

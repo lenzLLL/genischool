@@ -7,7 +7,7 @@ import { TableResult } from './result-table'
 import { useSearchParams } from 'next/navigation'
 import { useResult } from '@/hooks/result/use-result'
 
-export default function ResultComponent({classes,subjects,user,school,current}:{current:Schoolyear&{semestres:(Mestre&{session:(SessionSequence&{sessions:Session[]})[]})[]}|null,school:School|null,user:AuthSchema, classes:Class[],subjects:Subject[]}) {
+export default function ResultComponent({classes,subjects,user,school,current}:{current:Schoolyear&{semestres:(Mestre&{session:(SessionSequence&{sessions:Session[]})[]})[]}|null,school:School|null,user:AuthSchema|null, classes:Class[],subjects:Subject[]}) {
   const [classId,setClassId] = useState<string>("")
   const searchParams = useSearchParams();
   const [subjectId,setSubjectId] = useState<string>("")
@@ -106,7 +106,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
     </Select>
 
         </div>
-        <TableResult sessions = {sessions}  sequenceId = {sequenceId} classId = {classId} subjectId = {subjectId} mesterId = {mesterId}    user={user}/>
+        <TableResult sessions = {sessions}  sequenceId = {sequenceId} classId = {classId} subjectId = {subjectId} mesterId = {mesterId}    user={user||null}/>
     </div>
   )
 }

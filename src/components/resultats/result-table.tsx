@@ -25,7 +25,7 @@ export function formatNumber(num:number) {
   }
   return num; // Retourne le nombre tel quel
 }
-export function TableResult({sessions, user,classId,sequenceId,mesterId,subjectId}:{sessions:any[],classId:string,sequenceId:string,mesterId:string,subjectId:string, user:AuthSchema}) {
+export function TableResult({sessions, user,classId,sequenceId,mesterId,subjectId}:{sessions:any[],classId:string,sequenceId:string,mesterId:string,subjectId:string, user:AuthSchema|null}) {
   const {students,setIsChanging,isChanging,allStudents,results,loading,getResults}  = useResult({classe:classId,sequence:sequenceId,mestre:mesterId,subject:subjectId})
   const [showModal,setShowModal] = useState<boolean>(false)
   const [currentResults,setCurrentResults]  = useState<any[]>(results)
@@ -140,8 +140,8 @@ export function TableResult({sessions, user,classId,sequenceId,mesterId,subjectI
   return (
     <div className="w-full mt-14">
       <Table columns={columns} renderRow={renderRow} data={students} /> 
-      <Secondpagination itemsPerPage={1} itemsCount={allStudents?.length}/>
-      {showModal && <ResultModal setRefresh={setRefresh} refresh = {refresh} subjectId={subjectId} sequenceId={sequenceId}  currentUser={currentUser} students={allStudents} setShowModal={setShowModal} user={user} sessions={sessions} classe={classId}/>}
+      <Secondpagination itemsPerPage={10} itemsCount={allStudents?.length}/>
+      {showModal && <ResultModal setRefresh={setRefresh} refresh = {refresh} subjectId={subjectId} sequenceId={sequenceId}  currentUser={currentUser} students={allStudents} setShowModal={setShowModal} user={user||null} sessions={sessions} classe={classId}/>}
     </div>
   )
 }
