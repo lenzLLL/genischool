@@ -201,7 +201,7 @@ useEffect(
             let isCheckedExam = (exam && attendances.find((a)=>a.examenId === exam && a.studentId === s.id && a.type))? true:false
             let isCheckedLesson = (lesson && attendances.find((a)=>a.lessonId === lesson && a.studentId === s.id && a.type))? true:false
             return(
-            <Card onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
+            <Card key={s.id} onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
                         <div  className='flex items-center gap-2'>
                         
                         <Image
@@ -284,7 +284,7 @@ useEffect(
             if(totalTime > 18000000){return}
             
             return(
-            <Card onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
+            <Card key={s.id} onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
                         <div  className='flex items-center gap-2'>
                         
                         <Image
@@ -367,7 +367,7 @@ useEffect(
             if(totalTime < 18000000 || totalTime > 36000000){return}
             
             return(
-            <Card onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
+            <Card key={s.id} onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
                         <div  className='flex items-center gap-2'>
                         
                         <Image
@@ -450,7 +450,7 @@ useEffect(
             if(totalTime < 36000000||totalTime>54000000){return}
             
             return(
-            <Card onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
+            <Card key={s.id} onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
                         <div  className='flex items-center gap-2'>
                         
                         <Image
@@ -530,7 +530,7 @@ useEffect(
             let isCheckedLesson = (lesson && attendances.find((a)=>a.lessonId === lesson && a.studentId === s.id && a.type))? true:false
             if(totalTime<54000000){return}
             return(
-            <Card onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
+            <Card key={s.id} onMouseLeave={()=>setIsHover(false)} onClick={()=>setIsHover(false)}  className='mb-2 p-6 flex items-center justify-between'>
                         <div  className='flex items-center gap-2'>
                         
                         <Image

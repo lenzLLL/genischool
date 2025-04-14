@@ -10,7 +10,7 @@ import {
   } from "@/components/ui/tabs"
 import { useUser } from '@/hooks/user/use-user'
 import { BellOff } from 'lucide-react';
-export default function page() {
+export default function Page() {
     const {user,isLoading,getNotifications} = useUser()
     const [notifications,setNotifications] = useState<any[]>([])
     const getNot = async () => {
@@ -38,7 +38,7 @@ export default function page() {
             (notifications.length > 0) && notifications.map(
                 (n:any)=>{
                     return (
-                        <Alert variant="filled" severity={n.type}>
+                        <Alert key={n.id} variant="filled" severity={n.type}>
                              {n.msg}
                         </Alert>
                     )
@@ -63,7 +63,7 @@ export default function page() {
             (notifications.filter(n=>n.type === "success").length > 0) && notifications.filter(n=>n.type === "success").map(
                 (n:any)=>{
                     return (
-                        <Alert variant="filled" severity={n.type}>
+                        <Alert key={n.id}  variant="filled" severity={n.type}>
                              {n.msg}
                         </Alert>
                     )
@@ -88,7 +88,7 @@ export default function page() {
             (notifications.filter(n=>n.type === "info").length > 0) && notifications.filter(n=>n.type === "info").map(
                 (n:any)=>{
                     return (
-                        <Alert variant="filled" severity={n.type}>
+                        <Alert key={n.id}  variant="filled" severity={n.type}>
                              {n.msg}
                         </Alert>
                     )
@@ -113,7 +113,7 @@ export default function page() {
             (notifications.filter(n=>n.type === "warning").length > 0) && notifications.filter(n=>n.type === "warning").map(
                 (n:any)=>{
                     return (
-                        <Alert variant="filled" severity={n.type}>
+                        <Alert key={n.id}  variant="filled" severity={n.type}>
                              {n.msg}
                         </Alert>
                     )

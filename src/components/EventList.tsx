@@ -23,8 +23,8 @@ const EventList = async ({ dateParam,user }: {user:AuthSchema|null, dateParam: s
     ]
   });
   
-  return(<> {data.map((event) => (
-     <EventComponent event={event}/>
+  return(<> {data.map((event,i) => (
+     <EventComponent key={i} event={event}/>
   ))
   
 }

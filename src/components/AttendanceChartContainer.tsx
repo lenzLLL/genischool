@@ -76,7 +76,7 @@ const AttendanceChartContainer = async ({user}:{user:AuthSchema|null}) => {
             }
             c1 = c1? c1:"#f39c12"
           
-            return <div style = {{background:style}} className="flex items-start text-md justify-start flex-col p-2 rounded-lg my-1 text-white">
+            return <div key={i} style = {{background:style}} className="flex items-start text-md justify-start flex-col p-2 rounded-lg my-1 text-white">
               {
                 user?.lang === "Français"? d.fr:d.eng
               }
