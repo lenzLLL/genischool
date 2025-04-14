@@ -79,7 +79,7 @@ const TeacherListPage = async ({
            {role === "admin" && (
             <>
            
-            <FormModal table="teacher" type="delete" id={item.id}/>
+            <FormContainer  table="teacher" type="delete" id={item.id}/>
             </>
           )} 
         </div>
@@ -134,7 +134,7 @@ const TeacherListPage = async ({
             </button>
              {true && (
               
-               <FormContainer   table="school" type="create"/>
+               <FormContainer    table="school" type="create"/>
             )} 
           </div>
         </div>
