@@ -31,6 +31,9 @@ const AdminPage = async({
       }
     }
   })
+  if(!school){
+    redirect("sign-in")  
+}
   function getMonthName(monthNumber:number) {
     const months = [
       "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
