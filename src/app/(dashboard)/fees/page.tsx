@@ -278,7 +278,7 @@ const FixNewAmount = () =>{
                   )+parseInt(i.toString())
                   let s = sum===amount?  (currentUser?.lang === "Français"?"Statut: Soldé":"Status: Paid"):currentUser?.lang === "Français"?"Statut: Non Soldé":"Status: Unpaid"
                   return (
-                    <div className='mt-5 bg-gray-50 p-5  gap-3 grid grid-cols-2 rounded-lg '>
+                    <div key={"1"} className='mt-5 bg-gray-50 p-5  gap-3 grid grid-cols-2 rounded-lg '>
                     <div style={{background:"linear-gradient(to top,  #0ea5e9, #4f46e5)"}} className='w-auto  p-3  text-white rounded-lg flex items-start justify-center'>
                        { currentStudent?.lang === "Français"?'Montant attendu: ':'Expected amount: '} {sum} fcfa
                     </div>

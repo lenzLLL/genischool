@@ -81,8 +81,8 @@ const TeacherListPage = async ({
           <p className="text-xs text-gray-500">{item?.email}</p>
         </div>
       </td>
-      <td className="hidden md:table-cell">{item.subjects.map(item=><span className="flex flex-wrap gap-1 text-sm">{item.name}</span>)}</td>
-      <td className="hidden md:table-cell">{item.classes.map(item=><span className="flex flex-wrap gap-1 text-sm">{item.name}</span>)}</td>
+      <td className="hidden md:table-cell">{item.subjects.map(item=><span key={item.id} className="flex flex-wrap gap-1 text-sm">{item.name}</span>)}</td>
+      <td className="hidden md:table-cell">{item.classes.map(item=><span key={item.id} className="flex flex-wrap gap-1 text-sm">{item.name}</span>)}</td>
       <td className="hidden md:table-cell">{item.phone}</td>
       <td className="hidden md:table-cell">{item.address}</td>
       <td>

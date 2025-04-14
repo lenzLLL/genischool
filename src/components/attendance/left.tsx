@@ -187,7 +187,7 @@ export default function AttendanceLeft({data1,data2,classes,user}:{user:AuthSche
       <SelectGroup>
         {
           classes.map(
-            (c)=><SelectItem value={c.id}>{c.name}</SelectItem>
+            (c)=><SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
           )
         }
       </SelectGroup>
@@ -230,7 +230,7 @@ export default function AttendanceLeft({data1,data2,classes,user}:{user:AuthSche
       <TabsContent value="password">
       <div className='h-[100vh] p-2 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-300'>
 
-{      !isLoading? <>{ data2.length>0 && data2.map((d)=>(    <Card onClick={()=>fixSelectedExamen(d.id,d.endTime.getTime()-d.startTime.getTime())}  key={d.id} className='p-5 mb-2 relative  cursor-pointer'>
+{      !isLoading? <>{ data2.length>0 && data2.map((d)=>(    <Card key={d.id} onClick={()=>fixSelectedExamen(d.id,d.endTime.getTime()-d.startTime.getTime())}   className='p-5 mb-2 relative  cursor-pointer'>
         {selectedExamen === d.id && <CircleCheck className='absolute text-green-600 top-2 right-5'/>}
        
        <div className='flex justify-start gap-3 items-center'>

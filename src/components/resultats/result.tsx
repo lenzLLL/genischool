@@ -52,7 +52,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
       <SelectGroup>
         {
           current?.semestres.map(
-            (s)=><SelectItem value={s.id}>
+            (s)=><SelectItem key = {s.id}  value={s.id}>
               {user?.lang === "Français"? (msg1 === "Semestre"? "Semestre":"Trimestre"):(msg1 === "Semestre"? "Semester":"Trimester")}{" "+s.order}
             </SelectItem>
           )
@@ -68,7 +68,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
       <SelectGroup>
         {
           current?.semestres.find(s=>s.id === mesterId)?.session.map(
-            (s)=><SelectItem value={s.id}>
+            (s)=><SelectItem key = {s.id}  value={s.id}>
               {`Sequence ${s.order}`}
             </SelectItem>
           )
@@ -84,7 +84,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
       <SelectGroup>
         {
           classes.map(
-            (c)=><SelectItem value={c.id}>{c.name}</SelectItem>
+            (c)=><SelectItem key = {c.id}  value={c.id}>{c.name}</SelectItem>
           )
         }
       </SelectGroup>
@@ -98,7 +98,7 @@ export default function ResultComponent({classes,subjects,user,school,current}:{
       <SelectGroup>
         {
           subjects.map(
-            (c)=><SelectItem value={c.id}>{c.name}</SelectItem>
+            (c)=><SelectItem key = {c.id}  value={c.id}>{c.name}</SelectItem>
           )
         }
       </SelectGroup>

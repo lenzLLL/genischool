@@ -189,7 +189,7 @@ export function StudentFilter({user,classes}:{user:AuthSchema|null,classes:any[]
                             classes.map(
                                 (c,i)=>{
                                     return (
-                                        <SelectItem value={c?.id}>{c?.name}</SelectItem>
+                                        <SelectItem key={c.id} value={c?.id}>{c?.name}</SelectItem>
                                     )
                                 }
                             )

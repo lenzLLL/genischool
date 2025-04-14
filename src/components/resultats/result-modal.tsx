@@ -47,7 +47,7 @@ export default function ResultModal({setRefresh,refresh,sessions,user,setShowMod
       <SelectGroup>
         {
           students.map(
-            (s)=><SelectItem value={s.id}>
+            (s)=><SelectItem  key = {s.id} value={s.id}>
                 {s.username}
             </SelectItem>
           )
@@ -63,7 +63,7 @@ export default function ResultModal({setRefresh,refresh,sessions,user,setShowMod
       <SelectGroup>
         {
           sessions.map(
-            (s)=><SelectItem value={s.id}>
+            (s)=><SelectItem key = {s.id}  value={s.id}>
                 {s.title}
             </SelectItem>
           )
@@ -79,7 +79,7 @@ export default function ResultModal({setRefresh,refresh,sessions,user,setShowMod
                 (s)=>{
                     let r = results.find((r:any)=>r?.exam?.sessionId === s.id && r?.studentId === studentId && r?.exam?.subjectId === subjectId)
                     if(r){
-                        return       <div className={'w-auto flex items-center justify-center rounded-md text-white px-5 py-2  '+getClassName(r?.rating)}>
+                        return       <div key = {s.id}  className={'w-auto flex items-center justify-center rounded-md text-white px-5 py-2  '+getClassName(r?.rating)}>
                         {s?.title} {r?.rating}/20
                      </div>
                     }

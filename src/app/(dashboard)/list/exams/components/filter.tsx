@@ -127,7 +127,7 @@ export function ExamFilter({user,subjects,classes}:{user:AuthSchema|null,subject
                           {
                             classes.map(
                               (c)=>{
-                                  return    (<SelectItem value={c.id}>{c.name}</SelectItem>
+                                  return    (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                                   )
                               }
                             )
@@ -151,7 +151,7 @@ export function ExamFilter({user,subjects,classes}:{user:AuthSchema|null,subject
                             subjects.map(
                                 (c,i)=>{
                                     return (
-                                        <SelectItem value={c?.id}>{c?.name}</SelectItem>
+                                        <SelectItem key={c.id} value={c?.id}>{c?.name}</SelectItem>
                                     )
                                 }
                             )

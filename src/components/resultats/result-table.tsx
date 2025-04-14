@@ -111,7 +111,7 @@ export function TableResult({sessions, user,classId,sequenceId,mesterId,subjectI
                   ...sessions.map((s) =>{ 
                     let r = results.find((rr:any)=>rr?.student?.id === item.id && rr.exam?.session?.id === s.id)
                     let rating = r?.rating
-                    return <td className="pr-5">
+                    return <td key = {s.id}  className="pr-5">
                       <div className={getClassName(rating)}>{r?.rating? `${r?.rating}/20 ${r?.exam?.session?.percentage}%`:"......"}</div>
 
                     </td>})
