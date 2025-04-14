@@ -22,7 +22,7 @@ const EventListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
-  const currentUser = await getCurrentUser()
+  const currentUser = await getCurrentUser()||null
   const columns = [
     {
       header: currentUser?.lang === "Français"? "Titre":"Title",
@@ -45,7 +45,7 @@ const EventListPage = async ({
       accessor: "endTime",
       className: "hidden md:table-cell",
     },
-    ...(currentUser.role === "Admin"
+    ...(currentUser?.role === "Admin"
       ? [
           {
             header: "Actions",
