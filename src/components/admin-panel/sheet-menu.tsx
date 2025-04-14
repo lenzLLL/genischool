@@ -10,8 +10,10 @@ import {
   SheetTrigger,
   SheetTitle
 } from "@/components/ui/sheet";
+import { useUser } from "@/hooks/user/use-user";
 
 export function SheetMenu() {
+  const {user} = useUser()
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden" asChild>
@@ -32,7 +34,7 @@ export function SheetMenu() {
             </Link>
           </Button>
         </SheetHeader>
-        <Menu isOpen />
+        <Menu user={user} isOpen />
       </SheetContent>
     </Sheet>
   );
