@@ -92,7 +92,7 @@ const FixNewAmount = () =>{
                         <SelectGroup>
                            {
                                classes.map(
-                                    (c)=><SelectItem value={c?.id}>{c?.name}</SelectItem>
+                                    (c)=><SelectItem key = {c?.id} value={c?.id}>{c?.name}</SelectItem>
                                 )
                             }
                         </SelectGroup>
@@ -108,7 +108,7 @@ const FixNewAmount = () =>{
                         <SelectGroup>
                            {
                                classes.find((c)=>c?.id === classId)?.fees?.tranches.map(
-                                    (c:any)=><SelectItem  value={c?.id}>Tranche {c?.order}</SelectItem>
+                                    (c:any)=><SelectItem key={c?.id} value={c?.id}>Tranche {c?.order}</SelectItem>
                                 )
                             }
                      
