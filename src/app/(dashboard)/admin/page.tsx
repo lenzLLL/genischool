@@ -71,13 +71,13 @@ const AdminPage = async({
   }    )
   let fr = []
   console.log(r)
-  for(let i = 0;i<12;i++){
-    fr.push({
-      name:getMonthName(i+1),
-      income:parseInt(r.find(d=>d.month === (i+1).toString())?._sum.amount?.toString()||"")||0,
-      expense:parseInt(e.find(d=>d.month === (i+1))?._sum.amount?.toString()||"")||0
-      })
-  }
+  // for(let i = 0;i<12;i++){
+  //   fr.push({
+  //     name:getMonthName(i+1),
+  //     income:parseInt(r.find(d=>d.month === (i+1).toString())?._sum.amount?.toString()||"")||0,
+  //     expense:parseInt(e.find(d=>d.month === (i+1))?._sum.amount?.toString()||"")||0
+  //     })
+  // }
 
   return (
     <div className="p-4 flex gap-4 flex-col md:flex-row">
@@ -103,7 +103,7 @@ const AdminPage = async({
         </div>
         {/* BOTTOM CHART */}
         <div className="w-full h-[500px]">
-           <FinanceChart statsF={fr} /> 
+           <FinanceChart statsF={[]} /> 
         </div>
       </div>
       {/* RIGHT */}
