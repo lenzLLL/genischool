@@ -910,7 +910,8 @@ export const deleteAnnouncement = async (  currentState: CurrentState,
 
   }
   catch(error:any){
-    return { success: false, error: true,fr:"",eng:"" };
+    return { success: false, error: true,fr:"Une erreur s'est produite, s'il vous plaît veillez recommencer!",eng:"An error occurred, please try again!" }    
+    
   }
 }
 export const updateAnnouncement = async (
