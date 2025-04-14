@@ -1,3 +1,4 @@
+"use client"
 import Image from "next/image";
 import dynamic from 'next/dynamic'
 const EventCalendar = dynamic(() => import('./EventCalendar'), { ssr: false })

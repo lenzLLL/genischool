@@ -1,3 +1,4 @@
+"use server"
 import prisma from "@/lib/prisma";
 import { AuthSchema } from "@/lib/schemas";
 import Image from "next/image";
