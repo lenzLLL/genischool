@@ -32,7 +32,7 @@ import { ProgressBar } from '@/components/progress-bar'
 import { MdWhatsapp } from 'react-icons/md'
 import { FeesFilter } from './components/filter'
 import { toast } from 'react-toastify'
-export default function page() {
+export default function Page() {
   type StudentList = Student
   const [currentTranche,setCurrentTranche] = useState("")
   const [newAmount,setNewAmount] = useState<number|null>(null)
